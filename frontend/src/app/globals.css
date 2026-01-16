@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-white text-secondary-800;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold text-secondary-900;
+  }
+}
+
+@layer components {
+  /* Coursera-style buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white 
+           bg-primary-500
+           hover:bg-primary-600
+           transition-colors duration-200
+           cursor-pointer;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-semibold 
+           text-primary-500 bg-white
+           border border-primary-500
+           hover:bg-primary-50
+           transition-colors duration-200
+           cursor-pointer;
+  }
+  
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium
+           text-secondary-700 bg-transparent
+           hover:bg-secondary-100
+           transition-colors duration-200
+           cursor-pointer;
+  }
+  
+  /* Coursera-style cards */
+  .card {
+    @apply bg-white border border-secondary-200
+           shadow-card hover:shadow-card-hover
+           transition-shadow duration-200
+           cursor-pointer;
+  }
+  
+  /* Section styles */
+  .section-heading {
+    @apply text-3xl md:text-4xl font-heading font-semibold text-secondary-900;
+  }
+  
+  .section-subheading {
+    @apply text-lg text-secondary-600 mt-3;
+  }
+  
+  /* Link styles */
+  .link-primary {
+    @apply text-primary-500 hover:underline cursor-pointer;
+  }
+  
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium;
+  }
+  
+  .badge-blue {
+    @apply badge bg-primary-100 text-primary-700;
+  }
+  
+  .badge-green {
+    @apply badge bg-green-100 text-green-700;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
