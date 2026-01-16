@@ -22,12 +22,12 @@ export default function Hero() {
           {/* Left Content */}
           <div>
             {/* Heading */}
-            <h1 className="text-3xl sm:text-5xl lg:text-5xl font-heading font-bold leading-tight text-white">
+            <h1 className="text-lg sm:text-5xl lg:text-5xl font-heading font-bold leading-tight text-white">
               Học Toán Online 
             </h1>
 
             {/* Subheading */}
-            <p className="mt-6 text-sm sm:text-xl text-primary-100 max-w-lg">
+            <p className="mt-6 text-sm sm:text-lg text-primary-100 max-w-lg">
               Nền tảng học toán trực tuyến hàng đầu với hơn 500+ khóa học 
               từ lớp 6-12, luyện thi THPT Quốc Gia và toán cao cấp.
             </p>
@@ -47,7 +47,7 @@ export default function Hero() {
               {highlights.map((item) => (
                 <div key={item} className="flex items-center gap-3">
                   <CheckCircle className="w-6 h-6 text-accent-green flex-shrink-0" />
-                  <span className="text-lg text-primary-100">{item}</span>
+                  <span className="text-sm text-primary-100">{item}</span>
                 </div>
               ))}
             </div>
@@ -58,7 +58,7 @@ export default function Hero() {
             <h2 className="text-3xl font-heading font-semibold text-secondary-900 mb-2">
               Bạn muốn học gì?
             </h2>
-            <p className="text-lg text-secondary-600 mb-6">
+            <p className="text-base text-secondary-600 mb-6">
               Tìm khóa học phù hợp với trình độ và mục tiêu của bạn
             </p>
 

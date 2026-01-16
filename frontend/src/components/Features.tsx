@@ -43,7 +43,7 @@ const goals = [
     subtitle: 'Ôn thi đại học',
     description: 'Đạt điểm cao với lộ trình ôn luyện bài bản và đề thi thử.',
     link: '/khoa-hoc?topic=luyen-thi-thpt',
-    cta: 'Bắt đầu ngay',
+    cta: 'Xem khoá học',
     gradient: 'from-orange-500 to-amber-500',
     bgLight: 'bg-violet-50',
     iconColor: 'text-violet-600',
@@ -113,10 +113,10 @@ export default function Features() {
                   <Users className="w-4 h-4 text-secondary-400" />
                   <span>{goal.students} học sinh</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-sm text-secondary-600">
+                {/* <div className="flex items-center gap-1.5 text-sm text-secondary-600">
                   <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                   <span>{goal.rating}</span>
-                </div>
+                </div> */}
               </div>
 
               {/* CTA */}

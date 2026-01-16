@@ -7,6 +7,7 @@ const courses = [
     title: 'Toán lớp 12 - Ôn thi THPT Quốc gia',
     instructor: 'Thầy Nguyễn Văn A',
     rating: 4.9,
+    reviews: 3200,
     students: 12500,
     lessons: 120,
     duration: '60 giờ',
@@ -20,6 +21,7 @@ const courses = [
     title: 'Hình học không gian từ A-Z',
     instructor: 'Cô Trần Thị B',
     rating: 4.8,
+    reviews: 2100,
     students: 8900,
     lessons: 85,
     duration: '42 giờ',
@@ -33,6 +35,7 @@ const courses = [
     title: 'Đại số tuyến tính cơ bản',
     instructor: 'Thầy Lê Văn C',
     rating: 4.7,
+    reviews: 980,
     students: 4500,
     lessons: 65,
     duration: '32 giờ',
@@ -46,6 +49,7 @@ const courses = [
     title: 'Luyện đề thi thử THPT Quốc gia',
     instructor: 'Đội ngũ MathVN',
     rating: 4.9,
+    reviews: 4500,
     students: 15000,
     lessons: 100,
     duration: '50 giờ',
@@ -63,14 +67,14 @@ function formatPrice(price: number) {
 function CourseCard({ course }: { course: typeof courses[0] }) {
   return (
     <Link href={`/khoa-hoc/${course.id}`} className="group block h-full">
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 h-full flex flex-col">
         {/* Image */}
         <div className="relative aspect-video bg-gradient-to-br from-primary-100 to-primary-200 overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center text-primary-400">
             <BookOpen className="w-12 h-12" />
           </div>
           {course.badge && (
-            <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold text-white rounded ${course.badgeColor}`}>
+            <span className={`absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold text-white rounded ${course.badgeColor}`}>
               {course.badge}
             </span>
           )}
@@ -78,36 +82,30 @@ function CourseCard({ course }: { course: typeof courses[0] }) {
 
         {/* Content */}
         <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-semibold text-secondary-900 mb-1 line-clamp-2 group-hover:text-primary-600 transition-colors min-h-[2.75rem]">
+          {/* Title */}
+          <h3 className="font-semibold text-secondary-900 leading-snug line-clamp-2 group-hover:text-primary-600 transition-colors min-h-[2.5rem]">
             {course.title}
           </h3>
-          <p className="text-sm text-secondary-500 mb-2">{course.instructor}</p>
+          
+          {/* Instructor */}
+          <p className="text-xs text-secondary-500 mt-1.5">{course.instructor}</p>
 
-          {/* Rating */}
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span className="text-sm font-semibold text-secondary-900">{course.rating}</span>
-            </div>
-            <span className="text-sm text-secondary-400">({course.students.toLocaleString()} học sinh)</span>
+          {/* Rating - Coursera style */}
+          <div className="flex items-center gap-1 mt-2">
+            <span className="text-sm font-bold text-secondary-900">{course.rating}</span>
+            <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+            <span className="text-xs text-secondary-500">({course.reviews.toLocaleString()} đánh giá)</span>
           </div>
 
-          {/* Meta */}
-          <div className="flex items-center gap-4 text-xs text-secondary-500 mb-3">
-            <div className="flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>{course.lessons} bài</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{course.duration}</span>
-            </div>
-          </div>
+          {/* Meta - Coursera style */}
+          <p className="text-xs text-secondary-500 mt-1.5">
+            {course.lessons} bài học · {course.duration}
+          </p>
 
           {/* Price */}
-          <div className="flex items-center gap-2 mt-auto pt-2">
-            <span className="text-lg font-bold text-secondary-900">{formatPrice(course.price)}</span>
-            <span className="text-sm text-secondary-400 line-through">{formatPrice(course.originalPrice)}</span>
+          <div className="flex items-baseline gap-2 mt-auto pt-3">
+            <span className="text-base font-bold text-secondary-900">{formatPrice(course.price)}</span>
+            <span className="text-xs text-secondary-400 line-through">{formatPrice(course.originalPrice)}</span>
           </div>
         </div>
       </div>

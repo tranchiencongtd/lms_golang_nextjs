@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { formatPrice, formatDuration, getYouTubeEmbedUrl, getYouTubeThumbnail } from '@/lib/utils'
 import { 
   Star, 
   Clock, 
@@ -19,7 +20,8 @@ import {
   Download,
   Globe,
   Shield,
-  ArrowLeft
+  ArrowLeft,
+  X
 } from 'lucide-react'
 
 // Mock course data - In real app, fetch from API
@@ -39,7 +41,7 @@ const coursesData: Record<string, {
   description: string
   whatYouLearn: string[]
   requirements: string[]
-  curriculum: { title: string; lessons: { title: string; duration: string; preview?: boolean }[] }[]
+  curriculum: { title: string; lessons: { title: string; duration: string; preview?: boolean; youtubeId?: string }[] }[]
   badge: string | null
   badgeColor: string | null
   level: string
@@ -78,8 +80,8 @@ const coursesData: Record<string, {
       {
         title: 'Chương 1: Ứng dụng đạo hàm',
         lessons: [
-          { title: 'Giới thiệu khóa học', duration: '10:00', preview: true },
-          { title: 'Sự đồng biến, nghịch biến của hàm số', duration: '45:00', preview: true },
+          { title: 'Giới thiệu khóa học', duration: '10:00', preview: true, youtubeId: 'DN0G0Lbj6os' },
+          { title: 'Sự đồng biến, nghịch biến của hàm số', duration: '45:00', preview: true, youtubeId: '9bZkp7q19f0' },
           { title: 'Cực trị của hàm số', duration: '50:00' },
           { title: 'Giá trị lớn nhất, nhỏ nhất', duration: '40:00' },
           { title: 'Bài tập tổng hợp chương 1', duration: '60:00' },
@@ -118,6 +120,7 @@ const coursesData: Record<string, {
     level: 'Nâng cao',
     language: 'Tiếng Việt',
     lastUpdated: 'Tháng 1/2026',
+    certificate: true,
   },
 }
 
@@ -150,7 +153,7 @@ const defaultCourse = {
     {
       title: 'Phần 1: Kiến thức cơ bản',
       lessons: [
-        { title: 'Giới thiệu khóa học', duration: '10:00', preview: true },
+        { title: 'Giới thiệu khóa học', duration: '10:00', preview: true, youtubeId: 'dQw4w9WgXcQ' },
         { title: 'Bài 1: Nền tảng', duration: '45:00' },
         { title: 'Bài 2: Lý thuyết cơ bản', duration: '50:00' },
       ],
@@ -171,16 +174,26 @@ const defaultCourse = {
   lastUpdated: 'Tháng 1/2026',
 }
 
-function formatPrice(price: number) {
-  return new Intl.NumberFormat('vi-VN').format(price) + 'đ'
-}
-
 export default function CourseDetailPage() {
   const params = useParams()
   const courseId = params.id as string
   const course = coursesData[courseId] || { ...defaultCourse, id: parseInt(courseId) || 0 }
   
   const [expandedSections, setExpandedSections] = useState<number[]>([0])
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [currentPreviewLesson, setCurrentPreviewLesson] = useState<{ title: string; duration: string; chapterTitle: string; youtubeId?: string } | null>(null)
+
+  // Get all preview lessons
+  const previewLessons = course.curriculum.flatMap((section) => 
+    section.lessons
+      .filter(lesson => lesson.preview)
+      .map(lesson => ({ ...lesson, chapterTitle: section.title }))
+  )
+
+  const openPreviewModal = (lesson?: { title: string; duration: string; chapterTitle: string; youtubeId?: string }) => {
+    setCurrentPreviewLesson(lesson || previewLessons[0] || null)
+    setShowPreviewModal(true)
+  }
 
   const toggleSection = (index: number) => {
     setExpandedSections(prev => 
@@ -196,6 +209,127 @@ export default function CourseDetailPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       <Navbar />
+
+      {/* Preview Video Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop - Dark blur */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowPreviewModal(false)}
+          />
+          
+          {/* Modal Content - White background */}
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+            {/* Close Button */}
+            <button 
+              onClick={() => setShowPreviewModal(false)}
+              className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+
+            <div className="flex flex-col lg:flex-row">
+              {/* Video Player - YouTube Embed */}
+              <div className="flex-1 flex flex-col bg-gray-900">
+                <div className="aspect-video bg-black">
+                  {currentPreviewLesson?.youtubeId ? (
+                    <iframe
+                      className="w-full h-full"
+                      src={`${getYouTubeEmbedUrl(currentPreviewLesson.youtubeId)}?autoplay=1&rel=0`}
+                      title={currentPreviewLesson.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center text-white/60">
+                        <Play className="w-16 h-16 mx-auto mb-3 opacity-50" />
+                        <p>Video không khả dụng</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Current Lesson Info */}
+                <div className="p-5 bg-gray-50 border-t border-gray-200">
+                  <p className="text-primary-600 text-sm font-medium mb-1">
+                    {currentPreviewLesson?.chapterTitle}
+                  </p>
+                  <h4 className="text-secondary-900 text-lg font-semibold">
+                    {currentPreviewLesson?.title}
+                  </h4>
+                  <p className="text-secondary-500 text-sm mt-1">
+                    Thời lượng: {currentPreviewLesson?.duration ? formatDuration(currentPreviewLesson.duration) : ''}
+                  </p>
+                </div>
+              </div>
+
+              {/* Preview Lessons List */}
+              <div className="lg:w-80 bg-gray-50 border-t lg:border-t-0 lg:border-l border-gray-200 flex flex-col">
+                <div className="p-4 border-b border-gray-200 bg-white">
+                  <h3 className="text-secondary-900 font-semibold">Nội dung xem trước</h3>
+                  <p className="text-secondary-500 text-sm mt-0.5">{previewLessons.length} video miễn phí</p>
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-64 lg:max-h-[350px]">
+                  {previewLessons.length > 0 ? (
+                    previewLessons.map((lesson, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentPreviewLesson(lesson)}
+                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-primary-50 transition-colors ${
+                          currentPreviewLesson?.title === lesson.title ? 'bg-primary-50 border-l-4 border-l-primary-500' : 'bg-white'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                            currentPreviewLesson?.title === lesson.title 
+                              ? 'bg-primary-500 text-white' 
+                              : 'bg-gray-200 text-secondary-500'
+                          }`}>
+                            <Play className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm line-clamp-2 ${
+                              currentPreviewLesson?.title === lesson.title 
+                                ? 'text-primary-700 font-medium' 
+                                : 'text-secondary-700'
+                            }`}>
+                              {lesson.title}
+                            </p>
+                            <p className="text-secondary-400 text-xs mt-1">{formatDuration(lesson.duration)}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center text-secondary-400 text-sm">
+                      Không có video xem trước
+                    </div>
+                  )}
+                </div>
+
+                {/* CTA */}
+                <div className="p-4 border-t border-gray-200 bg-white">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl font-bold text-secondary-900">{formatPrice(course.price)}</span>
+                    <span className="text-sm text-secondary-400 line-through">{formatPrice(course.originalPrice)}</span>
+                    <span className="ml-auto text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-medium">
+                      -{discount}%
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => setShowPreviewModal(false)}
+                    className="w-full btn-primary py-3 font-semibold"
+                  >
+                    Đăng ký khóa học
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
@@ -220,7 +354,7 @@ export default function CourseDetailPage() {
               {/* Course Header */}
               <div className="bg-white rounded-xl p-6 lg:p-8 ">
               {/* Badge & Level */}
-              <div className="flex items-center gap-2 mb-4">
+              {/* <div className="flex items-center gap-2 mb-4">
                 {course.badge && (
                   <span className={`px-3 py-1 text-xs font-semibold text-white rounded-full ${course.badgeColor}`}>
                     {course.badge}
@@ -229,7 +363,7 @@ export default function CourseDetailPage() {
                 <span className="px-3 py-1 text-xs font-medium text-primary-600 bg-primary-50 rounded-full">
                   {course.level}
                 </span>
-              </div>
+              </div> */}
 
               {/* Title */}
               <h1 className="text-2xl lg:text-3xl font-bold text-secondary-900 mb-4 leading-tight">
@@ -356,12 +490,20 @@ export default function CourseDetailPage() {
                                 <Play className="w-4 h-4 text-secondary-400" />
                                 <span className="text-sm text-secondary-700">{lesson.title}</span>
                                 {lesson.preview && (
-                                  <span className="px-2 py-0.5 bg-primary-50 text-primary-600 text-xs rounded">
+                                  <button 
+                                    onClick={() => openPreviewModal({ 
+                                      title: lesson.title, 
+                                      duration: lesson.duration, 
+                                      chapterTitle: section.title,
+                                      youtubeId: lesson.youtubeId 
+                                    })}
+                                    className="px-2 py-0.5 bg-primary-50 text-primary-600 text-xs rounded hover:bg-primary-100 transition-colors cursor-pointer"
+                                  >
                                     Xem trước
-                                  </span>
+                                  </button>
                                 )}
                               </div>
-                              <span className="text-sm text-secondary-500">{lesson.duration}</span>
+                              <span className="text-sm text-secondary-500">{formatDuration(lesson.duration)}</span>
                             </div>
                           ))}
                         </div>
@@ -404,14 +546,26 @@ export default function CourseDetailPage() {
             <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0">
               <div className="sticky top-20">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6">
-                  {/* Thumbnail */}
-                  <div className="cursor-pointer relative aspect-video bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg mb-5 flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9IiMwMDU2RDIiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9nPjwvc3ZnPg==')] opacity-50"></div>
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform z-10">
+                  {/* Thumbnail - YouTube Preview */}
+                  <div 
+                    onClick={() => openPreviewModal()}
+                    className="cursor-pointer relative aspect-video rounded-lg mb-5 flex items-center justify-center overflow-hidden group"
+                  >
+                    {previewLessons[0]?.youtubeId ? (
+                      <img 
+                        src={getYouTubeThumbnail(previewLessons[0].youtubeId, 'hq')}
+                        alt="Video preview"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary-100 to-primary-200" />
+                    )}
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white transition-all z-10">
                       <Play className="w-7 h-7 text-primary-600 ml-1" />
                     </div>
-                    <span className="absolute bottom-3 right-3 bg-secondary-900/80 text-white text-xs px-2 py-1 rounded-md">
-                      Xem giới thiệu
+                    <span className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                      Xem trước miễn phí
                     </span>
                   </div>
 
