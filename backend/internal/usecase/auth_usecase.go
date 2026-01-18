@@ -9,15 +9,16 @@ import (
 
 // RegisterInput represents the input for user registration
 type RegisterInput struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
-	FullName string `json:"full_name" binding:"required,min=2"`
+	Email       string `json:"email" binding:"required,email"`
+	Password    string `json:"password" binding:"required,min=8"`
+	FullName    string `json:"full_name" binding:"required,min=2"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
 }
 
 // LoginInput represents the input for user login
 type LoginInput struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	EmailOrPhone string `json:"email_or_phone" binding:"required"`
+	Password     string `json:"password" binding:"required"`
 }
 
 // AuthOutput represents the output after successful authentication
@@ -29,12 +30,13 @@ type AuthOutput struct {
 
 // UserOutput represents the output for user data
 type UserOutput struct {
-	ID         uuid.UUID       `json:"id"`
-	Email      string          `json:"email"`
-	FullName   string          `json:"full_name"`
-	Avatar     *string         `json:"avatar,omitempty"`
-	Role       domain.UserRole `json:"role"`
-	IsVerified bool            `json:"is_verified"`
+	ID          uuid.UUID       `json:"id"`
+	Email       string          `json:"email"`
+	FullName    string          `json:"full_name"`
+	Avatar      *string         `json:"avatar,omitempty"`
+	PhoneNumber string          `json:"phone_number"`
+	Role        domain.UserRole `json:"role"`
+	IsVerified  bool            `json:"is_verified"`
 }
 
 // AuthUseCase defines the interface for authentication use cases

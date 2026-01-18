@@ -136,6 +136,10 @@ func (h *AuthHandler) handleAuthError(c *gin.Context, err error) {
 		response.Unauthorized(c, "Token không hợp lệ")
 	case errors.Is(err, domain.ErrTokenExpired):
 		response.Unauthorized(c, "Token đã hết hạn")
+	case errors.Is(err, domain.ErrPhoneNumberAlreadyExists):
+	       response.Conflict(c, "Số điện thoại đã được sử dụng")
+    case errors.Is(err, domain.ErrInvalidPhoneNumber):
+	       response.BadRequest(c, "Số điện thoại không hợp lệ")
 	default:
 		response.InternalServerError(c, "Đã xảy ra lỗi hệ thống")
 	}

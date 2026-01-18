@@ -18,15 +18,18 @@ type UserRepository interface {
 	// GetByEmail retrieves a user by email
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
 
+	// GetByPhoneNumber retrieves a user by phone number
+	GetByPhoneNumber(ctx context.Context, phoneNumber string) (*domain.User, error)
+
 	// Update updates an existing user
 	Update(ctx context.Context, user *domain.User) error
-
-	// UpdateLastLogin updates the last login timestamp
-	UpdateLastLogin(ctx context.Context, id uuid.UUID) error
 
 	// Delete deletes a user by ID
 	Delete(ctx context.Context, id uuid.UUID) error
 
 	// ExistsByEmail checks if a user with the given email exists
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
+
+	// ExistsByPhoneNumber checks if a user with the given phone number exists
+	ExistsByPhoneNumber(ctx context.Context, phoneNumber string) (bool, error)
 }
