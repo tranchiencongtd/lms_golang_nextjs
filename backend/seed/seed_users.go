@@ -47,11 +47,11 @@ func main() {
 			u.email, string(hash), u.fullName, u.phone, u.role, u.isActive, u.isVerified, now, now,
 		)
 		if err != nil {
-			fmt.Printf("❌ Failed to insert user %s: %v\n", u.email, err)
+			fmt.Printf("Failed to insert user %s: %v\n", u.email, err)
 		} else {
-			fmt.Printf("✅ Seeded user: %s (%s)\n", u.email, u.role)
+			fmt.Printf(" Seeded user: %s (%s)\n", u.email, u.role)
 		}
 	}
 
-	fmt.Println("🎉 Seeding done!")
+	fmt.Println(" Seeding done!")
 }

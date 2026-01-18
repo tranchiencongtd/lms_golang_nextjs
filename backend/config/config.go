@@ -42,7 +42,7 @@ type BcryptConfig struct {
 // Load loads configuration from environment variables
 func Load() (*Config, error) {
 	// Load .env file if exists
-	_ = godotenv.Load()
+	_ = godotenv.Load(".env.dev")
 
 	jwtExpiryHours, err := strconv.Atoi(getEnv("JWT_EXPIRY_HOURS", "24"))
 	if err != nil {

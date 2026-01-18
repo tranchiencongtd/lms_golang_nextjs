@@ -23,6 +23,8 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
+	} else {
+		log.Println("Config loaded successfully")
 	}
 
 	// Set Gin mode
@@ -65,8 +67,8 @@ func main() {
 
 	// Start server in a goroutine
 	go func() {
-		log.Printf("🚀 Server starting on port %s", cfg.Server.Port)
-		log.Printf("📖 API docs: http://localhost:%s/api/v1", cfg.Server.Port)
+		log.Printf("Server starting on port %s", cfg.Server.Port)
+		log.Printf("API docs: http://localhost:%s/api/v1", cfg.Server.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}
@@ -76,7 +78,7 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("🛑 Shutting down server...")
+	log.Println("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -85,5 +87,5 @@ func main() {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 
-	log.Println("👋 Server exited gracefully")
+	log.Println("Server exited gracefully")
 }
