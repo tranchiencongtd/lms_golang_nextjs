@@ -56,6 +56,7 @@ function mapApiCourseToUi(course: ApiCourse) {
     duration: formatDuration(minutesToDurationString(course.duration_minutes || 0)),
     price: course.price || 0,
     originalPrice: course.original_price ?? course.price ?? 0,
+    language: course.language || 'Tiếng Việt',
     description: course.description || course.short_description || '',
     whatYouLearn: [
       'Nắm vững kiến thức trọng tâm theo lộ trình',
@@ -109,8 +110,96 @@ export default function CourseDetailPage() {
     return (
       <main className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 space-y-8 animate-pulse">
+          {/* Breadcrumb skeleton */}
+          {/* <div className="h-6 w-48 bg-gray-200 rounded" /> */}
+
+          <div className="lg:flex lg:gap-12">
+            {/* Left column */}
+            <div className="lg:flex-1 space-y-6">
+              <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border border-gray-100 space-y-4">
+                <div className="h-6 w-2/3 bg-gray-200 rounded" />
+                <div className="h-8 w-2/3 bg-gray-200 rounded" />
+                <div className="space-y-2">
+                  <div className="h-4 w-full bg-gray-200 rounded" />
+                  <div className="h-4 w-5/6 bg-gray-200 rounded" />
+                  <div className="h-4 w-2/3 bg-gray-200 rounded" />
+                </div>
+                <div className="flex gap-4">
+                  <div className="h-10 w-28 bg-gray-200 rounded" />
+                  <div className="h-10 w-36 bg-gray-200 rounded" />
+                </div>
+                <div className="flex gap-3">
+                  <div className="h-10 w-10 bg-gray-200 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-32 bg-gray-200 rounded" />
+                    <div className="h-4 w-24 bg-gray-200 rounded" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-3">
+                <div className="h-6 w-48 bg-gray-200 rounded" />
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-4 w-full bg-gray-200 rounded" />
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-3">
+                <div className="h-6 w-32 bg-gray-200 rounded" />
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-4 w-5/6 bg-gray-200 rounded" />
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="h-6 w-40 bg-gray-200 rounded" />
+                  <div className="h-4 w-24 bg-gray-200 rounded" />
+                </div>
+                <div className="space-y-3">
+                  {[...Array(3)].map((_, sectionIdx) => (
+                    <div key={sectionIdx} className="border border-gray-200 rounded-lg">
+                      <div className="flex items-center justify-between p-4 bg-gray-50">
+                        <div className="h-4 w-40 bg-gray-200 rounded" />
+                        <div className="h-4 w-12 bg-gray-200 rounded" />
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {[...Array(2)].map((__, lessonIdx) => (
+                          <div key={lessonIdx} className="p-4 flex items-center justify-between">
+                            <div className="h-4 w-56 bg-gray-200 rounded" />
+                            <div className="h-4 w-10 bg-gray-200 rounded" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right column (sidebar) */}
+            <aside className="lg:w-96 space-y-4 mt-8 lg:mt-0">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+                <div className="h-52 w-full bg-gray-200 rounded-lg" />
+                <div className="h-6 w-24 bg-gray-200 rounded" />
+                <div className="h-4 w-32 bg-gray-200 rounded" />
+                <div className="space-y-2">
+                  <div className="h-10 w-full bg-gray-200 rounded" />
+                  <div className="h-10 w-full bg-gray-200 rounded" />
+                </div>
+                <div className="space-y-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-4 w-full bg-gray-200 rounded" />
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
         <Footer />
       </main>
@@ -123,7 +212,9 @@ export default function CourseDetailPage() {
         <Navbar />
         <div className="max-w-3xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-secondary-900 mb-3">Không tìm thấy khóa học</h1>
-          <p className="text-secondary-600 mb-6">{'Khóa học không tồn tại hoặc đã bị gỡ.'}</p>
+          <p className="text-secondary-600 mb-6">
+            {'Khóa học không tồn tại hoặc đã bị gỡ.'}
+          </p>
           <Link href="/khoa-hoc" className="text-primary-600 hover:underline">
             Quay lại danh sách khóa học
           </Link>
