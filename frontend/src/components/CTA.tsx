@@ -204,6 +204,11 @@ export default function CTA() {
                           className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 appearance-none bg-white transition-all"
                         >
                           <option value="">Chọn lớp</option>
+                          <option value="1">Lớp 1</option>
+                          <option value="2">Lớp 2</option>
+                          <option value="3">Lớp 3</option>
+                          <option value="4">Lớp 4</option>
+                          <option value="5">Lớp 5</option>
                           <option value="6">Lớp 6</option>
                           <option value="7">Lớp 7</option>
                           <option value="8">Lớp 8</option>

@@ -11,18 +11,18 @@ import { formatDuration } from '@/lib/utils'
 
 const grades = [
   { id: 'all', name: 'Tất cả' },
-  { id: '1', name: 'Lớp 1' },
-  { id: '2', name: 'Lớp 2' },
-  { id: '3', name: 'Lớp 3' },
-  { id: '4', name: 'Lớp 4' },
-  { id: '5', name: 'Lớp 5' },
-  { id: '6', name: 'Lớp 6' },
-  { id: '7', name: 'Lớp 7' },
-  { id: '8', name: 'Lớp 8' },
-  { id: '9', name: 'Lớp 9' },
-  { id: '10', name: 'Lớp 10' },
-  { id: '11', name: 'Lớp 11' },
-  { id: '12', name: 'Lớp 12' },
+  { id: '1', name: 'Toán 1' },
+  { id: '2', name: 'Toán 2' },
+  { id: '3', name: 'Toán 3' },
+  { id: '4', name: 'Toán 4' },
+  { id: '5', name: 'Toán 5' },
+  { id: '6', name: 'Toán 6' },
+  { id: '7', name: 'Toán 7' },
+  { id: '8', name: 'Toán 8' },
+  { id: '9', name: 'Toán 9' },
+  { id: '10', name: 'Toán 10' },
+  { id: '11', name: 'Toán 11' },
+  { id: '12', name: 'Toán 12' },
 ]
 
 const levels = [
