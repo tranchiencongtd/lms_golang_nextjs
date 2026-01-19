@@ -606,7 +606,7 @@ export default function CourseDetailPage() {
                       <Play className="w-7 h-7 text-primary-600 ml-1" />
                     </div>
                     <span className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
-                      Xem trước miễn phí
+                      Xem trước
                     </span>
                   </div>
 

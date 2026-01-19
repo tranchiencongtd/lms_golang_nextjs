@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import { Star, BookOpen, Clock } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
@@ -25,24 +28,39 @@ interface CourseCardProps {
 }
 
 export default function CourseCard({ course, className = '' }: CourseCardProps) {
+  const [imageError, setImageError] = useState(false)
+  
   // Calculate discount percentage
   const originalPrice = course.originalPrice ?? course.price
   const discount = originalPrice > course.price
     ? Math.round(((originalPrice - course.price) / originalPrice) * 100)
     : 0
 
+  const showImage = course.image && !imageError
+  const showPlaceholder = !course.image || imageError
+
   return (
     <Link href={`/khoa-hoc/${course.slug}`} className={`group block h-full ${className}`}>
       <div className="bg-white border border-secondary-200 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 h-full flex flex-col">
         {/* Image */}
         <div className="relative aspect-video bg-gradient-to-br from-primary-100 to-primary-200 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center text-primary-400">
-            <BookOpen className="w-12 h-12" />
-          </div>
+          {showImage && (
+            <img
+              src={course.image}
+              alt={course.title}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          )}
+          {showPlaceholder && (
+            <div className="absolute inset-0 flex items-center justify-center text-primary-400">
+              <BookOpen className="w-12 h-12" />
+            </div>
+          )}
           
           {/* Discount Badge (right top) */}
           {discount > 0 && (
-            <span className="absolute top-3 right-3 px-2.5 py-1 bg-red-600 text-white text-xs font-bold rounded z-10">
+            <span className="absolute top-3 right-3 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded z-10">
               -{discount}%
             </span>
           )}
