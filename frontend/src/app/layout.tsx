@@ -3,7 +3,9 @@ import { Poppins, Open_Sans } from 'next/font/google'
 import './globals.css'
 import { AuthModalProvider } from '@/contexts/AuthModalContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { CourseActivationModalProvider } from '@/contexts/CourseActivationModalContext'
 import AuthModal from '@/components/AuthModal'
+import CourseActivationModal from '@/components/CourseActivationModal'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -32,8 +34,11 @@ export default function RootLayout({
       <body className="font-body antialiased bg-white text-secondary-800">
         <AuthProvider>
           <AuthModalProvider>
-            {children}
-            <AuthModal />
+            <CourseActivationModalProvider>
+              {children}
+              <AuthModal />
+              <CourseActivationModal />
+            </CourseActivationModalProvider>
           </AuthModalProvider>
         </AuthProvider>
       </body>

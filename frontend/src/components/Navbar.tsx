@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Menu, X, Search, ChevronDown, User, BookOpen, Settings, LogOut, Key, ChevronUp } from 'lucide-react'
 import { useAuthModal } from '@/contexts/AuthModalContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { useCourseActivationModal } from '@/contexts/CourseActivationModalContext'
 
 const exploreCategories = [
   'Đại số',
@@ -17,6 +18,7 @@ export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const { openLogin, openRegister } = useAuthModal()
   const { user, isAuthenticated, logout } = useAuth()
+  const { openModal: openCourseActivationModal } = useCourseActivationModal()
   const userMenuRef = useRef<HTMLDivElement>(null)
 
   // Close user menu when clicking outside
@@ -65,16 +67,6 @@ export default function Navbar() {
               <span className="text-xl font-heading font-bold text-primary-600">MathVN</span>
             </Link>
 
-            {/* Kích hoạt khoá học Button */}
-            {/* {isAuthenticated && (
-              <Link
-                href="/kich-hoat-khoa-hoc"
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-semibold rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all shadow-md hover:shadow-lg"
-              >
-                <Key className="w-4 h-4" />
-                Kích hoạt khoá học
-              </Link>
-            )} */}
 
             {/* Explore Dropdown */}
             <div className="relative hidden lg:block">
@@ -127,11 +119,22 @@ export default function Navbar() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
               <input
                 type="text"
-                placeholder="Tìm kiếm khóa học, bài giảng..."
+                placeholder="Tìm kiếm khóa học"
                 className="w-full pl-10 pr-4 py-2.5 bg-secondary-50 border border-secondary-200 text-sm text-secondary-700 placeholder-secondary-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
               />
             </div>
           </div>
+
+          {/* Kích hoạt khoá học Button */}
+          { (
+              <button
+                onClick={openCourseActivationModal}
+                className="mr-4 hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-semibold rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all shadow-md hover:shadow-lg"
+              >
+                <Key className="w-4 h-4" />
+                Kích hoạt khoá học
+              </button>
+            )}
 
           {/* Right: Auth Buttons or User Menu */}
           <div className="hidden md:flex items-center gap-2">
@@ -211,14 +214,16 @@ export default function Navbar() {
 
                       {/* Menu Items */}
                       <div className="py-1">
-                        <Link
-                          href="/kich-hoat-khoa-hoc"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false)
+                            openCourseActivationModal()
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors text-left"
                         >
                           <Key className="w-4 h-4 text-secondary-500" />
                           <span>Kích hoạt khoá học</span>
-                        </Link>
+                        </button>
                         <Link
                           href="/tai-khoan"
                           onClick={() => setShowUserMenu(false)}
@@ -235,14 +240,16 @@ export default function Navbar() {
                           <BookOpen className="w-4 h-4 text-secondary-500" />
                           <span>Khoá học của tôi</span>
                         </Link>
-                        <Link
-                          href="/kich-hoat-khoa-hoc"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors md:hidden"
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false)
+                            openCourseActivationModal()
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors text-left md:hidden"
                         >
                           <Key className="w-4 h-4 text-secondary-500" />
                           <span>Kích hoạt khoá học</span>
-                        </Link>
+                        </button>
                         <Link
                           href="/cai-dat"
                           onClick={() => setShowUserMenu(false)}
@@ -273,6 +280,7 @@ export default function Navbar() {
                 <Link href="/phu-huynh" className="btn-ghost">
                   Dành cho Phụ huynh
                 </Link> */}
+                
                 <Link href="/huong-dan-hoc" className="btn-ghost">
                   Hướng dẫn học
                 </Link>
@@ -308,7 +316,7 @@ export default function Navbar() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
               <input
                 type="text"
-                placeholder="Tìm kiếm khóa học..."
+                placeholder="Tìm kiếm khóa học"
                 className="w-full pl-10 pr-4 py-2.5 bg-secondary-50 border border-secondary-200 text-sm"
               />
             </div>
@@ -356,14 +364,16 @@ export default function Navbar() {
 
                 {/* Mobile Menu Links */}
                 <div className="space-y-1">
-                  <Link
-                    href="/kich-hoat-khoa-hoc"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded-lg"
+                  <button
+                    onClick={() => {
+                      setIsOpen(false)
+                      openCourseActivationModal()
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded-lg text-left"
                   >
                     <Key className="w-4 h-4" />
                     Kích hoạt khoá học
-                  </Link>
+                  </button>
                   <Link
                     href="/khoa-hoc-cua-toi"
                     onClick={() => setIsOpen(false)}
