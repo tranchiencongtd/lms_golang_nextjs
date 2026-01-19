@@ -2,18 +2,6 @@
 
 ## Tổng Quan Thay Đổi
 
-### 1. **Database Changes**
-- ✅ Thêm cột `phone_number` (VARCHAR(20), UNIQUE, NULLABLE)
-- ✅ Xóa cột `last_login_at`
-- ✅ Thêm index cho `phone_number`
-
-### 2. **Code Changes**
-- ✅ Cập nhật `User` struct: thêm `PhoneNumber`, xóa `LastLoginAt`
-- ✅ Cập nhật `UserRepository`: thêm `GetByPhoneNumber()`, `ExistsByPhoneNumber()`
-- ✅ Cập nhật `RegisterInput`: thêm field `phone_number`
-- ✅ Cập nhật `LoginInput`: cho phép đăng nhập bằng email hoặc số điện thoại
-- ✅ Thêm validation cho số điện thoại Việt Nam
-
 ---
 
 ## Cách Chạy Migration

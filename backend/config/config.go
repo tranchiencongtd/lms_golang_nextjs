@@ -31,8 +31,10 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	Secret     string
-	ExpiryTime time.Duration
+	AccessTokenSecret      string
+	AccessTokenExpiryTime  time.Duration
+	RefreshTokenSecret     string
+	RefreshTokenExpiryTime time.Duration
 }
 
 type BcryptConfig struct {
@@ -44,9 +46,16 @@ func Load() (*Config, error) {
 	// Load .env file if exists
 	_ = godotenv.Load(".env.dev")
 
-	jwtExpiryHours, err := strconv.Atoi(getEnv("JWT_EXPIRY_HOURS", "24"))
+	// Access token expiry (default: 15 minutes)
+	accessTokenExpiryMinutes, err := strconv.Atoi(getEnv("JWT_ACCESS_TOKEN_EXPIRY_MINUTES", "15"))
 	if err != nil {
-		jwtExpiryHours = 24
+		accessTokenExpiryMinutes = 15
+	}
+
+	// Refresh token expiry (default: 7 days)
+	refreshTokenExpiryDays, err := strconv.Atoi(getEnv("JWT_REFRESH_TOKEN_EXPIRY_DAYS", "7"))
+	if err != nil {
+		refreshTokenExpiryDays = 7
 	}
 
 	bcryptCost, err := strconv.Atoi(getEnv("BCRYPT_COST", "10"))
@@ -68,8 +77,10 @@ func Load() (*Config, error) {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWTConfig{
-			Secret:     getEnv("JWT_SECRET", "default-secret-key"),
-			ExpiryTime: time.Duration(jwtExpiryHours) * time.Hour,
+			AccessTokenSecret:      getEnv("JWT_ACCESS_TOKEN_SECRET", "default-access-secret-key"),
+			AccessTokenExpiryTime:  time.Duration(accessTokenExpiryMinutes) * time.Minute,
+			RefreshTokenSecret:     getEnv("JWT_REFRESH_TOKEN_SECRET", "default-refresh-secret-key"),
+			RefreshTokenExpiryTime: time.Duration(refreshTokenExpiryDays) * 24 * time.Hour,
 		},
 		Bcrypt: BcryptConfig{
 			Cost: bcryptCost,

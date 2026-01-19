@@ -5,8 +5,11 @@ root = "."           # Project root (backend)
 tmp_dir = "tmp"      # Temporary build output
 
 [build]
-  cmd = "go build -o tmp/main ./cmd/api"
-  bin = "tmp/main"
+  #cmd = "go build -o tmp/main ./cmd/api"
+  #bin = "tmp/main"
+  cmd = "go build -o tmp/main.exe ./cmd/api"
+  bin = "tmp/main.exe"
+
   include_ext = ["go", "env"]
   exclude_dir = ["tmp", "vendor"]
   exclude_file = []

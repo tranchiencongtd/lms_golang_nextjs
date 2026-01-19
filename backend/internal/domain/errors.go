@@ -19,6 +19,9 @@ var (
 	ErrInvalidRole        = errors.New("invalid user role")
 
 	// Token errors
-	ErrInvalidToken = errors.New("invalid or expired token")
-	ErrTokenExpired = errors.New("token has expired")
+	ErrInvalidToken        = errors.New("invalid or expired token")
+	ErrTokenExpired        = errors.New("token has expired")
+	ErrInvalidRefreshToken = errors.New("invalid refresh token")
+	ErrRefreshTokenExpired = errors.New("refresh token has expired")
+	ErrRefreshTokenRevoked = errors.New("refresh token has been revoked")
 )

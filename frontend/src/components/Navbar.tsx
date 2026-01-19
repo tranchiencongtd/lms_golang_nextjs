@@ -106,7 +106,7 @@ export default function Navbar() {
               Đăng nhập
             </button>
             <button onClick={openRegister} className="btn-primary py-2 px-4">
-              Đăng ký miễn phí
+              Đăng ký
             </button>
           </div>
 
@@ -153,7 +153,7 @@ export default function Navbar() {
                 Đăng nhập
               </button>
               <button onClick={() => { openRegister(); setIsOpen(false); }} className="btn-primary text-center">
-                Đăng ký miễn phí
+                Đăng ký
               </button>
             </div>
           </div>

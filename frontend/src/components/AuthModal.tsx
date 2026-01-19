@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { X, Lock, Eye, EyeOff, ArrowRight, User, Mail, Phone, CheckCircle, ArrowLeft } from 'lucide-react'
+import { X, Lock, Eye, EyeOff, ArrowRight, User, Mail, Phone, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react'
 import { useAuthModal } from '@/contexts/AuthModalContext'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function AuthModal() {
   const { isOpen, view, closeModal, switchView } = useAuthModal()
@@ -49,25 +50,35 @@ export default function AuthModal() {
 
 function LoginForm() {
   const { switchView, closeModal } = useAuthModal()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
-    username: '',
+    emailOrPhone: '',
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     setIsLoading(true)
-    console.log('Login:', formData)
-    setTimeout(() => {
-      setIsLoading(false)
+
+    try {
+      await login(formData.emailOrPhone, formData.password)
       closeModal()
-    }, 1000)
+      // Reset form
+      setFormData({ emailOrPhone: '', password: '' })
+    } catch (err: any) {
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+    setError(null) // Clear error on input change
   }
 
   return (
@@ -95,21 +106,29 @@ function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Username */}
+        {/* Error message */}
+        {error && (
+          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Email or Phone */}
         <div>
-          <label htmlFor="login-username" className="block text-sm font-medium text-secondary-700 mb-1.5">
-            Tên tài khoản
+          <label htmlFor="login-emailOrPhone" className="block text-sm font-medium text-secondary-700 mb-1.5">
+            Email hoặc Số điện thoại
           </label>
           <div className="relative">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              id="login-username"
-              name="username"
-              value={formData.username}
+              id="login-emailOrPhone"
+              name="emailOrPhone"
+              value={formData.emailOrPhone}
               onChange={handleChange}
               required
-              placeholder="Nhập tên tài khoản"
+              placeholder="Nhập email hoặc số điện thoại"
               className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
             />
           </div>
@@ -214,7 +233,9 @@ function LoginForm() {
 
 function RegisterForm() {
   const { switchView, closeModal } = useAuthModal()
+  const { register } = useAuth()
   const [formData, setFormData] = useState({
+    email: '',
     fullName: '',
     phone: '',
     password: '',
@@ -225,27 +246,48 @@ function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+
     if (formData.password !== formData.confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp!')
+      setError('Mật khẩu xác nhận không khớp!')
+      return
+    }
+    if (formData.password.length < 8) {
+      setError('Mật khẩu phải có ít nhất 8 ký tự!')
       return
     }
     if (!agreeTerms) {
-      alert('Vui lòng đồng ý với điều khoản sử dụng!')
+      setError('Vui lòng đồng ý với điều khoản sử dụng!')
       return
     }
+
     setIsLoading(true)
-    console.log('Register:', formData)
-    setTimeout(() => {
-      setIsLoading(false)
+
+    try {
+      await register(formData.email, formData.password, formData.fullName, formData.phone)
       setIsSuccess(true)
-    }, 1000)
+      // Reset form
+      setFormData({
+        email: '',
+        fullName: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+      })
+    } catch (err: any) {
+      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+    setError(null) // Clear error on input change
   }
 
   if (isSuccess) {
@@ -295,6 +337,34 @@ function RegisterForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Error message */}
+        {error && (
+          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Email */}
+        <div>
+          <label htmlFor="reg-email" className="block text-sm font-medium text-secondary-700 mb-1">
+            Email <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="email"
+              id="reg-email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="Nhập email"
+              className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+            />
+          </div>
+        </div>
+
         {/* Full Name */}
         <div>
           <label htmlFor="reg-fullName" className="block text-sm font-medium text-secondary-700 mb-1">
@@ -349,8 +419,8 @@ function RegisterForm() {
               value={formData.password}
               onChange={handleChange}
               required
-              minLength={6}
-              placeholder="Tối thiểu 6 ký tự"
+              minLength={8}
+              placeholder="Tối thiểu 8 ký tự"
               className="w-full pl-12 pr-12 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
             />
             <button
@@ -517,7 +587,7 @@ function ForgotPasswordForm() {
           Quên mật khẩu?
         </h2>
         <p className="text-secondary-600 text-sm">
-          Nhập email hoặc SĐT đã đăng ký để nhận hướng dẫn đặt lại mật khẩu.
+          Nhập email hoặc SĐT đã đăng ký để nhận hướng dẫn đặt lại mật khẩu. (Chức năng đang phát triển, vui lòng liên hệ admin qua sđt: 0973.507.865 để được hỗ trợ)
         </p>
       </div>
 

@@ -43,6 +43,8 @@ func (r *Router) Setup(engine *gin.Engine) {
 		{
 			auth.POST("/register", r.authHandler.Register)
 			auth.POST("/login", r.authHandler.Login)
+			auth.POST("/refresh-token", r.authHandler.RefreshToken)
+			auth.POST("/logout", r.authHandler.Logout)
 		}
 
 		// Protected auth routes
@@ -50,6 +52,7 @@ func (r *Router) Setup(engine *gin.Engine) {
 		authProtected.Use(middleware.AuthMiddleware(r.authUseCase))
 		{
 			authProtected.GET("/profile", r.authHandler.GetProfile)
+			authProtected.POST("/logout-all", r.authHandler.LogoutAll)
 		}
 	}
 }

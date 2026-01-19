@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Poppins, Open_Sans } from 'next/font/google'
 import './globals.css'
 import { AuthModalProvider } from '@/contexts/AuthModalContext'
+import { AuthProvider } from '@/contexts/AuthContext'
 import AuthModal from '@/components/AuthModal'
 
 const poppins = Poppins({
@@ -29,10 +30,12 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${poppins.variable} ${openSans.variable}`}>
       <body className="font-body antialiased bg-white text-secondary-800">
-        <AuthModalProvider>
-          {children}
-          <AuthModal />
-        </AuthModalProvider>
+        <AuthProvider>
+          <AuthModalProvider>
+            {children}
+            <AuthModal />
+          </AuthModalProvider>
+        </AuthProvider>
       </body>
     </html>
   )

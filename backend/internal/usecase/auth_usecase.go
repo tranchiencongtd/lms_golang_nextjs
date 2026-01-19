@@ -23,9 +23,10 @@ type LoginInput struct {
 
 // AuthOutput represents the output after successful authentication
 type AuthOutput struct {
-	User        *domain.User `json:"user"`
-	AccessToken string       `json:"access_token"`
-	ExpiresIn   int64        `json:"expires_in"` // Token expiry in seconds
+	User         *domain.User `json:"user"`
+	AccessToken  string       `json:"access_token"`
+	RefreshToken string       `json:"refresh_token"`
+	ExpiresIn    int64        `json:"expires_in"` // Access token expiry in seconds
 }
 
 // UserOutput represents the output for user data
@@ -39,6 +40,11 @@ type UserOutput struct {
 	IsVerified  bool            `json:"is_verified"`
 }
 
+// RefreshTokenInput represents the input for refresh token request
+type RefreshTokenInput struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
 // AuthUseCase defines the interface for authentication use cases
 type AuthUseCase interface {
 	// Register creates a new user account
@@ -50,6 +56,15 @@ type AuthUseCase interface {
 	// GetProfile retrieves the current user's profile
 	GetProfile(ctx context.Context, userID uuid.UUID) (*UserOutput, error)
 
-	// ValidateToken validates a JWT token and returns the user ID
+	// ValidateToken validates a JWT access token and returns the user ID
 	ValidateToken(token string) (uuid.UUID, error)
+
+	// RefreshToken generates a new access token using a refresh token
+	RefreshToken(ctx context.Context, input *RefreshTokenInput) (*AuthOutput, error)
+
+	// Logout revokes a refresh token
+	Logout(ctx context.Context, refreshToken string) error
+
+	// LogoutAll revokes all refresh tokens for a user
+	LogoutAll(ctx context.Context, userID uuid.UUID) error
 }

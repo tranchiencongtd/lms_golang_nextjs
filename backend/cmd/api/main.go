@@ -42,9 +42,10 @@ func main() {
 
 	// Initialize repositories
 	userRepo := postgres.NewUserRepository(db)
+	refreshTokenRepo := postgres.NewRefreshTokenRepository(db)
 
 	// Initialize use cases
-	authUseCase := usecase.NewAuthUseCase(userRepo, cfg.JWT, cfg.Bcrypt.Cost)
+	authUseCase := usecase.NewAuthUseCase(userRepo, refreshTokenRepo, cfg.JWT, cfg.Bcrypt.Cost)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authUseCase)

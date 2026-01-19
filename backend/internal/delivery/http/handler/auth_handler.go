@@ -47,9 +47,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	response.Created(c, "Đăng ký thành công", gin.H{
-		"user":         result.User,
-		"access_token": result.AccessToken,
-		"expires_in":   result.ExpiresIn,
+		"user":          result.User,
+		"access_token":  result.AccessToken,
+		"refresh_token": result.RefreshToken,
+		"expires_in":    result.ExpiresIn,
 	})
 }
 
@@ -78,9 +79,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	response.OK(c, "Đăng nhập thành công", gin.H{
-		"user":         result.User,
-		"access_token": result.AccessToken,
-		"expires_in":   result.ExpiresIn,
+		"user":          result.User,
+		"access_token":  result.AccessToken,
+		"refresh_token": result.RefreshToken,
+		"expires_in":    result.ExpiresIn,
 	})
 }
 
@@ -117,6 +119,95 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 	response.OK(c, "Lấy thông tin thành công", profile)
 }
 
+// RefreshToken handles refresh token request
+// @Summary Refresh access token
+// @Description Generate a new access token using a refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body usecase.RefreshTokenInput true "Refresh token input"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /api/v1/auth/refresh-token [post]
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	var input usecase.RefreshTokenInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.BadRequest(c, "Dữ liệu không hợp lệ: "+err.Error())
+		return
+	}
+
+	result, err := h.authUseCase.RefreshToken(c.Request.Context(), &input)
+	if err != nil {
+		h.handleAuthError(c, err)
+		return
+	}
+
+	response.OK(c, "Làm mới token thành công", gin.H{
+		"user":          result.User,
+		"access_token":  result.AccessToken,
+		"refresh_token": result.RefreshToken,
+		"expires_in":    result.ExpiresIn,
+	})
+}
+
+// Logout handles user logout
+// @Summary Logout user
+// @Description Revoke a refresh token to logout
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body usecase.RefreshTokenInput true "Refresh token input"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Router /api/v1/auth/logout [post]
+func (h *AuthHandler) Logout(c *gin.Context) {
+	var input usecase.RefreshTokenInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.BadRequest(c, "Dữ liệu không hợp lệ: "+err.Error())
+		return
+	}
+
+	if err := h.authUseCase.Logout(c.Request.Context(), input.RefreshToken); err != nil {
+		h.handleAuthError(c, err)
+		return
+	}
+
+	response.OK(c, "Đăng xuất thành công", nil)
+}
+
+// LogoutAll handles logout from all devices
+// @Summary Logout from all devices
+// @Description Revoke all refresh tokens for the current user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /api/v1/auth/logout-all [post]
+func (h *AuthHandler) LogoutAll(c *gin.Context) {
+	// Get user ID from context (set by auth middleware)
+	userIDStr, exists := c.Get("userID")
+	if !exists {
+		response.Unauthorized(c, "Chưa xác thực")
+		return
+	}
+
+	userID, ok := userIDStr.(uuid.UUID)
+	if !ok {
+		response.Unauthorized(c, "Token không hợp lệ")
+		return
+	}
+
+	if err := h.authUseCase.LogoutAll(c.Request.Context(), userID); err != nil {
+		h.handleAuthError(c, err)
+		return
+	}
+
+	response.OK(c, "Đăng xuất khỏi tất cả thiết bị thành công", nil)
+}
+
 // handleAuthError handles authentication errors
 func (h *AuthHandler) handleAuthError(c *gin.Context, err error) {
 	switch {
@@ -136,6 +227,12 @@ func (h *AuthHandler) handleAuthError(c *gin.Context, err error) {
 		response.Unauthorized(c, "Token không hợp lệ")
 	case errors.Is(err, domain.ErrTokenExpired):
 		response.Unauthorized(c, "Token đã hết hạn")
+	case errors.Is(err, domain.ErrInvalidRefreshToken):
+		response.Unauthorized(c, "Refresh token không hợp lệ")
+	case errors.Is(err, domain.ErrRefreshTokenExpired):
+		response.Unauthorized(c, "Refresh token đã hết hạn")
+	case errors.Is(err, domain.ErrRefreshTokenRevoked):
+		response.Unauthorized(c, "Refresh token đã bị thu hồi")
 	case errors.Is(err, domain.ErrPhoneNumberAlreadyExists):
 	       response.Conflict(c, "Số điện thoại đã được sử dụng")
     case errors.Is(err, domain.ErrInvalidPhoneNumber):
