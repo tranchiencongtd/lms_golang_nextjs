@@ -143,9 +143,8 @@ function CoursesPage() {
     )
   }
 
-  const sortedCourses = courses
-
   const activeFiltersCount = selectedGrades.length + selectedLevels.length
+  const skeletonItems = Array.from({ length: 6 }).map((_, idx) => idx)
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -351,8 +350,17 @@ function CoursesPage() {
 
               {/* Course Grid */}
               {isLoading ? (
-                <div className="flex items-center justify-center py-16">
-                  <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary-500 border-t-transparent"></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {skeletonItems.map((idx) => (
+                    <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse space-y-3">
+                      <div className="aspect-video bg-gray-200 rounded-md" />
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      <div className="h-3 bg-gray-200 rounded w-full" />
+                      <div className="h-3 bg-gray-200 rounded w-2/3" />
+                      <div className="h-5 bg-gray-200 rounded w-1/3 mt-4" />
+                    </div>
+                  ))}
                 </div>
               ) : error ? (
                 <div className="text-center py-16">
@@ -370,9 +378,9 @@ function CoursesPage() {
                     Thử lại
                   </button>
                 </div>
-              ) : sortedCourses.length > 0 ? (
+              ) : courses.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {sortedCourses.map((course) => (
+                  {courses.map((course) => (
                     <CourseCard key={course.slug} course={course} />
                   ))}
                 </div>
@@ -401,7 +409,7 @@ function CoursesPage() {
               )}
 
               {/* Load More */}
-              {sortedCourses.length > 0 && (
+              {courses.length > 0 && (
                 <div className="text-center mt-10">
                   <button className="px-8 py-3 border border-primary-500 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors">
                     Xem thêm khóa học
