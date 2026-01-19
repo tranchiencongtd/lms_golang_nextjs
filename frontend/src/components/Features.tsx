@@ -9,7 +9,6 @@ import {
 
 const learningPaths = [
   {
-    icon: GraduationCap,
     title: 'Toán THCS',
     subtitle: 'Lớp 6 - 9',
     description: 'Chương trình toán lớp 6-9 với bài giảng sinh động và bài tập đa dạng.',
@@ -19,7 +18,6 @@ const learningPaths = [
     bgColor: 'bg-blue-50',
   },
   {
-    icon: Target,
     title: 'Toán THPT',
     subtitle: 'Lớp 10 - 12',
     description: 'Nắm vững kiến thức toán lớp 10-12, chuẩn bị tốt cho kỳ thi.',
@@ -27,10 +25,8 @@ const learningPaths = [
     students: '3,200+',
     color: 'text-violet-600',
     bgColor: 'bg-violet-50',
-    popular: true,
   },
   {
-    icon: Trophy,
     title: 'Luyện thi THPT QG',
     subtitle: 'Ôn thi đại học',
     description: 'Đạt điểm cao với lộ trình ôn luyện bài bản và đề thi thử.',
@@ -48,7 +44,7 @@ export default function Features() {
         {/* Section Header */}
         <div className="mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-secondary-900 mb-4">
-            Chọn lộ khoá học phù hợp với bạn
+            Chọn khoá học phù hợp với bạn
           </h2>
           <p className="text-lg text-secondary-600 max-w-3xl">
             Dù bạn đang học THCS, THPT hay chuẩn bị thi đại học, chúng tôi đều có khóa học phù hợp.
