@@ -13,4 +13,8 @@ export const API_ENDPOINTS = {
     logoutAll: '/auth/logout-all',
     profile: '/auth/profile',
   },
+  courses: {
+    list: '/courses',
+    get: (idOrSlug: string) => `/courses/${idOrSlug}`,
+  },
 } as const

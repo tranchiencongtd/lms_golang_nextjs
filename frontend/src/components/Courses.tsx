@@ -1,67 +1,61 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import CourseCard, { Course } from '@/components/CourseCard'
+import CourseCard, { CourseCardModel } from '@/components/CourseCard'
+import { getCourses, type Course as ApiCourse } from '@/lib/api/courses'
+import { formatDuration } from '@/lib/utils'
 
-const courses: Course[] = [
-  {
-    id: 1,
-    title: 'Toán lớp 12 - Ôn thi THPT Quốc gia',
-    instructor: 'Thầy Nguyễn Văn A',
-    rating: 4.9,
-    reviews: 3200,
-    students: 12500,
-    lessons: 120,
-    duration: '60 giờ',
-    price: 1200000,
-    originalPrice: 2000000,
-    badge: 'Bestseller',
-    badgeColor: 'bg-primary-600',
-  },
-  {
-    id: 2,
-    title: 'Hình học không gian từ A-Z',
-    instructor: 'Cô Trần Thị B',
-    rating: 4.8,
-    reviews: 2100,
-    students: 8900,
-    lessons: 85,
-    duration: '42 giờ',
-    price: 800000,
-    originalPrice: 1500000,
-    badge: 'Hot',
-    badgeColor: 'bg-red-500',
-  },
-  {
-    id: 3,
-    title: 'Đại số tuyến tính cơ bản',
-    instructor: 'Thầy Lê Văn C',
-    rating: 4.7,
-    reviews: 980,
-    students: 4500,
-    lessons: 65,
-    duration: '32 giờ',
-    price: 600000,
-    originalPrice: 1000000,
-    badge: 'Mới',
-    badgeColor: 'bg-green-600',
-  },
-  {
-    id: 4,
-    title: 'Luyện đề thi thử THPT Quốc gia',
-    instructor: 'Đội ngũ MathVN',
-    rating: 4.9,
-    reviews: 4500,
-    students: 15000,
-    lessons: 100,
-    duration: '50 giờ',
-    price: 1000000,
-    originalPrice: 1800000,
-    badge: 'Phổ biến',
-    badgeColor: 'bg-primary-600',
-  },
-]
+function toCourseCardModel(course: ApiCourse): CourseCardModel {
+  const duration = course.duration_minutes > 0 ? formatDuration(`${course.duration_minutes}:00`) : ''
+  return {
+    slug: course.slug || course.id,
+    title: course.title,
+    instructor: course.instructor?.full_name || 'Giảng viên MathVN',
+    rating: course.rating || 0,
+    reviews: course.total_reviews || 0,
+    students: course.total_students || 0,
+    lessons: course.total_lessons || 0,
+    duration,
+    price: course.price || 0,
+    originalPrice: course.original_price,
+    badge: course.badge ?? null,
+    badgeColor: course.badge_color ?? null,
+    image: course.image_url,
+    grade: course.grade,
+    topic: course.topic,
+    level: course.level,
+  }
+}
 
 export default function Courses() {
+  const [courses, setCourses] = useState<CourseCardModel[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const res = await getCourses({
+          sort: 'students_desc',
+          page: 1,
+          page_size: 4,
+        })
+        setCourses(res.courses.map(toCourseCardModel))
+      } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải khóa học'
+        setError(msg)
+        setCourses([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchFeatured()
+  }, [])
+
   return (
     <section id="courses" className="pb-16 lg:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,11 +84,27 @@ export default function Courses() {
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} className="h-full bg-white border border-secondary-200 rounded-lg p-4 animate-pulse">
+                  <div className="aspect-video bg-secondary-100 rounded mb-4" />
+                  <div className="h-4 bg-secondary-100 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-secondary-100 rounded w-1/2 mb-4" />
+                  <div className="h-3 bg-secondary-100 rounded w-1/3 mb-6" />
+                  <div className="h-5 bg-secondary-100 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-10 text-secondary-600">{error}</div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {courses.map((course) => (
+                <CourseCard key={course.slug} course={course} />
+              ))}
+            </div>
+          )}
         </div>
        
         {/* Mobile View All */}

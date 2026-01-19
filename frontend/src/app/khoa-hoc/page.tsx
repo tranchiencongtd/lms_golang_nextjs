@@ -6,7 +6,9 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Search, Filter, ChevronDown, X } from 'lucide-react'
-import CourseCard, { Course } from '@/components/CourseCard'
+import CourseCard, { CourseCardModel } from '@/components/CourseCard'
+import { getCourses, type Course as ApiCourse } from '@/lib/api/courses'
+import { formatDuration } from '@/lib/utils'
 
 const grades = [
   { id: 'all', name: 'Tất cả' },
@@ -32,152 +34,27 @@ const levels = [
   { id: 'intermediate', name: 'Nâng cao' },
 ]
 
-const courses: Course[] = [
-  {
-    id: 1,
-    title: 'Toán lớp 12 - Luyện thi THPT Quốc Gia',
-    instructor: 'Thầy Nguyễn Văn A',
-    rating: 4.9,
-    reviews: 3200,
-    students: 12500,
-    lessons: 120,
-    duration: '60 giờ',
-    price: 1200000,
-    originalPrice: 2000000,
-    image: '/images/course-1.jpg',
-    grade: '12',
-    topic: 'giai-tich',
-    level: 'advanced',
-    badge: 'Bestseller',
-    badgeColor: 'bg-accent-orange',
-  },
-  {
-    id: 2,
-    title: 'Hình học không gian - Từ cơ bản đến nâng cao',
-    instructor: 'Cô Trần Thị B',
-    rating: 4.8,
-    reviews: 2100,
-    students: 8900,
-    lessons: 85,
-    duration: '42 giờ',
-    price: 800000,
-    originalPrice: 1500000,
-    image: '/images/course-2.jpg',
-    grade: '11',
-    topic: 'hinh-hoc',
-    level: 'intermediate',
-    badge: 'Hot',
-    badgeColor: 'bg-red-500',
-  },
-  {
-    id: 3,
-    title: 'Đại số tuyến tính cho học sinh THPT',
-    instructor: 'Thầy Lê Văn C',
-    rating: 4.7,
-    reviews: 1500,
-    students: 6500,
-    lessons: 65,
-    duration: '32 giờ',
-    price: 600000,
-    originalPrice: 1000000,
-    image: '/images/course-3.jpg',
-    grade: '10',
-    topic: 'dai-so',
-    level: 'basic',
-    badge: 'Mới',
-    badgeColor: 'bg-accent-green',
-  },
-  {
-    id: 4,
-    title: 'Lượng giác toàn tập - Công thức & Bài tập',
-    instructor: 'Thầy Phạm Văn D',
-    rating: 4.9,
-    reviews: 2800,
-    students: 10200,
-    lessons: 95,
-    duration: '48 giờ',
-    price: 900000,
-    originalPrice: 1600000,
-    image: '/images/course-4.jpg',
-    grade: '11',
-    topic: 'luong-giac',
-    level: 'intermediate',
-    badge: 'Bestseller',
-    badgeColor: 'bg-accent-orange',
-  },
-  {
-    id: 5,
-    title: 'Toán lớp 9 - Ôn thi vào lớp 10 chuyên',
-    instructor: 'Cô Nguyễn Thị E',
-    rating: 4.8,
-    reviews: 4200,
-    students: 15000,
-    lessons: 100,
-    duration: '50 giờ',
-    price: 1000000,
-    originalPrice: 1800000,
-    image: '/images/course-5.jpg',
-    grade: '9',
-    topic: 'dai-so',
-    level: 'advanced',
-    badge: 'Hot',
-    badgeColor: 'bg-red-500',
-  },
-  {
-    id: 6,
-    title: 'Xác suất thống kê - Lớp 10, 11, 12',
-    instructor: 'Thầy Hoàng Văn F',
-    rating: 4.6,
-    reviews: 890,
-    students: 4500,
-    lessons: 55,
-    duration: '28 giờ',
-    price: 500000,
-    originalPrice: 900000,
-    image: '/images/course-6.jpg',
-    grade: '10',
-    topic: 'xac-suat',
-    level: 'basic',
-    badge: null,
-    badgeColor: null,
-  },
-  {
-    id: 7,
-    title: 'Toán lớp 6 - Nền tảng vững chắc',
-    instructor: 'Cô Lê Thị G',
-    rating: 4.9,
-    reviews: 2400,
-    students: 8000,
-    lessons: 80,
-    duration: '40 giờ',
-    price: 400000,
-    originalPrice: 700000,
-    image: '/images/course-7.jpg',
-    grade: '6',
-    topic: 'dai-so',
-    level: 'basic',
-    badge: 'Phổ biến',
-    badgeColor: 'bg-primary-500',
-  },
-  {
-    id: 8,
-    title: 'Giải tích 12 - Chinh phục điểm 9, 10',
-    instructor: 'Thầy Nguyễn Văn H',
-    rating: 4.8,
-    reviews: 3100,
-    students: 11000,
-    lessons: 110,
-    duration: '55 giờ',
-    price: 1100000,
-    originalPrice: 1900000,
-    image: '/images/course-8.jpg',
-    grade: '12',
-    topic: 'giai-tich',
-    level: 'advanced',
-    badge: 'Bestseller',
-    badgeColor: 'bg-accent-orange',
-  },
-]
+function toCourseCardModel(course: ApiCourse): CourseCardModel {
+  const duration = course.duration_minutes > 0 ? formatDuration(`${course.duration_minutes}:00`) : ''
+  return {
+    slug: course.slug || course.id,
+    title: course.title,
+    instructor: course.instructor?.full_name || 'Giảng viên MathVN',
+    rating: course.rating || 0,
+    reviews: course.total_reviews || 0,
+    students: course.total_students || 0,
+    lessons: course.total_lessons || 0,
+    duration,
+    price: course.price || 0,
+    originalPrice: course.original_price,
+    badge: course.badge ?? null,
+    badgeColor: course.badge_color ?? null,
+    image: course.image_url,
+    grade: course.grade,
+    topic: course.topic,
+    level: course.level,
+  }
+}
 
 
 function CoursesPage() {
@@ -188,6 +65,10 @@ function CoursesPage() {
   const [selectedLevels, setSelectedLevels] = useState<string[]>([])
   const [sortBy, setSortBy] = useState('popular')
   const [showFilters, setShowFilters] = useState(false)
+  const [courses, setCourses] = useState<CourseCardModel[]>([])
+  const [total, setTotal] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const sortOptions = [
     { id: 'popular', name: 'Phổ biến nhất' },
@@ -214,6 +95,51 @@ function CoursesPage() {
     }
   }, [searchParams])
 
+  // Fetch courses from API whenever filters change
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      const sortMap: Record<string, any> = {
+        popular: 'students_desc',
+        newest: 'created_at_desc',
+        rating: 'rating_desc',
+        'price-low': 'price_asc',
+        'price-high': 'price_desc',
+      }
+
+      // Backend hiện support filter đơn (grade/topic/level). UI đang multi-select → lấy phần tử đầu tiên.
+      const grade = selectedGrades[0]
+      const topic = selectedTopics[0]
+      const level = selectedLevels[0]
+
+      try {
+        const res = await getCourses({
+          search: searchQuery || undefined,
+          grade: grade || undefined,
+          topic: topic || undefined,
+          level: (level as any) || undefined,
+          sort: sortMap[sortBy] || 'students_desc',
+          page: 1,
+          page_size: 50,
+        })
+
+        setCourses(res.courses.map(toCourseCardModel))
+        setTotal(res.pagination.total)
+      } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải danh sách khóa học'
+        setError(msg)
+        setCourses([])
+        setTotal(0)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCourses()
+  }, [searchQuery, selectedGrades, selectedTopics, selectedLevels, sortBy])
+
   // Toggle functions for multi-select
   const toggleGrade = (gradeId: string) => {
     setSelectedGrades(prev => 
@@ -239,32 +165,7 @@ function CoursesPage() {
     )
   }
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          course.instructor.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesGrade = selectedGrades.length === 0 || (course.grade && selectedGrades.includes(course.grade))
-    const matchesTopic = selectedTopics.length === 0 || (course.topic && selectedTopics.includes(course.topic))
-    const matchesLevel = selectedLevels.length === 0 || (course.level && selectedLevels.includes(course.level))
-    return matchesSearch && matchesGrade && matchesTopic && matchesLevel
-  })
-
-  // Sort courses
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    switch (sortBy) {
-      case 'popular':
-        return (b.students || 0) - (a.students || 0)
-      case 'newest':
-        return b.id - a.id // Assuming higher ID = newer
-      case 'rating':
-        return b.rating - a.rating
-      case 'price-low':
-        return a.price - b.price
-      case 'price-high':
-        return b.price - a.price
-      default:
-        return 0
-    }
-  })
+  const sortedCourses = courses
 
   const activeFiltersCount = selectedGrades.length + selectedTopics.length + selectedLevels.length
 
@@ -368,7 +269,7 @@ function CoursesPage() {
               {/* Toolbar */}
               <div className="flex items-center justify-between mb-6">
                 <p className="text-secondary-600">
-                  <span className="font-semibold text-secondary-900">{filteredCourses.length}</span> khóa học
+                  <span className="font-semibold text-secondary-900">{total}</span> khóa học
                 </p>
 
                 <div className="flex items-center gap-4">
@@ -524,10 +425,30 @@ function CoursesPage() {
               )}
 
               {/* Course Grid */}
-              {sortedCourses.length > 0 ? (
+              {isLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary-500 border-t-transparent"></div>
+                </div>
+              ) : error ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-8 h-8 text-red-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-secondary-900 mb-2">
+                    Không thể tải khóa học
+                  </h3>
+                  <p className="text-secondary-600 mb-4">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-primary-600 font-medium hover:underline"
+                  >
+                    Thử lại
+                  </button>
+                </div>
+              ) : sortedCourses.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {sortedCourses.map((course) => (
-                    <CourseCard key={course.id} course={course} />
+                    <CourseCard key={course.slug} course={course} />
                   ))}
                 </div>
               ) : (

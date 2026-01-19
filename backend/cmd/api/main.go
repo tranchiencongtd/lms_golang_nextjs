@@ -43,18 +43,21 @@ func main() {
 	// Initialize repositories
 	userRepo := postgres.NewUserRepository(db)
 	refreshTokenRepo := postgres.NewRefreshTokenRepository(db)
+	courseRepo := postgres.NewCourseRepository(db)
 
 	// Initialize use cases
 	authUseCase := usecase.NewAuthUseCase(userRepo, refreshTokenRepo, cfg.JWT, cfg.Bcrypt.Cost)
+	courseUseCase := usecase.NewCourseUseCase(courseRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authUseCase)
+	courseHandler := handler.NewCourseHandler(courseUseCase)
 
 	// Setup router
 	engine := gin.New()
 	engine.Use(gin.Logger())
 
-	r := router.NewRouter(authHandler, authUseCase)
+	r := router.NewRouter(authHandler, courseHandler, authUseCase)
 	r.Setup(engine)
 
 	// Create HTTP server

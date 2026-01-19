@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { formatPrice, formatDuration, getYouTubeEmbedUrl, getYouTubeThumbnail } from '@/lib/utils'
+import { getCourse, type Course as ApiCourse } from '@/lib/api/courses'
 import { 
   Star, 
   Clock, 
@@ -24,164 +25,122 @@ import {
   X
 } from 'lucide-react'
 
-// Mock course data - In real app, fetch from API
-const coursesData: Record<string, {
-  id: number
-  title: string
-  instructor: string
-  instructorTitle: string
-  instructorAvatar: string
-  rating: number
-  students: number
-  reviews: number
-  lessons: number
-  duration: string
-  price: number
-  originalPrice: number
-  description: string
-  whatYouLearn: string[]
-  requirements: string[]
-  curriculum: { title: string; lessons: { title: string; duration: string; preview?: boolean; youtubeId?: string }[] }[]
-  badge: string | null
-  badgeColor: string | null
-  level: string
-  language: string
-  lastUpdated: string
-  certificate: boolean
-}> = {
-  '1': {
-    id: 1,
-    title: 'Toán lớp 12 - Luyện thi THPT Quốc Gia',
-    instructor: 'Thầy Nguyễn Văn A',
-    instructorTitle: 'Giáo viên Toán THPT chuyên, 15 năm kinh nghiệm',
-    instructorAvatar: '',
-    rating: 4.9,
-    students: 12500,
-    reviews: 3200,
-    lessons: 120,
-    duration: '60 giờ',
-    price: 1200000,
-    originalPrice: 2000000,
-    description: 'Khóa học Toán lớp 12 toàn diện, được thiết kế đặc biệt để giúp học sinh chuẩn bị tốt nhất cho kỳ thi THPT Quốc Gia. Với phương pháp giảng dạy khoa học, bài giảng sinh động và hệ thống bài tập đa dạng từ cơ bản đến nâng cao.',
-    whatYouLearn: [
-      'Nắm vững toàn bộ kiến thức Toán lớp 12 theo chương trình mới',
-      'Giải thành thạo các dạng bài tập thường gặp trong đề thi',
-      'Phương pháp làm bài nhanh, chính xác và hiệu quả',
-      'Kỹ năng phân tích đề và quản lý thời gian làm bài',
-      'Chiến lược ôn thi và đạt điểm cao trong kỳ thi THPT QG',
-      'Tự tin giải quyết các bài toán từ cơ bản đến nâng cao',
-    ],
-    requirements: [
-      'Đã học xong chương trình Toán lớp 11',
-      'Máy tính hoặc điện thoại có kết nối internet',
-      'Có tinh thần học tập nghiêm túc và kiên trì',
-    ],
-    curriculum: [
-      {
-        title: 'Chương 1: Ứng dụng đạo hàm',
-        lessons: [
-          { title: 'Giới thiệu khóa học', duration: '10:00', preview: true, youtubeId: 'DN0G0Lbj6os' },
-          { title: 'Sự đồng biến, nghịch biến của hàm số', duration: '45:00', preview: true, youtubeId: '9bZkp7q19f0' },
-          { title: 'Cực trị của hàm số', duration: '50:00' },
-          { title: 'Giá trị lớn nhất, nhỏ nhất', duration: '40:00' },
-          { title: 'Bài tập tổng hợp chương 1', duration: '60:00' },
-        ],
-      },
-      {
-        title: 'Chương 2: Hàm số mũ và logarit',
-        lessons: [
-          { title: 'Lũy thừa với số mũ thực', duration: '35:00' },
-          { title: 'Hàm số mũ', duration: '40:00' },
-          { title: 'Logarit', duration: '45:00' },
-          { title: 'Hàm số logarit', duration: '40:00' },
-          { title: 'Phương trình mũ và logarit', duration: '55:00' },
-        ],
-      },
-      {
-        title: 'Chương 3: Nguyên hàm - Tích phân',
-        lessons: [
-          { title: 'Nguyên hàm', duration: '50:00' },
-          { title: 'Tích phân', duration: '55:00' },
-          { title: 'Ứng dụng tích phân', duration: '60:00' },
-          { title: 'Bài tập nâng cao', duration: '45:00' },
-        ],
-      },
-      {
-        title: 'Chương 4: Số phức',
-        lessons: [
-          { title: 'Số phức và các phép toán', duration: '40:00' },
-          { title: 'Phương trình bậc hai với hệ số thực', duration: '35:00' },
-          { title: 'Dạng lượng giác của số phức', duration: '45:00' },
-        ],
-      },
-    ],
-    badge: 'Bestseller',
-    badgeColor: 'bg-accent-orange',
-    level: 'Nâng cao',
-    language: 'Tiếng Việt',
-    lastUpdated: 'Tháng 1/2026',
-    certificate: true,
-  },
+function minutesToDurationString(minutes: number): string {
+  if (!minutes || minutes <= 0) return '0:00'
+  return `${minutes}:00`
 }
 
-// Default course for IDs not in mock data
-const defaultCourse = {
-  id: 0,
-  title: 'Khóa học Toán',
-  instructor: 'Giảng viên MathVN',
-  instructorTitle: 'Giáo viên Toán',
-  instructorAvatar: '',
-  rating: 4.8,
-  students: 5000,
-  reviews: 1200,
-  lessons: 80,
-  duration: '40 giờ',
-  price: 800000,
-  originalPrice: 1500000,
-  description: 'Khóa học Toán chất lượng cao với phương pháp giảng dạy hiện đại, giúp học sinh nắm vững kiến thức và đạt điểm cao.',
-  whatYouLearn: [
-    'Nắm vững kiến thức cốt lõi',
-    'Giải thành thạo các dạng bài tập',
-    'Phương pháp làm bài hiệu quả',
-    'Kỹ năng tự học và ôn tập',
-  ],
-  requirements: [
-    'Có kiến thức nền tảng phù hợp',
-    'Máy tính hoặc điện thoại có kết nối internet',
-  ],
-  curriculum: [
-    {
-      title: 'Phần 1: Kiến thức cơ bản',
-      lessons: [
-        { title: 'Giới thiệu khóa học', duration: '10:00', preview: true, youtubeId: 'dQw4w9WgXcQ' },
-        { title: 'Bài 1: Nền tảng', duration: '45:00' },
-        { title: 'Bài 2: Lý thuyết cơ bản', duration: '50:00' },
-      ],
-    },
-    {
-      title: 'Phần 2: Bài tập ứng dụng',
-      lessons: [
-        { title: 'Bài tập dạng 1', duration: '40:00' },
-        { title: 'Bài tập dạng 2', duration: '45:00' },
-        { title: 'Bài tập tổng hợp', duration: '60:00' },
-      ],
-    },
-  ],
-  badge: null,
-  badgeColor: null,
-  level: 'Trung bình',
-  language: 'Tiếng Việt',
-  lastUpdated: 'Tháng 1/2026',
+function mapApiCourseToUi(course: ApiCourse) {
+  const curriculum =
+    course.sections?.map((section) => ({
+      title: section.title,
+      lessons:
+        section.lessons?.map((lesson) => ({
+          title: lesson.title,
+          duration: minutesToDurationString(lesson.duration_minutes),
+          preview: !!lesson.is_preview,
+          youtubeId: lesson.youtube_id,
+        })) ?? [],
+    })) ?? []
+
+  return {
+    id: course.id,
+    title: course.title,
+    instructor: course.instructor?.full_name || 'Giảng viên MathVN',
+    instructorTitle: 'Giảng viên',
+    instructorAvatar: course.instructor?.avatar || '',
+    rating: course.rating || 0,
+    students: course.total_students || 0,
+    reviews: course.total_reviews || 0,
+    lessons: course.total_lessons || 0,
+    duration: formatDuration(minutesToDurationString(course.duration_minutes || 0)),
+    price: course.price || 0,
+    originalPrice: course.original_price ?? course.price ?? 0,
+    description: course.description || course.short_description || '',
+    whatYouLearn: [
+      'Nắm vững kiến thức trọng tâm theo lộ trình',
+      'Giải thành thạo các dạng bài tập thường gặp',
+      'Tăng tốc độ và độ chính xác khi làm bài',
+      'Tự tin ôn tập và kiểm tra',
+    ],
+    requirements: [
+      'Thiết bị có kết nối Internet',
+      'Tinh thần học tập nghiêm túc và kiên trì',
+    ],
+    curriculum,
+    badge: course.badge ?? null,
+    badgeColor: course.badge_color ?? null,
+    level:
+      course.level === 'advanced'
+        ? 'Nâng cao'
+        : course.level === 'intermediate'
+          ? 'Trung bình'
+          : 'Cơ bản',
+    language: course.language === 'vi' ? 'Tiếng Việt' : course.language,
+    lastUpdated: course.updated_at ? new Date(course.updated_at).toLocaleDateString('vi-VN') : '',
+    certificate: !!course.certificate,
+  }
 }
 
 export default function CourseDetailPage() {
   const params = useParams()
-  const courseId = params.id as string
-  const course = coursesData[courseId] || { ...defaultCourse, id: parseInt(courseId) || 0 }
+  const courseIdOrSlug = params.id as string
+  const [apiCourse, setApiCourse] = useState<ApiCourse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const res = await getCourse(courseIdOrSlug, true)
+        setApiCourse(res)
+      } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải khóa học'
+        setError(msg)
+        setApiCourse(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCourse()
+  }, [courseIdOrSlug])
+
+  const course = useMemo(() => (apiCourse ? mapApiCourseToUi(apiCourse) : null), [apiCourse])
   
   const [expandedSections, setExpandedSections] = useState<number[]>([0])
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [currentPreviewLesson, setCurrentPreviewLesson] = useState<{ title: string; duration: string; chapterTitle: string; youtubeId?: string } | null>(null)
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
+
+  if (!course) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+          <h1 className="text-2xl font-bold text-secondary-900 mb-3">Không tìm thấy khóa học</h1>
+          <p className="text-secondary-600 mb-6">{'Khóa học không tồn tại hoặc đã bị gỡ.'}</p>
+          <Link href="/khoa-hoc" className="text-primary-600 hover:underline">
+            Quay lại danh sách khóa học
+          </Link>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
 
   // Get all preview lessons
   const previewLessons = course.curriculum.flatMap((section) => 

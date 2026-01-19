@@ -9,15 +9,17 @@ import (
 
 // Router holds all route handlers
 type Router struct {
-	authHandler *handler.AuthHandler
-	authUseCase usecase.AuthUseCase
+	authHandler   *handler.AuthHandler
+	courseHandler *handler.CourseHandler
+	authUseCase   usecase.AuthUseCase
 }
 
 // NewRouter creates a new router
-func NewRouter(authHandler *handler.AuthHandler, authUseCase usecase.AuthUseCase) *Router {
+func NewRouter(authHandler *handler.AuthHandler, courseHandler *handler.CourseHandler, authUseCase usecase.AuthUseCase) *Router {
 	return &Router{
-		authHandler: authHandler,
-		authUseCase: authUseCase,
+		authHandler:   authHandler,
+		courseHandler: courseHandler,
+		authUseCase:   authUseCase,
 	}
 }
 
@@ -53,6 +55,14 @@ func (r *Router) Setup(engine *gin.Engine) {
 		{
 			authProtected.GET("/profile", r.authHandler.GetProfile)
 			authProtected.POST("/logout-all", r.authHandler.LogoutAll)
+		}
+
+		// Public course routes
+		courses := v1.Group("/courses")
+		{
+			courses.GET("/filters", r.courseHandler.ListCourseFilters)
+			courses.GET("", r.courseHandler.ListCourses)
+			courses.GET("/:id", r.courseHandler.GetCourse)
 		}
 	}
 }
