@@ -68,17 +68,8 @@ function mapApiCourseToUi(course: ApiCourse) {
       'Tinh thần học tập nghiêm túc và kiên trì',
     ],
     curriculum,
-    badge: course.badge ?? null,
-    badgeColor: course.badge_color ?? null,
-    level:
-      course.level === 'advanced'
-        ? 'Nâng cao'
-        : course.level === 'intermediate'
-          ? 'Trung bình'
-          : 'Cơ bản',
-    language: course.language === 'vi' ? 'Tiếng Việt' : course.language,
+    level: course.level === 'advanced' ? 'Nâng cao' : 'Cơ bản',
     lastUpdated: course.updated_at ? new Date(course.updated_at).toLocaleDateString('vi-VN') : '',
-    certificate: !!course.certificate,
   }
 }
 

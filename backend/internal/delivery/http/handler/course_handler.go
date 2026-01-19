@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mathvn/backend/internal/delivery/http/response"
@@ -64,7 +65,6 @@ func (h *CourseHandler) GetCourse(c *gin.Context) {
 // @Param status query string false "Course status (draft, published, archived)"
 // @Param level query string false "Course level (basic, intermediate, advanced)"
 // @Param grade query string false "Grade filter"
-// @Param topic query string false "Topic filter"
 // @Param search query string false "Search query"
 // @Param featured query boolean false "Featured courses only"
 // @Param sort query string false "Sort by (created_at_desc, created_at_asc, price_asc, price_desc, rating_desc, students_desc)"
@@ -82,16 +82,23 @@ func (h *CourseHandler) ListCourses(c *gin.Context) {
 	}
 
 	if levelStr := c.Query("level"); levelStr != "" {
-		level := domain.CourseLevel(levelStr)
-		filter.Level = &level
+		levels := strings.Split(levelStr, ",")
+		for _, lv := range levels {
+			trimmed := strings.TrimSpace(lv)
+			if trimmed != "" {
+				filter.Levels = append(filter.Levels, domain.CourseLevel(trimmed))
+			}
+		}
 	}
 
 	if grade := c.Query("grade"); grade != "" {
-		filter.Grade = &grade
-	}
-
-	if topic := c.Query("topic"); topic != "" {
-		filter.Topic = &topic
+		grades := strings.Split(grade, ",")
+		for _, g := range grades {
+			trimmed := strings.TrimSpace(g)
+			if trimmed != "" {
+				filter.Grades = append(filter.Grades, trimmed)
+			}
+		}
 	}
 
 	if search := c.Query("search"); search != "" {
@@ -139,23 +146,6 @@ func (h *CourseHandler) ListCourses(c *gin.Context) {
 			"total_pages": (total + pageSize - 1) / pageSize,
 		},
 	})
-}
-
-// ListCourseFilters handles retrieving available grade/topic/level options
-// @Summary Get course filter options
-// @Description Returns distinct grades, topics and levels for courses
-// @Tags courses
-// @Produce json
-// @Success 200 {object} response.Response
-// @Router /api/v1/courses/filters [get]
-func (h *CourseHandler) ListCourseFilters(c *gin.Context) {
-	taxonomies, err := h.courseUseCase.ListTaxonomies(c.Request.Context())
-	if err != nil {
-		response.InternalServerError(c, "Không thể tải bộ lọc khóa học")
-		return
-	}
-
-	response.OK(c, "Lấy bộ lọc khóa học thành công", taxonomies)
 }
 
 // handleCourseError handles course-related errors

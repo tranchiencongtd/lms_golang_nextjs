@@ -7,10 +7,6 @@ import { useAuthModal } from '@/contexts/AuthModalContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCourseActivationModal } from '@/contexts/CourseActivationModalContext'
 
-const exploreCategories = [
-  'Đại số',
-  'Hình học',
-]
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -88,23 +84,19 @@ export default function Navbar() {
                   <div className="px-4 py-2 border-b border-secondary-100">
                     <p className="text-xs font-semibold text-secondary-500 uppercase tracking-wide">Cấp học</p>
                   </div>
+                  <Link href="/khoa-hoc?grade=1,2,3,4,5" className="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 cursor-pointer">
+                    Toán Tiểu học (Lớp 1 - 5)
+                  </Link>
                   <Link href="/khoa-hoc?grade=6,7,8,9" className="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 cursor-pointer">
                     Toán THCS (Lớp 6 - 9)
                   </Link>
                   <Link href="/khoa-hoc?grade=10,11,12" className="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 cursor-pointer">
                     Toán THPT (Lớp 10 - 12)
                   </Link>
-                  <Link href="/khoa-hoc?grade=thpt" className="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 cursor-pointer">
+                  <Link href="/khoa-hoc?grade=12" className="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 cursor-pointer">
                     Luyện thi THPT Quốc Gia
                   </Link>
-                  <div className="px-4 py-2 border-b border-t border-secondary-100 mt-2">
-                    <p className="text-xs font-semibold text-secondary-500 uppercase tracking-wide">Chủ đề</p>
-                  </div>
-                  {exploreCategories.slice(0, 4).map((cat) => (
-                    <Link key={cat} href={`/chu-de/${cat.toLowerCase().replace(' ', '-')}`} className="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 cursor-pointer">
-                      {cat}
-                    </Link>
-                  ))}
+                
                   <Link href="/khoa-hoc" className="block px-4 py-2 text-sm text-primary-500 font-medium hover:bg-secondary-50 cursor-pointer">
                     Xem tất cả khoá học →
                   </Link>

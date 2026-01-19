@@ -10,9 +10,8 @@ import (
 type CourseLevel string
 
 const (
-	LevelBasic        CourseLevel = "basic"
-	LevelIntermediate CourseLevel = "intermediate"
-	LevelAdvanced     CourseLevel = "advanced"
+	LevelBasic    CourseLevel = "basic"
+	LevelAdvanced CourseLevel = "advanced"
 )
 
 // CourseStatus represents the status of a course
@@ -43,11 +42,6 @@ type Course struct {
 	DurationMinutes  int          `json:"duration_minutes"`
 	Level            CourseLevel  `json:"level"`
 	Grade            *string      `json:"grade,omitempty"`
-	Topic            *string      `json:"topic,omitempty"`
-	Language         string       `json:"language"`
-	Badge            *string      `json:"badge,omitempty"`
-	BadgeColor       *string      `json:"badge_color,omitempty"`
-	Certificate      bool         `json:"certificate"`
 	Status           CourseStatus `json:"status"`
 	IsFeatured       bool         `json:"is_featured"`
 	CreatedAt        time.Time    `json:"created_at"`
@@ -91,9 +85,8 @@ type CourseLesson struct {
 // CourseFilter represents filters for course queries
 type CourseFilter struct {
 	Status       *CourseStatus `json:"status,omitempty"`
-	Level        *CourseLevel  `json:"level,omitempty"`
-	Grade        *string       `json:"grade,omitempty"`
-	Topic        *string       `json:"topic,omitempty"`
+	Levels       []CourseLevel `json:"levels,omitempty"`
+	Grades       []string      `json:"grades,omitempty"`
 	InstructorID *uuid.UUID    `json:"instructor_id,omitempty"`
 	IsFeatured   *bool         `json:"is_featured,omitempty"`
 	Search       *string       `json:"search,omitempty"`
@@ -110,17 +103,3 @@ const (
 	SortRatingDesc    CourseSort = "rating_desc"
 	SortStudentsDesc  CourseSort = "students_desc"
 )
-
-// TaxonomyOption represents a filter option with its display name and optional course count
-type TaxonomyOption struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Count int    `json:"count"`
-}
-
-// CourseTaxonomies groups all course-related filter options
-type CourseTaxonomies struct {
-	Grades []TaxonomyOption `json:"grades"`
-	Topics []TaxonomyOption `json:"topics"`
-	Levels []TaxonomyOption `json:"levels"`
-}

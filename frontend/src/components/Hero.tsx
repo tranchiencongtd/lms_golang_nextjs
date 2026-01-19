@@ -29,7 +29,7 @@ export default function Hero() {
             {/* Subheading */}
             <p className="mt-6 text-sm sm:text-lg text-primary-100 max-w-lg">
               Nền tảng học toán trực tuyến hàng đầu với hơn 500+ khóa học 
-              từ lớp 6-12, luyện thi THPT Quốc Gia và toán cao cấp.
+              từ lớp 1-12, luyện thi THPT Quốc Gia.
             </p>
 
             {/* CTA Buttons */}
@@ -74,9 +74,9 @@ export default function Hero() {
 
             {/* Popular Searches */}
             <div className="mb-6">
-              <p className="text-sm text-secondary-500 mb-3">Chủ đề phổ biến:</p>
+              <p className="text-sm text-secondary-500 mb-3">Lớp học:</p>
               <div className="flex flex-wrap gap-2">
-                {['Đại số', 'Hình học',].map((topic) => (
+                {['Lớp 1','Lớp 2','Lớp 3','Lớp 4','Lớp 5','Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'].map((topic) => (
                   <Link 
                     key={topic}
                     href={`/tim-kiem?q=${topic}`}

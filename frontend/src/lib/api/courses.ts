@@ -17,13 +17,9 @@ export interface Course {
   total_students: number
   total_lessons: number
   duration_minutes: number
-  level: 'basic' | 'intermediate' | 'advanced'
+  level: 'basic' | 'advanced'
   grade?: string
-  topic?: string
-  language: string
-  badge?: string
-  badge_color?: string
-  certificate: boolean
+  language?: string
   status: 'draft' | 'published' | 'archived'
   is_featured: boolean
   created_at: string
@@ -75,9 +71,8 @@ export interface CourseListResponse {
 
 export interface CourseListParams {
   status?: 'draft' | 'published' | 'archived'
-  level?: 'basic' | 'intermediate' | 'advanced'
+  level?: 'basic' | 'advanced'
   grade?: string
-  topic?: string
   search?: string
   featured?: boolean
   sort?: 'created_at_desc' | 'created_at_asc' | 'price_asc' | 'price_desc' | 'rating_desc' | 'students_desc'

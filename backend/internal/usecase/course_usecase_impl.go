@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/mathvn/backend/internal/domain"
@@ -184,97 +183,4 @@ func generateSlug(title string) string {
 	}
 
 	return result.String()
-}
-
-// ListTaxonomies returns distinct grade/topic/level options with display names
-func (uc *courseUseCase) ListTaxonomies(ctx context.Context) (*domain.CourseTaxonomies, error) {
-	data, err := uc.courseRepo.ListTaxonomies(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := range data.Grades {
-		data.Grades[i].Name = gradeDisplayName(data.Grades[i].ID)
-	}
-	for i := range data.Topics {
-		data.Topics[i].Name = topicDisplayName(data.Topics[i].ID)
-	}
-	for i := range data.Levels {
-		data.Levels[i].Name = levelDisplayName(data.Levels[i].ID)
-	}
-
-	return data, nil
-}
-
-func gradeDisplayName(code string) string {
-	switch strings.TrimSpace(code) {
-	case "6":
-		return "Lớp 6"
-	case "7":
-		return "Lớp 7"
-	case "8":
-		return "Lớp 8"
-	case "9":
-		return "Lớp 9"
-	case "10":
-		return "Lớp 10"
-	case "11":
-		return "Lớp 11"
-	case "12":
-		return "Lớp 12"
-	case "thpt":
-		return "THPT"
-	default:
-		return "Lớp " + code
-	}
-}
-
-func topicDisplayName(code string) string {
-	switch strings.TrimSpace(code) {
-	case "dai-so":
-		return "Đại số"
-	case "hinh-hoc":
-		return "Hình học"
-	case "luyen-thi-thpt":
-		return "Luyện thi THPT"
-	default:
-		return humanizeSlug(code)
-	}
-}
-
-func levelDisplayName(code string) string {
-	switch domain.CourseLevel(strings.TrimSpace(code)) {
-	case domain.LevelBasic:
-		return "Cơ bản"
-	case domain.LevelIntermediate:
-		return "Nâng cao"
-	case domain.LevelAdvanced:
-		return "Chuyên sâu"
-	default:
-		return humanizeSlug(code)
-	}
-}
-
-func humanizeSlug(slug string) string {
-	if slug == "" {
-		return ""
-	}
-	slug = strings.ReplaceAll(slug, "-", " ")
-	slug = strings.ReplaceAll(slug, "_", " ")
-	parts := strings.Fields(slug)
-	for i, p := range parts {
-		parts[i] = capitalizeWord(p)
-	}
-	return strings.Join(parts, " ")
-}
-
-func capitalizeWord(word string) string {
-	if word == "" {
-		return ""
-	}
-	first, size := utf8.DecodeRuneInString(word)
-	if first == utf8.RuneError {
-		return strings.Title(word)
-	}
-	return strings.ToUpper(string(first)) + strings.ToLower(word[size:])
 }

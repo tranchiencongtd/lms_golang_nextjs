@@ -60,7 +60,6 @@ func (r *Router) Setup(engine *gin.Engine) {
 		// Public course routes
 		courses := v1.Group("/courses")
 		{
-			courses.GET("/filters", r.courseHandler.ListCourseFilters)
 			courses.GET("", r.courseHandler.ListCourses)
 			courses.GET("/:id", r.courseHandler.GetCourse)
 		}

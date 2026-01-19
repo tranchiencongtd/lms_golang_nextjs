@@ -30,9 +30,6 @@ type CourseRepository interface {
 	// GetByInstructor retrieves courses by instructor ID
 	GetByInstructor(ctx context.Context, instructorID uuid.UUID, limit, offset int) ([]*domain.Course, int, error)
 
-	// ListTaxonomies returns distinct grade/topic/level values with counts for filters
-	ListTaxonomies(ctx context.Context) (*domain.CourseTaxonomies, error)
-
 	// CourseSectionRepository defines operations for course sections
 	CourseSectionRepository
 

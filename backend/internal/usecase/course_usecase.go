@@ -16,7 +16,4 @@ type CourseUseCase interface {
 
 	// GetCourseWithDetails retrieves a course with instructor and sections/lessons
 	GetCourseWithDetails(ctx context.Context, idOrSlug string) (*domain.Course, error)
-
-	// ListTaxonomies returns the available grade/topic/level options
-	ListTaxonomies(ctx context.Context) (*domain.CourseTaxonomies, error)
 }

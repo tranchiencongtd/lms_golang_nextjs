@@ -2,16 +2,20 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { Search, Filter, ChevronDown, X } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Search, Filter, ChevronDown, X } from 'lucide-react'
 import CourseCard, { CourseCardModel } from '@/components/CourseCard'
 import { getCourses, type Course as ApiCourse } from '@/lib/api/courses'
 import { formatDuration } from '@/lib/utils'
 
 const grades = [
   { id: 'all', name: 'Tất cả' },
+  { id: '1', name: 'Lớp 1' },
+  { id: '2', name: 'Lớp 2' },
+  { id: '3', name: 'Lớp 3' },
+  { id: '4', name: 'Lớp 4' },
+  { id: '5', name: 'Lớp 5' },
   { id: '6', name: 'Lớp 6' },
   { id: '7', name: 'Lớp 7' },
   { id: '8', name: 'Lớp 8' },
@@ -21,17 +25,10 @@ const grades = [
   { id: '12', name: 'Lớp 12' },
 ]
 
-const topics = [
-  { id: 'all', name: 'Tất cả chủ đề' },
-  { id: 'dai-so', name: 'Đại số' },
-  { id: 'hinh-hoc', name: 'Hình học' },
-  { id: 'luyen-thi-thpt', name: 'Luyện thi THPT' },
-]
-
 const levels = [
   { id: 'all', name: 'Tất cả trình độ' },
   { id: 'basic', name: 'Cơ bản' },
-  { id: 'intermediate', name: 'Nâng cao' },
+  { id: 'advanced', name: 'Nâng cao' },
 ]
 
 function toCourseCardModel(course: ApiCourse): CourseCardModel {
@@ -47,11 +44,8 @@ function toCourseCardModel(course: ApiCourse): CourseCardModel {
     duration,
     price: course.price || 0,
     originalPrice: course.original_price,
-    badge: course.badge ?? null,
-    badgeColor: course.badge_color ?? null,
     image: course.image_url,
     grade: course.grade,
-    topic: course.topic,
     level: course.level,
   }
 }
@@ -61,7 +55,6 @@ function CoursesPage() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGrades, setSelectedGrades] = useState<string[]>([])
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([])
   const [selectedLevels, setSelectedLevels] = useState<string[]>([])
   const [sortBy, setSortBy] = useState('popular')
   const [showFilters, setShowFilters] = useState(false)
@@ -81,14 +74,10 @@ function CoursesPage() {
   // Read URL params on load
   useEffect(() => {
     const gradeParam = searchParams.get('grade')
-    const topicParam = searchParams.get('topic')
     const levelParam = searchParams.get('level')
 
     if (gradeParam) {
       setSelectedGrades(gradeParam.split(','))
-    }
-    if (topicParam) {
-      setSelectedTopics(topicParam.split(','))
     }
     if (levelParam) {
       setSelectedLevels(levelParam.split(','))
@@ -109,20 +98,17 @@ function CoursesPage() {
         'price-high': 'price_desc',
       }
 
-      // Backend hiện support filter đơn (grade/topic/level). UI đang multi-select → lấy phần tử đầu tiên.
-      const grade = selectedGrades[0]
-      const topic = selectedTopics[0]
-      const level = selectedLevels[0]
+      const grade = selectedGrades.length ? selectedGrades.join(',') : undefined
+      const level = selectedLevels.length ? selectedLevels.join(',') : undefined
 
       try {
         const res = await getCourses({
           search: searchQuery || undefined,
-          grade: grade || undefined,
-          topic: topic || undefined,
-          level: (level as any) || undefined,
+          grade: grade,
+          level: level as any,
           sort: sortMap[sortBy] || 'students_desc',
           page: 1,
-          page_size: 50,
+          page_size: 6,
         })
 
         setCourses(res.courses.map(toCourseCardModel))
@@ -138,7 +124,7 @@ function CoursesPage() {
     }
 
     fetchCourses()
-  }, [searchQuery, selectedGrades, selectedTopics, selectedLevels, sortBy])
+  }, [searchQuery, selectedGrades, selectedLevels, sortBy])
 
   // Toggle functions for multi-select
   const toggleGrade = (gradeId: string) => {
@@ -146,14 +132,6 @@ function CoursesPage() {
       prev.includes(gradeId) 
         ? prev.filter(g => g !== gradeId)
         : [...prev, gradeId]
-    )
-  }
-
-  const toggleTopic = (topicId: string) => {
-    setSelectedTopics(prev => 
-      prev.includes(topicId) 
-        ? prev.filter(t => t !== topicId)
-        : [...prev, topicId]
     )
   }
 
@@ -167,7 +145,7 @@ function CoursesPage() {
 
   const sortedCourses = courses
 
-  const activeFiltersCount = selectedGrades.length + selectedTopics.length + selectedLevels.length
+  const activeFiltersCount = selectedGrades.length + selectedLevels.length
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -213,24 +191,6 @@ function CoursesPage() {
                   </div>
                 </div>
 
-                {/* Topic Filter */}
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-secondary-700 mb-3">Chủ đề</h4>
-                  <div className="space-y-2">
-                    {topics.filter(t => t.id !== 'all').map((topic) => (
-                      <label key={topic.id} className="flex items-center gap-2 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={selectedTopics.includes(topic.id)}
-                          onChange={() => toggleTopic(topic.id)}
-                          className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
-                        />
-                        <span className={`text-sm ${selectedTopics.includes(topic.id) ? 'text-primary-600 font-medium' : 'text-secondary-600 group-hover:text-secondary-900'}`}>{topic.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Level Filter */}
                 <div>
                   <h4 className="text-sm font-medium text-secondary-700 mb-3">Trình độ</h4>
@@ -253,7 +213,6 @@ function CoursesPage() {
                 <button
                   onClick={() => {
                     setSelectedGrades([])
-                    setSelectedTopics([])
                     setSelectedLevels([])
                   }}
                   className={`w-full mt-6 py-2 text-sm rounded transition-colors ${activeFiltersCount > 0 ? 'bg-primary-50 text-primary-600 hover:bg-primary-100' : 'text-secondary-400 cursor-not-allowed'}`}
@@ -320,19 +279,6 @@ function CoursesPage() {
                       </button>
                     ) : null
                   })}
-                  {selectedTopics.map(topicId => {
-                    const topic = topics.find(t => t.id === topicId)
-                    return topic ? (
-                      <button
-                        key={topicId}
-                        onClick={() => toggleTopic(topicId)}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-accent-green/10 text-accent-green text-sm rounded-full hover:bg-accent-green/20"
-                      >
-                        {topic.name}
-                        <X className="w-3 h-3" />
-                      </button>
-                    ) : null
-                  })}
                   {selectedLevels.map(levelId => {
                     const level = levels.find(l => l.id === levelId)
                     return level ? (
@@ -349,7 +295,6 @@ function CoursesPage() {
                   <button
                     onClick={() => {
                       setSelectedGrades([])
-                      setSelectedTopics([])
                       setSelectedLevels([])
                     }}
                     className="text-sm text-secondary-500 hover:text-secondary-700 underline ml-2"
@@ -377,26 +322,6 @@ function CoursesPage() {
                           }`}
                         >
                           {grade.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Topic Section */}
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-secondary-700 mb-2">Chủ đề</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {topics.filter(t => t.id !== 'all').map((topic) => (
-                        <button
-                          key={topic.id}
-                          onClick={() => toggleTopic(topic.id)}
-                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                            selectedTopics.includes(topic.id)
-                              ? 'bg-primary-500 text-white border-primary-500'
-                              : 'bg-white text-secondary-600 border-gray-200 hover:border-primary-500'
-                          }`}
-                        >
-                          {topic.name}
                         </button>
                       ))}
                     </div>
@@ -466,7 +391,6 @@ function CoursesPage() {
                     onClick={() => {
                       setSearchQuery('')
                       setSelectedGrades([])
-                      setSelectedTopics([])
                       setSelectedLevels([])
                     }}
                     className="text-primary-600 font-medium hover:underline"

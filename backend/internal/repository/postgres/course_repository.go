@@ -31,10 +31,9 @@ func (r *courseRepository) Create(ctx context.Context, course *domain.Course) er
 			id, title, slug, description, short_description, instructor_id,
 			price, original_price, image_url, video_preview_url,
 			rating, total_reviews, total_students, total_lessons, duration_minutes,
-			level, grade, topic, language, badge, badge_color, certificate,
-			status, is_featured, created_at, updated_at
+			level, grade, status, is_featured, created_at, updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 	`
 
 	now := time.Now()
@@ -60,11 +59,6 @@ func (r *courseRepository) Create(ctx context.Context, course *domain.Course) er
 		course.DurationMinutes,
 		course.Level,
 		course.Grade,
-		course.Topic,
-		course.Language,
-		course.Badge,
-		course.BadgeColor,
-		course.Certificate,
 		course.Status,
 		course.IsFeatured,
 		course.CreatedAt,
@@ -80,8 +74,7 @@ func (r *courseRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.C
 		SELECT id, title, slug, description, short_description, instructor_id,
 		       price, original_price, image_url, video_preview_url,
 		       rating, total_reviews, total_students, total_lessons, duration_minutes,
-		       level, grade, topic, language, badge, badge_color, certificate,
-		       status, is_featured, created_at, updated_at
+		       level, grade, status, is_featured, created_at, updated_at
 		FROM courses
 		WHERE id = $1
 	`
@@ -105,11 +98,6 @@ func (r *courseRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.C
 		&course.DurationMinutes,
 		&course.Level,
 		&course.Grade,
-		&course.Topic,
-		&course.Language,
-		&course.Badge,
-		&course.BadgeColor,
-		&course.Certificate,
 		&course.Status,
 		&course.IsFeatured,
 		&course.CreatedAt,
@@ -129,8 +117,7 @@ func (r *courseRepository) GetBySlug(ctx context.Context, slug string) (*domain.
 		SELECT id, title, slug, description, short_description, instructor_id,
 		       price, original_price, image_url, video_preview_url,
 		       rating, total_reviews, total_students, total_lessons, duration_minutes,
-		       level, grade, topic, language, badge, badge_color, certificate,
-		       status, is_featured, created_at, updated_at
+		       level, grade, status, is_featured, created_at, updated_at
 		FROM courses
 		WHERE slug = $1
 	`
@@ -154,11 +141,6 @@ func (r *courseRepository) GetBySlug(ctx context.Context, slug string) (*domain.
 		&course.DurationMinutes,
 		&course.Level,
 		&course.Grade,
-		&course.Topic,
-		&course.Language,
-		&course.Badge,
-		&course.BadgeColor,
-		&course.Certificate,
 		&course.Status,
 		&course.IsFeatured,
 		&course.CreatedAt,
@@ -179,9 +161,8 @@ func (r *courseRepository) Update(ctx context.Context, course *domain.Course) er
 		SET title = $2, slug = $3, description = $4, short_description = $5,
 		    price = $6, original_price = $7, image_url = $8, video_preview_url = $9,
 		    rating = $10, total_reviews = $11, total_students = $12, total_lessons = $13,
-		    duration_minutes = $14, level = $15, grade = $16, topic = $17,
-		    language = $18, badge = $19, badge_color = $20, certificate = $21,
-		    status = $22, is_featured = $23, updated_at = $24
+		    duration_minutes = $14, level = $15, grade = $16,
+		    status = $17, is_featured = $18, updated_at = $19
 		WHERE id = $1
 	`
 
@@ -204,11 +185,6 @@ func (r *courseRepository) Update(ctx context.Context, course *domain.Course) er
 		course.DurationMinutes,
 		course.Level,
 		course.Grade,
-		course.Topic,
-		course.Language,
-		course.Badge,
-		course.BadgeColor,
-		course.Certificate,
 		course.Status,
 		course.IsFeatured,
 		course.UpdatedAt,
@@ -254,20 +230,31 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 			args = append(args, *filter.Status)
 			argIndex++
 		}
-		if filter.Level != nil {
-			conditions = append(conditions, fmt.Sprintf("level = $%d", argIndex))
-			args = append(args, *filter.Level)
-			argIndex++
+		if len(filter.Levels) > 0 {
+			levels := make([]string, 0, len(filter.Levels))
+			for _, lv := range filter.Levels {
+				if lv != "" {
+					levels = append(levels, string(lv))
+				}
+			}
+			if len(levels) > 0 {
+				conditions = append(conditions, fmt.Sprintf("level = ANY($%d)", argIndex))
+				args = append(args, levels)
+				argIndex++
+			}
 		}
-		if filter.Grade != nil {
-			conditions = append(conditions, fmt.Sprintf("grade = $%d", argIndex))
-			args = append(args, *filter.Grade)
-			argIndex++
-		}
-		if filter.Topic != nil {
-			conditions = append(conditions, fmt.Sprintf("topic = $%d", argIndex))
-			args = append(args, *filter.Topic)
-			argIndex++
+		if len(filter.Grades) > 0 {
+			grades := make([]string, 0, len(filter.Grades))
+			for _, g := range filter.Grades {
+				if g != "" {
+					grades = append(grades, g)
+				}
+			}
+			if len(grades) > 0 {
+				conditions = append(conditions, fmt.Sprintf("grade = ANY($%d)", argIndex))
+				args = append(args, grades)
+				argIndex++
+			}
 		}
 		if filter.InstructorID != nil {
 			conditions = append(conditions, fmt.Sprintf("instructor_id = $%d", argIndex))
@@ -320,8 +307,7 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 		SELECT id, title, slug, description, short_description, instructor_id,
 		       price, original_price, image_url, video_preview_url,
 		       rating, total_reviews, total_students, total_lessons, duration_minutes,
-		       level, grade, topic, language, badge, badge_color, certificate,
-		       status, is_featured, created_at, updated_at
+		       level, grade, status, is_featured, created_at, updated_at
 		FROM courses
 		%s
 		ORDER BY %s
@@ -357,11 +343,6 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 			&course.DurationMinutes,
 			&course.Level,
 			&course.Grade,
-			&course.Topic,
-			&course.Language,
-			&course.Badge,
-			&course.BadgeColor,
-			&course.Certificate,
 			&course.Status,
 			&course.IsFeatured,
 			&course.CreatedAt,
@@ -382,85 +363,6 @@ func (r *courseRepository) GetByInstructor(ctx context.Context, instructorID uui
 		InstructorID: &instructorID,
 	}
 	return r.List(ctx, filter, domain.SortCreatedAtDesc, limit, offset)
-}
-
-// ListTaxonomies returns distinct grade/topic/level values with counts for published courses
-func (r *courseRepository) ListTaxonomies(ctx context.Context) (*domain.CourseTaxonomies, error) {
-	result := &domain.CourseTaxonomies{
-		Grades: []domain.TaxonomyOption{},
-		Topics: []domain.TaxonomyOption{},
-		Levels: []domain.TaxonomyOption{},
-	}
-
-	// Helper to run a distinct query
-	type querySpec struct {
-		sql   string
-		dest  *[]domain.TaxonomyOption
-		field string
-	}
-
-	queries := []querySpec{
-		{
-			sql: `
-				SELECT grade, COUNT(*) as total
-				FROM courses
-				WHERE status = 'published' AND grade IS NOT NULL AND grade <> ''
-				GROUP BY grade
-				ORDER BY grade ASC
-			`,
-			dest:  &result.Grades,
-			field: "grade",
-		},
-		{
-			sql: `
-				SELECT topic, COUNT(*) as total
-				FROM courses
-				WHERE status = 'published' AND topic IS NOT NULL AND topic <> ''
-				GROUP BY topic
-				ORDER BY topic ASC
-			`,
-			dest:  &result.Topics,
-			field: "topic",
-		},
-		{
-			sql: `
-				SELECT level, COUNT(*) as total
-				FROM courses
-				WHERE status = 'published' AND level IS NOT NULL AND level <> ''
-				GROUP BY level
-				ORDER BY level ASC
-			`,
-			dest:  &result.Levels,
-			field: "level",
-		},
-	}
-
-	for _, q := range queries {
-		rows, err := r.db.Query(ctx, q.sql)
-		if err != nil {
-			return nil, err
-		}
-
-		for rows.Next() {
-			var id string
-			var count int
-			if err := rows.Scan(&id, &count); err != nil {
-				rows.Close()
-				return nil, err
-			}
-			*q.dest = append(*q.dest, domain.TaxonomyOption{
-				ID:    strings.TrimSpace(id),
-				Count: count,
-			})
-		}
-		if err := rows.Err(); err != nil {
-			rows.Close()
-			return nil, err
-		}
-		rows.Close()
-	}
-
-	return result, nil
 }
 
 // Section methods

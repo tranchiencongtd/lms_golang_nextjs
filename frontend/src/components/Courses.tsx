@@ -20,11 +20,8 @@ function toCourseCardModel(course: ApiCourse): CourseCardModel {
     duration,
     price: course.price || 0,
     originalPrice: course.original_price,
-    badge: course.badge ?? null,
-    badgeColor: course.badge_color ?? null,
     image: course.image_url,
     grade: course.grade,
-    topic: course.topic,
     level: course.level,
   }
 }

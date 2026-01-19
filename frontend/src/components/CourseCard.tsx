@@ -14,11 +14,8 @@ export interface CourseCardModel {
   duration: string
   price: number
   originalPrice?: number
-  badge?: string | null
-  badgeColor?: string | null
   image?: string
   grade?: string
-  topic?: string
   level?: string
 }
 
@@ -42,13 +39,6 @@ export default function CourseCard({ course, className = '' }: CourseCardProps) 
           <div className="absolute inset-0 flex items-center justify-center text-primary-400">
             <BookOpen className="w-12 h-12" />
           </div>
-          
-          {/* Badge (left top) */}
-          {course.badge && (
-            <span className={`absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold text-white rounded z-10 ${course.badgeColor || 'bg-primary-600'}`}>
-              {course.badge}
-            </span>
-          )}
           
           {/* Discount Badge (right top) */}
           {discount > 0 && (
