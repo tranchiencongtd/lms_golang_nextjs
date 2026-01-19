@@ -51,7 +51,7 @@ function toCourseCardModel(course: ApiCourse): CourseCardModel {
 }
 
 
-function CoursesPage() {
+export default function CoursesPage() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGrades, setSelectedGrades] = useState<string[]>([])
@@ -128,16 +128,16 @@ function CoursesPage() {
 
   // Toggle functions for multi-select
   const toggleGrade = (gradeId: string) => {
-    setSelectedGrades(prev => 
-      prev.includes(gradeId) 
+    setSelectedGrades(prev =>
+      prev.includes(gradeId)
         ? prev.filter(g => g !== gradeId)
         : [...prev, gradeId]
     )
   }
 
   const toggleLevel = (levelId: string) => {
-    setSelectedLevels(prev => 
-      prev.includes(levelId) 
+    setSelectedLevels(prev =>
+      prev.includes(levelId)
         ? prev.filter(l => l !== levelId)
         : [...prev, levelId]
     )
@@ -226,9 +226,56 @@ function CoursesPage() {
             <div className="flex-1">
               {/* Toolbar */}
               <div className="flex items-center justify-between mb-6">
-                <p className="text-secondary-600">
-                  <span className="font-semibold text-secondary-900">{total}</span> khóa học
-                </p>
+                <div className="flex items-center justify-between gap-x-4">
+                  {activeFiltersCount > 0 && (
+                    <p className="text-secondary-600 flex-2">
+                      <span className="font-semibold text-secondary-900">{total}</span> khóa học
+                    </p>
+                  )}
+
+                  {/* Active Filters Tags */}
+                  {activeFiltersCount > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 flex-1">
+                      <span className="text-sm text-secondary-500">Đang lọc:</span>
+                      {selectedGrades.map(gradeId => {
+                        const grade = grades.find(g => g.id === gradeId)
+                        return grade ? (
+                          <button
+                            key={gradeId}
+                            onClick={() => toggleGrade(gradeId)}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary-50 text-primary-600 text-sm rounded-full hover:bg-primary-100"
+                          >
+                            {grade.name}
+                            <X className="w-3 h-3" />
+                          </button>
+                        ) : null
+                      })}
+                      {selectedLevels.map(levelId => {
+                        const level = levels.find(l => l.id === levelId)
+                        return level ? (
+                          <button
+                            key={levelId}
+                            onClick={() => toggleLevel(levelId)}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-accent-orange/10 text-accent-orange text-sm rounded-full hover:bg-accent-orange/20"
+                          >
+                            {level.name}
+                            <X className="w-3 h-3" />
+                          </button>
+                        ) : null
+                      })}
+                      <button
+                        onClick={() => {
+                          setSelectedGrades([])
+                          setSelectedLevels([])
+                        }}
+                        className="text-sm text-secondary-500 hover:text-secondary-700 underline ml-2"
+                      >
+                        Xóa tất cả
+                      </button>
+                    </div>
+                  )}
+                </div>
+
 
                 <div className="flex items-center gap-4">
                   {/* Mobile Filter Button */}
@@ -261,47 +308,7 @@ function CoursesPage() {
                 </div>
               </div>
 
-              {/* Active Filters Tags */}
-              {activeFiltersCount > 0 && (
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="text-sm text-secondary-500">Đang lọc:</span>
-                  {selectedGrades.map(gradeId => {
-                    const grade = grades.find(g => g.id === gradeId)
-                    return grade ? (
-                      <button
-                        key={gradeId}
-                        onClick={() => toggleGrade(gradeId)}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-primary-50 text-primary-600 text-sm rounded-full hover:bg-primary-100"
-                      >
-                        {grade.name}
-                        <X className="w-3 h-3" />
-                      </button>
-                    ) : null
-                  })}
-                  {selectedLevels.map(levelId => {
-                    const level = levels.find(l => l.id === levelId)
-                    return level ? (
-                      <button
-                        key={levelId}
-                        onClick={() => toggleLevel(levelId)}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-accent-orange/10 text-accent-orange text-sm rounded-full hover:bg-accent-orange/20"
-                      >
-                        {level.name}
-                        <X className="w-3 h-3" />
-                      </button>
-                    ) : null
-                  })}
-                  <button
-                    onClick={() => {
-                      setSelectedGrades([])
-                      setSelectedLevels([])
-                    }}
-                    className="text-sm text-secondary-500 hover:text-secondary-700 underline ml-2"
-                  >
-                    Xóa tất cả
-                  </button>
-                </div>
-              )}
+
 
               {/* Mobile Filters */}
               {showFilters && (
@@ -314,11 +321,10 @@ function CoursesPage() {
                         <button
                           key={grade.id}
                           onClick={() => toggleGrade(grade.id)}
-                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                            selectedGrades.includes(grade.id)
+                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${selectedGrades.includes(grade.id)
                               ? 'bg-primary-500 text-white border-primary-500'
                               : 'bg-white text-secondary-600 border-gray-200 hover:border-primary-500'
-                          }`}
+                            }`}
                         >
                           {grade.name}
                         </button>
@@ -334,11 +340,10 @@ function CoursesPage() {
                         <button
                           key={level.id}
                           onClick={() => toggleLevel(level.id)}
-                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                            selectedLevels.includes(level.id)
+                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${selectedLevels.includes(level.id)
                               ? 'bg-primary-500 text-white border-primary-500'
                               : 'bg-white text-secondary-600 border-gray-200 hover:border-primary-500'
-                          }`}
+                            }`}
                         >
                           {level.name}
                         </button>
@@ -426,18 +431,3 @@ function CoursesPage() {
   )
 }
 
-export default function CoursesPageWrapper() {
-  return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
-        </div>
-        <Footer />
-      </main>
-    }>
-      <CoursesPage />
-    </Suspense>
-  )
-}

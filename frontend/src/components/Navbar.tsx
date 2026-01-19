@@ -314,17 +314,14 @@ export default function Navbar() {
             </div>
             
             <div className="space-y-1">
-              <Link href="/kham-pha" className="block px-3 py-2 text-sm font-medium text-secondary-700 hover:bg-secondary-50 cursor-pointer">
-                Khám phá
+              <Link href="/khoa-hoc?grade=1,2,3,4,5" className="block px-3 py-2 text-sm font-medium text-secondary-700 hover:bg-secondary-50 cursor-pointer">
+                Toán Tiểu học (Lớp 1 - 5)
               </Link>
-              <Link href="/toan-thcs" className="block px-3 py-2 text-sm text-secondary-600 hover:bg-secondary-50 cursor-pointer">
-                Toán THCS
+              <Link href="/khoa-hoc?grade=6,7,8,9" className="block px-3 py-2 text-sm text-secondary-600 hover:bg-secondary-50 cursor-pointer">
+                Toán THCS (Lớp 6 - 9)
               </Link>
-              <Link href="/toan-thpt" className="block px-3 py-2 text-sm text-secondary-600 hover:bg-secondary-50 cursor-pointer">
-                Toán THPT
-              </Link>
-              <Link href="/luyen-thi-thpt" className="block px-3 py-2 text-sm text-secondary-600 hover:bg-secondary-50 cursor-pointer">
-                Luyện thi THPT QG
+              <Link href="/khoa-hoc?grade=10,11,12" className="block px-3 py-2 text-sm text-secondary-600 hover:bg-secondary-50 cursor-pointer">
+                Toán THPT (Lớp 10 - 12)
               </Link>
             </div>
             

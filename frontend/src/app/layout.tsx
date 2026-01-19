@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { CourseActivationModalProvider } from '@/contexts/CourseActivationModalContext'
 import AuthModal from '@/components/AuthModal'
 import CourseActivationModal from '@/components/CourseActivationModal'
+import ProgressProviderWrapper from '@/components/ProgressProviderWrapper'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -32,15 +33,17 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${poppins.variable} ${openSans.variable}`}>
       <body className="font-body antialiased bg-white text-secondary-800">
-        <AuthProvider>
-          <AuthModalProvider>
-            <CourseActivationModalProvider>
-              {children}
-              <AuthModal />
-              <CourseActivationModal />
-            </CourseActivationModalProvider>
-          </AuthModalProvider>
-        </AuthProvider>
+        <ProgressProviderWrapper>
+          <AuthProvider>
+            <AuthModalProvider>
+              <CourseActivationModalProvider>
+                {children}
+                <AuthModal />
+                <CourseActivationModal />
+              </CourseActivationModalProvider>
+            </AuthModalProvider>
+          </AuthProvider>
+        </ProgressProviderWrapper>
       </body>
     </html>
   )
