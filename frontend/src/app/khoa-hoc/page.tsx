@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { formatPrice } from '@/lib/utils'
-import { Search, Filter, Star, Clock, Users, BookOpen, ChevronDown, Grid, List, X, ArrowUpDown } from 'lucide-react'
+import { Search, Filter, ChevronDown, X } from 'lucide-react'
+import CourseCard, { Course } from '@/components/CourseCard'
 
 const grades = [
   { id: 'all', name: 'Tất cả' },
@@ -32,7 +32,7 @@ const levels = [
   { id: 'intermediate', name: 'Nâng cao' },
 ]
 
-const courses = [
+const courses: Course[] = [
   {
     id: 1,
     title: 'Toán lớp 12 - Luyện thi THPT Quốc Gia',
@@ -179,54 +179,6 @@ const courses = [
   },
 ]
 
-function CourseCard({ course }: { course: typeof courses[0] }) {
-  return (
-    <Link href={`/khoa-hoc/${course.id}`} className="group block h-full">
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 h-full flex flex-col">
-        {/* Image */}
-        <div className="relative aspect-video bg-gradient-to-br from-primary-100 to-primary-200 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center text-primary-400">
-            <BookOpen className="w-12 h-12" />
-          </div>
-          {course.badge && (
-            <span className={`absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold text-white rounded ${course.badgeColor}`}>
-              {course.badge}
-            </span>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-4 flex flex-col flex-1">
-          {/* Title */}
-          <h3 className="font-semibold text-secondary-900 leading-snug line-clamp-2 group-hover:text-primary-600 transition-colors min-h-[2.5rem]">
-            {course.title}
-          </h3>
-          
-          {/* Instructor */}
-          <p className="text-xs text-secondary-500 mt-1.5">{course.instructor}</p>
-
-          {/* Rating - Coursera style */}
-          <div className="flex items-center gap-1 mt-2">
-            <span className="text-sm font-bold text-secondary-900">{course.rating}</span>
-            <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-            <span className="text-xs text-secondary-500">({course.reviews.toLocaleString()} đánh giá)</span>
-          </div>
-
-          {/* Meta - Coursera style */}
-          <p className="text-xs text-secondary-500 mt-1.5">
-            {course.lessons} bài học · {course.duration}
-          </p>
-
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mt-auto pt-3">
-            <span className="text-base font-bold text-secondary-900">{formatPrice(course.price)}</span>
-            <span className="text-xs text-secondary-400 line-through">{formatPrice(course.originalPrice)}</span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  )
-}
 
 function CoursesPage() {
   const searchParams = useSearchParams()
@@ -290,9 +242,9 @@ function CoursesPage() {
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           course.instructor.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesGrade = selectedGrades.length === 0 || selectedGrades.includes(course.grade)
-    const matchesTopic = selectedTopics.length === 0 || selectedTopics.includes(course.topic)
-    const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level)
+    const matchesGrade = selectedGrades.length === 0 || (course.grade && selectedGrades.includes(course.grade))
+    const matchesTopic = selectedTopics.length === 0 || (course.topic && selectedTopics.includes(course.topic))
+    const matchesLevel = selectedLevels.length === 0 || (course.level && selectedLevels.includes(course.level))
     return matchesSearch && matchesGrade && matchesTopic && matchesLevel
   })
 
@@ -300,7 +252,7 @@ function CoursesPage() {
   const sortedCourses = [...filteredCourses].sort((a, b) => {
     switch (sortBy) {
       case 'popular':
-        return b.students - a.students
+        return (b.students || 0) - (a.students || 0)
       case 'newest':
         return b.id - a.id // Assuming higher ID = newer
       case 'rating':

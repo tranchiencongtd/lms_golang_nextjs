@@ -34,10 +34,10 @@ export default function CTA() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left - Content */}
           <div className="text-white">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-6">
+            {/* <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-6">
               <Sparkles className="w-4 h-4" />
               Tư vấn miễn phí 100%
-            </span>
+            </span> */}
             
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-6 leading-tight text-white">
               Đăng ký nhận tư vấn

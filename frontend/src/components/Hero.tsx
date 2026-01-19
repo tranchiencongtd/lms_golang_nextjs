@@ -101,7 +101,7 @@ export default function Hero() {
       </div>
 
       {/* Partner Logos */}
-      <div className="bg-white border-t border-secondary-100">
+      {/* <div className="bg-white border-t border-secondary-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-center text-sm text-secondary-500 mb-6">
             Được tin dùng bởi <span className="text-primary-500 font-semibold">50,000+ học sinh và phụ huynh</span> trên toàn quốc
@@ -113,7 +113,7 @@ export default function Hero() {
             <div className="text-secondary-500">Hệ thống Vinschool</div>
           </div>
         </div>
-      </div>
+      </div> */}
     </section>
   )
 }
