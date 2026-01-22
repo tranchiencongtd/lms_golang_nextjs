@@ -39,6 +39,14 @@ func AuthMiddleware(authUseCase usecase.AuthUseCase) gin.HandlerFunc {
 
 		// Set user ID in context
 		c.Set("userID", userID)
+
+		// Fetch user profile to get role (for authorization checks)
+		profile, err := authUseCase.GetProfile(c.Request.Context(), userID)
+		if err == nil && profile != nil {
+			c.Set("userRole", profile.Role)
+		}
+
 		c.Next()
 	}
 }
+

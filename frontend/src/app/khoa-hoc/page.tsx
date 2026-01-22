@@ -50,8 +50,42 @@ function toCourseCardModel(course: ApiCourse): CourseCardModel {
   }
 }
 
+// Loading fallback for Suspense
+function CoursesLoading() {
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <Navbar />
+      <section className="py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse space-y-3">
+                <div className="aspect-video bg-gray-200 rounded-md" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="h-3 bg-gray-200 rounded w-full" />
+                <div className="h-3 bg-gray-200 rounded w-2/3" />
+                <div className="h-5 bg-gray-200 rounded w-1/3 mt-4" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <Footer />
+    </main>
+  )
+}
 
+// Main page component with Suspense wrapper
 export default function CoursesPage() {
+  return (
+    <Suspense fallback={<CoursesLoading />}>
+      <CoursesContent />
+    </Suspense>
+  )
+}
+
+function CoursesContent() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGrades, setSelectedGrades] = useState<string[]>([])
@@ -322,8 +356,8 @@ export default function CoursesPage() {
                           key={grade.id}
                           onClick={() => toggleGrade(grade.id)}
                           className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${selectedGrades.includes(grade.id)
-                              ? 'bg-primary-500 text-white border-primary-500'
-                              : 'bg-white text-secondary-600 border-gray-200 hover:border-primary-500'
+                            ? 'bg-primary-500 text-white border-primary-500'
+                            : 'bg-white text-secondary-600 border-gray-200 hover:border-primary-500'
                             }`}
                         >
                           {grade.name}
@@ -341,8 +375,8 @@ export default function CoursesPage() {
                           key={level.id}
                           onClick={() => toggleLevel(level.id)}
                           className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${selectedLevels.includes(level.id)
-                              ? 'bg-primary-500 text-white border-primary-500'
-                              : 'bg-white text-secondary-600 border-gray-200 hover:border-primary-500'
+                            ? 'bg-primary-500 text-white border-primary-500'
+                            : 'bg-white text-secondary-600 border-gray-200 hover:border-primary-500'
                             }`}
                         >
                           {level.name}

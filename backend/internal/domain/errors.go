@@ -27,4 +27,16 @@ var (
 	ErrInvalidCourseLevel        = errors.New("invalid course level")
 	ErrCourseSectionNotFound     = errors.New("course section not found")
 	ErrCourseLessonNotFound      = errors.New("course lesson not found")
+
+	// Activation code errors
+	ErrActivationCodeNotFound    = errors.New("activation code not found")
+	ErrActivationCodeExpired     = errors.New("activation code has expired")
+	ErrActivationCodeUsedUp      = errors.New("activation code has reached maximum uses")
+	ErrActivationCodeInactive    = errors.New("activation code is inactive")
+	ErrActivationCodeInvalid     = errors.New("activation code is invalid")
+
+	// Enrollment errors
+	ErrAlreadyEnrolled           = errors.New("user is already enrolled in this course")
+	ErrEnrollmentNotFound        = errors.New("enrollment not found")
+	ErrEnrollmentExpired         = errors.New("enrollment has expired")
 )

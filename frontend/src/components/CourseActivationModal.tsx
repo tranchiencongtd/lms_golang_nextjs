@@ -45,21 +45,21 @@ export default function CourseActivationModal() {
   if (!isOpen) return null
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="course-activation-title"
     >
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={closeModal}
         aria-hidden="true"
       />
-      
+
       {/* Modal */}
-      <div 
+      <div
         ref={modalRef}
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
@@ -84,19 +84,19 @@ export default function CourseActivationModal() {
   )
 }
 
-function LoginRequiredView({ 
-  onClose, 
-  onLogin 
-}: { 
+function LoginRequiredView({
+  onClose,
+  onLogin
+}: {
   onClose: () => void
-  onLogin: () => void 
+  onLogin: () => void
 }) {
   return (
     <div className="p-8 text-center">
       <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <AlertCircle className="w-8 h-8 text-secondary-400" />
       </div>
-      <h2 
+      <h2
         id="course-activation-title"
         className="text-2xl font-heading font-bold text-secondary-900 mb-2"
       >
@@ -132,6 +132,7 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [activatedCourseName, setActivatedCourseName] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -139,18 +140,18 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
     setIsLoading(true)
 
     try {
-      // TODO: Implement API call to activate course
-      // const response = await activateCourse(code)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
+      const { activateCourse } = await import('@/lib/api/enrollments')
+      const result = await activateCourse(code.trim())
+
       setIsLoading(false)
       setSuccess(true)
+      setActivatedCourseName(result.course?.title || 'Khoá học')
       setCode('')
     } catch (err: any) {
       setIsLoading(false)
-      setError(err.message || 'Kích hoạt thất bại. Vui lòng thử lại.')
+      // Handle API error messages
+      const errorMessage = err.response?.data?.message || err.message || 'Kích hoạt thất bại. Vui lòng thử lại.'
+      setError(errorMessage)
     }
   }
 
@@ -158,6 +159,7 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
     setSuccess(false)
     setCode('')
     setError(null)
+    setActivatedCourseName('')
   }
 
   if (success) {
@@ -170,7 +172,7 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
           Kích hoạt thành công!
         </h2>
         <p className="text-secondary-600 mb-6">
-          Khoá học đã được kích hoạt và thêm vào tài khoản của bạn.
+          Khoá học <strong className="text-secondary-900">{activatedCourseName}</strong> đã được kích hoạt và thêm vào tài khoản của bạn.
         </p>
         <div className="flex flex-col gap-3">
           <button
@@ -197,7 +199,7 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
         <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Key className="w-8 h-8 text-primary-600" />
         </div>
-        <h2 
+        <h2
           id="course-activation-title"
           className="text-2xl font-heading font-bold text-secondary-900 mb-2"
         >
@@ -212,7 +214,7 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Error message */}
         {error && (
-          <div 
+          <div
             className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600"
             role="alert"
           >

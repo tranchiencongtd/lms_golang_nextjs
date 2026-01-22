@@ -9,17 +9,24 @@ import (
 
 // Router holds all route handlers
 type Router struct {
-	authHandler   *handler.AuthHandler
-	courseHandler *handler.CourseHandler
-	authUseCase   usecase.AuthUseCase
+	authHandler       *handler.AuthHandler
+	courseHandler     *handler.CourseHandler
+	enrollmentHandler *handler.EnrollmentHandler
+	authUseCase       usecase.AuthUseCase
 }
 
 // NewRouter creates a new router
-func NewRouter(authHandler *handler.AuthHandler, courseHandler *handler.CourseHandler, authUseCase usecase.AuthUseCase) *Router {
+func NewRouter(
+	authHandler *handler.AuthHandler,
+	courseHandler *handler.CourseHandler,
+	enrollmentHandler *handler.EnrollmentHandler,
+	authUseCase usecase.AuthUseCase,
+) *Router {
 	return &Router{
-		authHandler:   authHandler,
-		courseHandler: courseHandler,
-		authUseCase:   authUseCase,
+		authHandler:       authHandler,
+		courseHandler:     courseHandler,
+		enrollmentHandler: enrollmentHandler,
+		authUseCase:       authUseCase,
 	}
 }
 
@@ -63,5 +70,16 @@ func (r *Router) Setup(engine *gin.Engine) {
 			courses.GET("", r.courseHandler.ListCourses)
 			courses.GET("/:id", r.courseHandler.GetCourse)
 		}
+
+		// Protected enrollment routes
+		enrollments := v1.Group("/enrollments")
+		enrollments.Use(middleware.AuthMiddleware(r.authUseCase))
+		{
+			enrollments.POST("/activate", r.enrollmentHandler.ActivateCourse)
+			enrollments.GET("/my-courses", r.enrollmentHandler.GetMyCourses)
+			enrollments.GET("/check/:courseId", r.enrollmentHandler.CheckEnrollment)
+			enrollments.POST("/activation-codes", r.enrollmentHandler.CreateActivationCode)
+		}
 	}
 }
+

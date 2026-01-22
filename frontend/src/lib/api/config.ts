@@ -17,4 +17,11 @@ export const API_ENDPOINTS = {
     list: '/courses',
     get: (idOrSlug: string) => `/courses/${idOrSlug}`,
   },
+  enrollments: {
+    activate: '/enrollments/activate',
+    myCourses: '/enrollments/my-courses',
+    check: (courseId: string) => `/enrollments/check/${courseId}`,
+    createActivationCode: '/enrollments/activation-codes',
+  },
 } as const
+
