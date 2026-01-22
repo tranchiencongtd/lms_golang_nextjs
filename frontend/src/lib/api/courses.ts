@@ -19,6 +19,8 @@ export interface Course {
   duration_minutes: number
   level: 'basic' | 'advanced'
   grade?: string
+  what_you_learn?: string
+  requirements?: string
   language?: string
   status: 'draft' | 'published' | 'archived'
   is_featured: boolean
@@ -85,7 +87,7 @@ export interface CourseListParams {
  */
 export async function getCourses(params?: CourseListParams): Promise<CourseListResponse> {
   const queryParams = new URLSearchParams()
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -105,7 +107,7 @@ export async function getCourses(params?: CourseListParams): Promise<CourseListR
  * Get a single course by ID or slug
  */
 export async function getCourse(idOrSlug: string, includeDetails = false): Promise<Course> {
-  const url = includeDetails 
+  const url = includeDetails
     ? `${API_ENDPOINTS.courses.get(idOrSlug)}?details=true`
     : API_ENDPOINTS.courses.get(idOrSlug)
 

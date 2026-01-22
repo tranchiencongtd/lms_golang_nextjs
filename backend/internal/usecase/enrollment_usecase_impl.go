@@ -61,13 +61,17 @@ func (uc *enrollmentUseCase) ActivateCourse(ctx context.Context, userID uuid.UUI
 		return nil, domain.ErrAlreadyEnrolled
 	}
 
+	now := time.Now()
+	expiresAt := now.AddDate(1, 0, 0) // Valid for 1 year from activation
+
 	// Create enrollment
 	enrollment := &domain.Enrollment{
 		ID:               uuid.New(),
 		UserID:           userID,
 		CourseID:         activationCode.CourseID,
 		ActivationCodeID: &activationCode.ID,
-		EnrolledAt:       time.Now(),
+		EnrolledAt:       now,
+		ExpiresAt:        &expiresAt,
 		Status:           domain.EnrollmentStatusActive,
 	}
 

@@ -42,6 +42,8 @@ type Course struct {
 	DurationMinutes  int          `json:"duration_minutes"`
 	Level            CourseLevel  `json:"level"`
 	Grade            *string      `json:"grade,omitempty"`
+	WhatYouLearn     *string      `json:"what_you_learn,omitempty"`
+	Requirements     *string      `json:"requirements,omitempty"`
 	Status           CourseStatus `json:"status"`
 	IsFeatured       bool         `json:"is_featured"`
 	CreatedAt        time.Time    `json:"created_at"`

@@ -74,7 +74,7 @@ func (r *courseRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.C
 		SELECT c.id, c.title, c.slug, c.description, c.short_description, c.instructor_id,
 		       c.price, c.original_price, c.image_url, c.video_preview_url,
 		       c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes,
-		       c.level, c.grade, c.status, c.is_featured, c.created_at, c.updated_at,
+		       c.level, c.grade, c.what_you_learn, c.requirements, c.status, c.is_featured, c.created_at, c.updated_at,
 		       u.id, u.full_name, u.email
 		FROM courses c
 		LEFT JOIN users u ON c.instructor_id = u.id
@@ -102,6 +102,8 @@ func (r *courseRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.C
 		&course.DurationMinutes,
 		&course.Level,
 		&course.Grade,
+		&course.WhatYouLearn,
+		&course.Requirements,
 		&course.Status,
 		&course.IsFeatured,
 		&course.CreatedAt,
@@ -129,7 +131,7 @@ func (r *courseRepository) GetBySlug(ctx context.Context, slug string) (*domain.
 		SELECT c.id, c.title, c.slug, c.description, c.short_description, c.instructor_id,
 		       c.price, c.original_price, c.image_url, c.video_preview_url,
 		       c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes,
-		       c.level, c.grade, c.status, c.is_featured, c.created_at, c.updated_at,
+		       c.level, c.grade, c.what_you_learn, c.requirements, c.status, c.is_featured, c.created_at, c.updated_at,
 		       u.id, u.full_name, u.email
 		FROM courses c
 		LEFT JOIN users u ON c.instructor_id = u.id
@@ -157,6 +159,8 @@ func (r *courseRepository) GetBySlug(ctx context.Context, slug string) (*domain.
 		&course.DurationMinutes,
 		&course.Level,
 		&course.Grade,
+		&course.WhatYouLearn,
+		&course.Requirements,
 		&course.Status,
 		&course.IsFeatured,
 		&course.CreatedAt,
@@ -331,7 +335,7 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 		SELECT c.id, c.title, c.slug, c.description, c.short_description, c.instructor_id,
 		       c.price, c.original_price, c.image_url, c.video_preview_url,
 		       c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes,
-		       c.level, c.grade, c.status, c.is_featured, c.created_at, c.updated_at,
+		       c.level, c.grade, c.what_you_learn, c.requirements, c.status, c.is_featured, c.created_at, c.updated_at,
 		       u.id, u.full_name, u.email
 		FROM courses c
 		LEFT JOIN users u ON c.instructor_id = u.id
@@ -370,6 +374,8 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 			&course.DurationMinutes,
 			&course.Level,
 			&course.Grade,
+			&course.WhatYouLearn,
+			&course.Requirements,
 			&course.Status,
 			&course.IsFeatured,
 			&course.CreatedAt,

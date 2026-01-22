@@ -7,14 +7,16 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { formatPrice, formatDuration, getYouTubeEmbedUrl, getYouTubeThumbnail } from '@/lib/utils'
 import { getCourse, type Course as ApiCourse } from '@/lib/api/courses'
-import { 
-  Star, 
-  Clock, 
-  BookOpen, 
-  Users, 
-  Play, 
-  CheckCircle, 
-  ChevronDown, 
+import { checkEnrollment } from '@/lib/api/enrollments'
+import { useAuth } from '@/contexts/AuthContext'
+import {
+  Star,
+  Clock,
+  BookOpen,
+  Users,
+  Play,
+  CheckCircle,
+  ChevronDown,
   ChevronUp,
   Award,
   FileText,
@@ -43,6 +45,24 @@ function mapApiCourseToUi(course: ApiCourse) {
         })) ?? [],
     })) ?? []
 
+  // Parse semicolon-separated strings into arrays
+  const parseList = (str?: string, fallback: string[] = []): string[] => {
+    if (!str || str.trim() === '') return fallback
+    return str.split(';').map(item => item.trim()).filter(item => item.length > 0)
+  }
+
+  const defaultWhatYouLearn = [
+    'Nắm vững kiến thức trọng tâm theo lộ trình',
+    'Giải thành thạo các dạng bài tập thường gặp',
+    'Tăng tốc độ và độ chính xác khi làm bài',
+    'Tự tin ôn tập và kiểm tra',
+  ]
+
+  const defaultRequirements = [
+    'Thiết bị có kết nối Internet',
+    'Tinh thần học tập nghiêm túc và kiên trì',
+  ]
+
   return {
     id: course.id,
     title: course.title,
@@ -58,16 +78,8 @@ function mapApiCourseToUi(course: ApiCourse) {
     originalPrice: course.original_price ?? course.price ?? 0,
     language: course.language || 'Tiếng Việt',
     description: course.description || course.short_description || '',
-    whatYouLearn: [
-      'Nắm vững kiến thức trọng tâm theo lộ trình',
-      'Giải thành thạo các dạng bài tập thường gặp',
-      'Tăng tốc độ và độ chính xác khi làm bài',
-      'Tự tin ôn tập và kiểm tra',
-    ],
-    requirements: [
-      'Thiết bị có kết nối Internet',
-      'Tinh thần học tập nghiêm túc và kiên trì',
-    ],
+    whatYouLearn: parseList(course.what_you_learn, defaultWhatYouLearn),
+    requirements: parseList(course.requirements, defaultRequirements),
     curriculum,
     level: course.level === 'advanced' ? 'Nâng cao' : 'Cơ bản',
     lastUpdated: course.updated_at ? new Date(course.updated_at).toLocaleDateString('vi-VN') : '',
@@ -77,9 +89,12 @@ function mapApiCourseToUi(course: ApiCourse) {
 export default function CourseDetailPage() {
   const params = useParams()
   const courseIdOrSlug = params.id as string
+  const { isAuthenticated } = useAuth()
+
   const [apiCourse, setApiCourse] = useState<ApiCourse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isEnrolled, setIsEnrolled] = useState(false)
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -88,6 +103,17 @@ export default function CourseDetailPage() {
       try {
         const res = await getCourse(courseIdOrSlug, true)
         setApiCourse(res)
+
+        // Check enrollment status if authenticated
+        if (isAuthenticated && res.id) {
+          try {
+            const enrolled = await checkEnrollment(res.id)
+            setIsEnrolled(enrolled)
+          } catch {
+            // Ignore enrollment check errors
+            setIsEnrolled(false)
+          }
+        }
       } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || 'Không thể tải khóa học'
         setError(msg)
@@ -98,10 +124,10 @@ export default function CourseDetailPage() {
     }
 
     fetchCourse()
-  }, [courseIdOrSlug])
+  }, [courseIdOrSlug, isAuthenticated])
 
   const course = useMemo(() => (apiCourse ? mapApiCourseToUi(apiCourse) : null), [apiCourse])
-  
+
   const [expandedSections, setExpandedSections] = useState<number[]>([0])
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [currentPreviewLesson, setCurrentPreviewLesson] = useState<{ title: string; duration: string; chapterTitle: string; youtubeId?: string } | null>(null)
@@ -225,7 +251,7 @@ export default function CourseDetailPage() {
   }
 
   // Get all preview lessons
-  const previewLessons = course.curriculum.flatMap((section) => 
+  const previewLessons = course.curriculum.flatMap((section) =>
     section.lessons
       .filter(lesson => lesson.preview)
       .map(lesson => ({ ...lesson, chapterTitle: section.title }))
@@ -237,8 +263,8 @@ export default function CourseDetailPage() {
   }
 
   const toggleSection = (index: number) => {
-    setExpandedSections(prev => 
-      prev.includes(index) 
+    setExpandedSections(prev =>
+      prev.includes(index)
         ? prev.filter(i => i !== index)
         : [...prev, index]
     )
@@ -255,15 +281,15 @@ export default function CourseDetailPage() {
       {showPreviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop - Dark blur */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/80 backdrop-blur-md"
             onClick={() => setShowPreviewModal(false)}
           />
-          
+
           {/* Modal Content - White background */}
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
             {/* Close Button */}
-            <button 
+            <button
               onClick={() => setShowPreviewModal(false)}
               className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
             >
@@ -291,7 +317,7 @@ export default function CourseDetailPage() {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Current Lesson Info */}
                 <div className="p-5 bg-gray-50 border-t border-gray-200">
                   <p className="text-primary-600 text-sm font-medium mb-1">
@@ -318,24 +344,21 @@ export default function CourseDetailPage() {
                       <button
                         key={index}
                         onClick={() => setCurrentPreviewLesson(lesson)}
-                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-primary-50 transition-colors ${
-                          currentPreviewLesson?.title === lesson.title ? 'bg-primary-50 border-l-4 border-l-primary-500' : 'bg-white'
-                        }`}
+                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-primary-50 transition-colors ${currentPreviewLesson?.title === lesson.title ? 'bg-primary-50 border-l-4 border-l-primary-500' : 'bg-white'
+                          }`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                            currentPreviewLesson?.title === lesson.title 
-                              ? 'bg-primary-500 text-white' 
-                              : 'bg-gray-200 text-secondary-500'
-                          }`}>
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${currentPreviewLesson?.title === lesson.title
+                            ? 'bg-primary-500 text-white'
+                            : 'bg-gray-200 text-secondary-500'
+                            }`}>
                             <Play className="w-4 h-4" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm line-clamp-2 ${
-                              currentPreviewLesson?.title === lesson.title 
-                                ? 'text-primary-700 font-medium' 
-                                : 'text-secondary-700'
-                            }`}>
+                            <p className={`text-sm line-clamp-2 ${currentPreviewLesson?.title === lesson.title
+                              ? 'text-primary-700 font-medium'
+                              : 'text-secondary-700'
+                              }`}>
                               {lesson.title}
                             </p>
                             <p className="text-secondary-400 text-xs mt-1">{formatDuration(lesson.duration)}</p>
@@ -359,7 +382,7 @@ export default function CourseDetailPage() {
                       -{discount}%
                     </span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setShowPreviewModal(false)}
                     className="w-full btn-primary py-3 font-semibold"
                   >
@@ -394,8 +417,8 @@ export default function CourseDetailPage() {
             <div className="lg:flex-1 space-y-8">
               {/* Course Header */}
               <div className="bg-white rounded-xl p-6 lg:p-8 ">
-              {/* Badge & Level */}
-              {/* <div className="flex items-center gap-2 mb-4">
+                {/* Badge & Level */}
+                {/* <div className="flex items-center gap-2 mb-4">
                 {course.badge && (
                   <span className={`px-3 py-1 text-xs font-semibold text-white rounded-full ${course.badgeColor}`}>
                     {course.badge}
@@ -406,66 +429,66 @@ export default function CourseDetailPage() {
                 </span>
               </div> */}
 
-              {/* Title */}
-              <h1 className="text-2xl lg:text-3xl font-bold text-secondary-900 mb-4 leading-tight">
-                {course.title}
-              </h1>
+                {/* Title */}
+                <h1 className="text-2xl lg:text-3xl font-bold text-secondary-900 mb-4 leading-tight">
+                  {course.title}
+                </h1>
 
-              {/* Description */}
-              <p className="text-secondary-600 mb-6 leading-relaxed">
-                {course.description}
-              </p>
-              
-              {/* Rating & Stats */}
-              <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 ">
-                <div className="flex items-center gap-1.5">
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star 
-                        key={star} 
-                        className={`w-4 h-4 ${star <= Math.floor(course.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'}`} 
-                      />
-                    ))}
+                {/* Description */}
+                <p className="text-secondary-600 mb-6 leading-relaxed">
+                  {course.description}
+                </p>
+
+                {/* Rating & Stats */}
+                <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 ">
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${star <= Math.floor(course.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="font-semibold text-secondary-900">{course.rating}</span>
+                    <span className="text-secondary-500">({course.reviews.toLocaleString()} đánh giá)</span>
                   </div>
-                  <span className="font-semibold text-secondary-900">{course.rating}</span>
-                  <span className="text-secondary-500">({course.reviews.toLocaleString()} đánh giá)</span>
+                  <div className="flex items-center gap-1.5 text-secondary-600">
+                    <Users className="w-4 h-4 text-primary-500" />
+                    <span>{course.students.toLocaleString()} học sinh đã đăng ký</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-secondary-600">
-                  <Users className="w-4 h-4 text-primary-500" />
-                  <span>{course.students.toLocaleString()} học sinh đã đăng ký</span>
-                </div>
-              </div>
 
-              {/* Instructor */}
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white text-lg font-semibold shadow-md">
-                  {course.instructor.charAt(0)}
+                {/* Instructor */}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white text-lg font-semibold shadow-md">
+                    {course.instructor.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-secondary-900">{course.instructor}</p>
+                    <p className="text-sm text-secondary-500">{course.instructorTitle}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-secondary-900">{course.instructor}</p>
-                  <p className="text-sm text-secondary-500">{course.instructorTitle}</p>
-                </div>
-              </div>
 
-              {/* Meta Tags */}
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
-                  <Clock className="w-4 h-4 text-primary-500" />
-                  <span>{course.duration}</span>
+                {/* Meta Tags */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
+                    <Clock className="w-4 h-4 text-primary-500" />
+                    <span>{course.duration}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
+                    <BookOpen className="w-4 h-4 text-primary-500" />
+                    <span>{course.lessons} bài học</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
+                    <Globe className="w-4 h-4 text-primary-500" />
+                    <span>{course.language}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
+                    <FileText className="w-4 h-4 text-primary-500" />
+                    <span>Cập nhật: {course.lastUpdated}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
-                  <BookOpen className="w-4 h-4 text-primary-500" />
-                  <span>{course.lessons} bài học</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
-                  <Globe className="w-4 h-4 text-primary-500" />
-                  <span>{course.language}</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm text-secondary-600">
-                  <FileText className="w-4 h-4 text-primary-500" />
-                  <span>Cập nhật: {course.lastUpdated}</span>
-                </div>
-              </div>
               </div>
 
               {/* What You'll Learn */}
@@ -531,12 +554,12 @@ export default function CourseDetailPage() {
                                 <Play className="w-4 h-4 text-secondary-400" />
                                 <span className="text-sm text-secondary-700">{lesson.title}</span>
                                 {lesson.preview && (
-                                  <button 
-                                    onClick={() => openPreviewModal({ 
-                                      title: lesson.title, 
-                                      duration: lesson.duration, 
+                                  <button
+                                    onClick={() => openPreviewModal({
+                                      title: lesson.title,
+                                      duration: lesson.duration,
                                       chapterTitle: section.title,
-                                      youtubeId: lesson.youtubeId 
+                                      youtubeId: lesson.youtubeId
                                     })}
                                     className="px-2 py-0.5 bg-primary-50 text-primary-600 text-xs rounded hover:bg-primary-100 transition-colors cursor-pointer"
                                   >
@@ -588,12 +611,12 @@ export default function CourseDetailPage() {
               <div className="sticky top-20">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6">
                   {/* Thumbnail - YouTube Preview */}
-                  <div 
+                  <div
                     onClick={() => openPreviewModal()}
                     className="cursor-pointer relative aspect-video rounded-lg mb-5 flex items-center justify-center overflow-hidden group"
                   >
                     {previewLessons[0]?.youtubeId ? (
-                      <img 
+                      <img
                         src={getYouTubeThumbnail(previewLessons[0].youtubeId, 'hq')}
                         alt="Video preview"
                         className="absolute inset-0 w-full h-full object-cover"
@@ -622,9 +645,19 @@ export default function CourseDetailPage() {
                   </div>
 
                   {/* CTA Button */}
-                  <button className="w-full btn-primary py-3.5 text-base font-semibold shadow-md hover:shadow-lg transition-shadow">
-                    Mua ngay
-                  </button>
+                  {isEnrolled ? (
+                    <Link
+                      href={`/hoc/${apiCourse?.slug || courseIdOrSlug}`}
+                      className="w-full btn-primary py-3.5 text-base font-semibold shadow-md hover:shadow-lg transition-shadow flex items-center justify-center gap-2"
+                    >
+                      {/* <Play className="w-5 h-5" /> */}
+                      Vào học ngay
+                    </Link>
+                  ) : (
+                    <button className="w-full btn-primary py-3.5 text-base font-semibold shadow-md hover:shadow-lg transition-shadow">
+                      Mua ngay
+                    </button>
+                  )}
 
                   {/* Features */}
                   <div className="mt-6 pt-6 border-t border-gray-100 space-y-3">
@@ -645,7 +678,7 @@ export default function CourseDetailPage() {
                       <Shield className="w-4 h-4 text-primary-500" />
                       <span>Truy cập mọi thiết bị</span>
                     </div>
-                    
+
                   </div>
                 </div>
               </div>
@@ -664,9 +697,19 @@ export default function CourseDetailPage() {
             </div>
             <span className="text-xs text-red-600 font-medium">Giảm {discount}%</span>
           </div>
-          <button className="btn-primary py-3 px-6 font-semibold">
-            Đăng ký ngay
-          </button>
+          {isEnrolled ? (
+            <Link
+              href={`/hoc/${apiCourse?.slug || courseIdOrSlug}`}
+              className="btn-primary py-3 px-6 font-semibold flex items-center gap-2"
+            >
+              <Play className="w-4 h-4" />
+              Vào học
+            </Link>
+          ) : (
+            <button className="btn-primary py-3 px-6 font-semibold">
+              Đăng ký ngay
+            </button>
+          )}
         </div>
       </div>
 

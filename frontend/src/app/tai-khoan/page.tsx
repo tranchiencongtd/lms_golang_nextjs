@@ -110,6 +110,9 @@ export default function AccountPage() {
 
   // Loading state - Skeleton
   if (authLoading) {
+    const tabParam = searchParams.get('tab')
+    const isCoursesTab = tabParam === 'courses'
+
     return (
       <>
         <Navbar />
@@ -136,35 +139,54 @@ export default function AccountPage() {
                   <div className="h-4 bg-secondary-200 rounded w-64 animate-pulse" />
                 </div>
 
-                {/* Profile Card Skeleton */}
-                <div className="bg-white rounded-xl shadow-sm border border-secondary-100 overflow-hidden">
-                  {/* Avatar Section */}
-                  <div className="p-6 border-b border-secondary-100 bg-secondary-50">
-                    <div className="flex items-center gap-6">
-                      <div className="w-24 h-24 bg-secondary-300 rounded-full animate-pulse" />
-                      <div className="space-y-2">
-                        <div className="h-5 bg-secondary-200 rounded w-24 animate-pulse" />
-                        <div className="h-4 bg-secondary-200 rounded w-48 animate-pulse" />
-                        <div className="h-4 bg-secondary-200 rounded w-20 animate-pulse" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Form Fields Skeleton */}
-                  <div className="p-6 space-y-6">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i}>
-                        <div className="h-4 bg-secondary-200 rounded w-24 mb-2 animate-pulse" />
-                        <div className="h-12 bg-secondary-100 rounded-lg animate-pulse" />
+                {isCoursesTab ? (
+                  // Courses Skeleton
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="bg-white rounded-xl shadow-sm border border-secondary-200 overflow-hidden h-full flex flex-col">
+                        <div className="aspect-video bg-secondary-200 animate-pulse" />
+                        <div className="p-4 space-y-3 flex-1">
+                          <div className="h-5 bg-secondary-200 rounded w-3/4 animate-pulse" />
+                          <div className="h-4 bg-secondary-200 rounded w-1/2 animate-pulse" />
+                          <div className="mt-auto pt-4 space-y-2">
+                            <div className="h-4 bg-secondary-200 rounded w-full animate-pulse" />
+                            <div className="h-10 bg-secondary-200 rounded w-full animate-pulse" />
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  // Profile Skeleton
+                  <div className="bg-white rounded-xl shadow-sm border border-secondary-100 overflow-hidden">
+                    {/* Avatar Section */}
+                    <div className="p-6 border-b border-secondary-100 bg-secondary-50">
+                      <div className="flex items-center gap-6">
+                        <div className="w-24 h-24 bg-secondary-300 rounded-full animate-pulse" />
+                        <div className="space-y-2">
+                          <div className="h-5 bg-secondary-200 rounded w-24 animate-pulse" />
+                          <div className="h-4 bg-secondary-200 rounded w-48 animate-pulse" />
+                          <div className="h-4 bg-secondary-200 rounded w-20 animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
 
-                  {/* Footer Skeleton */}
-                  <div className="px-6 py-4 bg-secondary-50 border-t border-secondary-100 flex justify-end">
-                    <div className="h-10 bg-secondary-200 rounded-lg w-32 animate-pulse" />
+                    {/* Form Fields Skeleton */}
+                    <div className="p-6 space-y-6">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i}>
+                          <div className="h-4 bg-secondary-200 rounded w-24 mb-2 animate-pulse" />
+                          <div className="h-12 bg-secondary-100 rounded-lg animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Footer Skeleton */}
+                    <div className="px-6 py-4 bg-secondary-50 border-t border-secondary-100 flex justify-end">
+                      <div className="h-10 bg-secondary-200 rounded-lg w-32 animate-pulse" />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -661,7 +683,7 @@ function EnrollmentCard({ enrollment }: EnrollmentCardProps) {
         )}
 
         {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
 
         {/* Status Badge */}
         <div className="absolute top-3 right-3">
