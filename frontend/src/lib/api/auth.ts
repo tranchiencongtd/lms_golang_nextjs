@@ -120,3 +120,39 @@ export async function getProfile(): Promise<User> {
   const response = await apiClient.get<ApiResponse<User>>(API_ENDPOINTS.auth.profile)
   return response.data.data
 }
+
+/**
+ * Update profile request
+ */
+export interface UpdateProfileRequest {
+  full_name: string
+  email: string
+  phone_number: string
+}
+
+/**
+ * Update user profile
+ */
+export async function updateProfile(data: UpdateProfileRequest): Promise<User> {
+  const response = await apiClient.put<ApiResponse<User>>(
+    API_ENDPOINTS.auth.updateProfile,
+    data
+  )
+  return response.data.data
+}
+
+/**
+ * Change password request
+ */
+export interface ChangePasswordRequest {
+  current_password: string
+  new_password: string
+}
+
+/**
+ * Change user password
+ */
+export async function changePassword(data: ChangePasswordRequest): Promise<void> {
+  await apiClient.post(API_ENDPOINTS.auth.changePassword, data)
+}
+

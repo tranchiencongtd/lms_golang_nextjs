@@ -21,6 +21,19 @@ type LoginInput struct {
 	Password     string `json:"password" binding:"required"`
 }
 
+// UpdateProfileInput represents the input for updating user profile
+type UpdateProfileInput struct {
+	FullName    string `json:"full_name" binding:"required,min=2"`
+	Email       string `json:"email" binding:"required,email"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
+}
+
+// ChangePasswordInput represents the input for changing password
+type ChangePasswordInput struct {
+	CurrentPassword string `json:"current_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=8"`
+}
+
 // AuthOutput represents the output after successful authentication
 type AuthOutput struct {
 	User         *domain.User `json:"user"`
@@ -56,6 +69,12 @@ type AuthUseCase interface {
 	// GetProfile retrieves the current user's profile
 	GetProfile(ctx context.Context, userID uuid.UUID) (*UserOutput, error)
 
+	// UpdateProfile updates the current user's profile
+	UpdateProfile(ctx context.Context, userID uuid.UUID, input *UpdateProfileInput) (*UserOutput, error)
+
+	// ChangePassword changes the current user's password
+	ChangePassword(ctx context.Context, userID uuid.UUID, input *ChangePasswordInput) error
+
 	// ValidateToken validates a JWT access token and returns the user ID
 	ValidateToken(token string) (uuid.UUID, error)
 
@@ -68,3 +87,4 @@ type AuthUseCase interface {
 	// LogoutAll revokes all refresh tokens for a user
 	LogoutAll(ctx context.Context, userID uuid.UUID) error
 }
+

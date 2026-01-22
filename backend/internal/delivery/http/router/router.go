@@ -61,6 +61,8 @@ func (r *Router) Setup(engine *gin.Engine) {
 		authProtected.Use(middleware.AuthMiddleware(r.authUseCase))
 		{
 			authProtected.GET("/profile", r.authHandler.GetProfile)
+			authProtected.PUT("/profile", r.authHandler.UpdateProfile)
+			authProtected.POST("/change-password", r.authHandler.ChangePassword)
 			authProtected.POST("/logout-all", r.authHandler.LogoutAll)
 		}
 
@@ -82,4 +84,3 @@ func (r *Router) Setup(engine *gin.Engine) {
 		}
 	}
 }
-

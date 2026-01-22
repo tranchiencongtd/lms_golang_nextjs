@@ -12,6 +12,8 @@ export const API_ENDPOINTS = {
     logout: '/auth/logout',
     logoutAll: '/auth/logout-all',
     profile: '/auth/profile',
+    updateProfile: '/auth/profile',
+    changePassword: '/auth/change-password',
   },
   courses: {
     list: '/courses',

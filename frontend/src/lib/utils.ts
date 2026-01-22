@@ -12,12 +12,23 @@ export function formatPrice(price: number): string {
 }
 
 /**
- * Format duration from "MM:SS" to Vietnamese readable format
- * @param duration - Duration string in "MM:SS" format (e.g., "10:00", "90:00")
+ * Format duration from minutes or "MM:SS" string to Vietnamese readable format
+ * @param duration - Duration in minutes (number) or string format "MM:SS" (e.g., "10:00", "90:00")
  * @returns Formatted duration string (e.g., "10 phút", "1 giờ 30 phút")
  */
-export function formatDuration(duration: string): string {
-  const [minutes] = duration.split(':').map(Number)
+export function formatDuration(duration: string | number): string {
+  let minutes: number
+
+  if (typeof duration === 'number') {
+    minutes = duration
+  } else {
+    [minutes] = duration.split(':').map(Number)
+  }
+
+  if (isNaN(minutes) || minutes <= 0) {
+    return '0 phút'
+  }
+
   if (minutes >= 60) {
     const hours = Math.floor(minutes / 60)
     const remainingMinutes = minutes % 60
@@ -27,6 +38,78 @@ export function formatDuration(duration: string): string {
     return `${hours} giờ ${remainingMinutes} phút`
   }
   return `${minutes} phút`
+}
+
+/**
+ * Format date to Vietnamese locale
+ * @param dateString - ISO date string
+ * @returns Formatted date string (e.g., "22/01/2026")
+ */
+export function formatDate(dateString: string): string {
+  if (!dateString) return ''
+
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(date)
+  } catch {
+    return dateString
+  }
+}
+
+/**
+ * Format date with time to Vietnamese locale
+ * @param dateString - ISO date string
+ * @returns Formatted date time string (e.g., "22/01/2026 09:30")
+ */
+export function formatDateTime(dateString: string): string {
+  if (!dateString) return ''
+
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date)
+  } catch {
+    return dateString
+  }
+}
+
+/**
+ * Format relative time (e.g., "2 ngày trước")
+ * @param dateString - ISO date string
+ * @returns Relative time string
+ */
+export function formatRelativeTime(dateString: string): string {
+  if (!dateString) return ''
+
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffSec = Math.floor(diffMs / 1000)
+    const diffMin = Math.floor(diffSec / 60)
+    const diffHour = Math.floor(diffMin / 60)
+    const diffDay = Math.floor(diffHour / 24)
+    const diffMonth = Math.floor(diffDay / 30)
+    const diffYear = Math.floor(diffDay / 365)
+
+    if (diffYear > 0) return `${diffYear} năm trước`
+    if (diffMonth > 0) return `${diffMonth} tháng trước`
+    if (diffDay > 0) return `${diffDay} ngày trước`
+    if (diffHour > 0) return `${diffHour} giờ trước`
+    if (diffMin > 0) return `${diffMin} phút trước`
+    return 'Vừa xong'
+  } catch {
+    return dateString
+  }
 }
 
 /**
@@ -45,12 +128,12 @@ export function formatNumber(num: number): string {
  * @returns YouTube thumbnail URL
  */
 export function getYouTubeThumbnail(
-  videoId: string, 
+  videoId: string,
   quality: 'default' | 'mq' | 'hq' | 'maxres' = 'hq'
 ): string {
   const qualityMap = {
     default: 'default',
-    mq: 'mqdefault', 
+    mq: 'mqdefault',
     hq: 'hqdefault',
     maxres: 'maxresdefault'
   }
@@ -111,7 +194,7 @@ export function slugify(text: string): string {
     'Ỳ': 'Y', 'Ý': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y',
     'Đ': 'D'
   }
-  
+
   return text
     .split('')
     .map(char => vietnameseMap[char] || char)

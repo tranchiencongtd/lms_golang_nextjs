@@ -32,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className={`${poppins.variable} ${openSans.variable}`}>
-      <body className="font-body antialiased bg-white text-secondary-800">
+      <body className="font-body antialiased bg-white text-secondary-800" suppressHydrationWarning>
         <ProgressProviderWrapper>
           <AuthProvider>
             <AuthModalProvider>

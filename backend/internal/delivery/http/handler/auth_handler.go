@@ -119,6 +119,88 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 	response.OK(c, "Lấy thông tin thành công", profile)
 }
 
+// UpdateProfile handles updating user profile
+// @Summary Update user profile
+// @Description Update the current authenticated user's profile
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param input body usecase.UpdateProfileInput true "Update profile input"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 409 {object} response.Response
+// @Router /api/v1/auth/profile [put]
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	// Get user ID from context (set by auth middleware)
+	userIDStr, exists := c.Get("userID")
+	if !exists {
+		response.Unauthorized(c, "Chưa xác thực")
+		return
+	}
+
+	userID, ok := userIDStr.(uuid.UUID)
+	if !ok {
+		response.Unauthorized(c, "Token không hợp lệ")
+		return
+	}
+
+	var input usecase.UpdateProfileInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.BadRequest(c, "Dữ liệu không hợp lệ: "+err.Error())
+		return
+	}
+
+	profile, err := h.authUseCase.UpdateProfile(c.Request.Context(), userID, &input)
+	if err != nil {
+		h.handleAuthError(c, err)
+		return
+	}
+
+	response.OK(c, "Cập nhật thông tin thành công", profile)
+}
+
+// ChangePassword handles changing user password
+// @Summary Change user password
+// @Description Change the current authenticated user's password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param input body usecase.ChangePasswordInput true "Change password input"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /api/v1/auth/change-password [post]
+func (h *AuthHandler) ChangePassword(c *gin.Context) {
+	// Get user ID from context (set by auth middleware)
+	userIDStr, exists := c.Get("userID")
+	if !exists {
+		response.Unauthorized(c, "Chưa xác thực")
+		return
+	}
+
+	userID, ok := userIDStr.(uuid.UUID)
+	if !ok {
+		response.Unauthorized(c, "Token không hợp lệ")
+		return
+	}
+
+	var input usecase.ChangePasswordInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.BadRequest(c, "Dữ liệu không hợp lệ: "+err.Error())
+		return
+	}
+
+	if err := h.authUseCase.ChangePassword(c.Request.Context(), userID, &input); err != nil {
+		h.handleAuthError(c, err)
+		return
+	}
+
+	response.OK(c, "Đổi mật khẩu thành công", nil)
+}
+
 // RefreshToken handles refresh token request
 // @Summary Refresh access token
 // @Description Generate a new access token using a refresh token
@@ -234,9 +316,9 @@ func (h *AuthHandler) handleAuthError(c *gin.Context, err error) {
 	case errors.Is(err, domain.ErrRefreshTokenRevoked):
 		response.Unauthorized(c, "Refresh token đã bị thu hồi")
 	case errors.Is(err, domain.ErrPhoneNumberAlreadyExists):
-	       response.Conflict(c, "Số điện thoại đã được sử dụng")
-    case errors.Is(err, domain.ErrInvalidPhoneNumber):
-	       response.BadRequest(c, "Số điện thoại không hợp lệ")
+		response.Conflict(c, "Số điện thoại đã được sử dụng")
+	case errors.Is(err, domain.ErrInvalidPhoneNumber):
+		response.BadRequest(c, "Số điện thoại không hợp lệ")
 	default:
 		response.InternalServerError(c, "Đã xảy ra lỗi hệ thống")
 	}

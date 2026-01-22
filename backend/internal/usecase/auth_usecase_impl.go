@@ -181,6 +181,104 @@ func (uc *authUseCase) GetProfile(ctx context.Context, userID uuid.UUID) (*UserO
 	}, nil
 }
 
+// UpdateProfile updates the current user's profile
+func (uc *authUseCase) UpdateProfile(ctx context.Context, userID uuid.UUID, input *UpdateProfileInput) (*UserOutput, error) {
+	// Get current user
+	user, err := uc.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate email format
+	if !isValidEmail(input.Email) {
+		return nil, domain.ErrInvalidEmail
+	}
+
+	// Validate phone number
+	if !isValidPhoneNumber(input.PhoneNumber) {
+		return nil, domain.ErrInvalidPhoneNumber
+	}
+
+	// Check if email is being changed and if new email already exists
+	if input.Email != user.Email {
+		emailExists, err := uc.userRepo.ExistsByEmail(ctx, input.Email)
+		if err != nil {
+			return nil, err
+		}
+		if emailExists {
+			return nil, domain.ErrUserAlreadyExists
+		}
+		// Reset verification status when email changes
+		user.IsVerified = false
+	}
+
+	// Check if phone number is being changed and if new phone already exists
+	if input.PhoneNumber != user.PhoneNumber {
+		phoneExists, err := uc.userRepo.ExistsByPhoneNumber(ctx, input.PhoneNumber)
+		if err != nil {
+			return nil, err
+		}
+		if phoneExists {
+			return nil, domain.ErrPhoneNumberAlreadyExists
+		}
+	}
+
+	// Update user fields
+	user.FullName = input.FullName
+	user.Email = input.Email
+	user.PhoneNumber = input.PhoneNumber
+
+	// Save to database
+	if err := uc.userRepo.Update(ctx, user); err != nil {
+		return nil, err
+	}
+
+	return &UserOutput{
+		ID:          user.ID,
+		Email:       user.Email,
+		FullName:    user.FullName,
+		Avatar:      user.Avatar,
+		PhoneNumber: user.PhoneNumber,
+		Role:        user.Role,
+		IsVerified:  user.IsVerified,
+	}, nil
+}
+
+// ChangePassword changes the current user's password
+func (uc *authUseCase) ChangePassword(ctx context.Context, userID uuid.UUID, input *ChangePasswordInput) error {
+	// Get current user
+	user, err := uc.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	// Verify current password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.CurrentPassword)); err != nil {
+		return domain.ErrInvalidCredentials
+	}
+
+	// Validate new password length
+	if len(input.NewPassword) < 8 {
+		return domain.ErrInvalidPassword
+	}
+
+	// Hash new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.NewPassword), uc.bcryptCost)
+	if err != nil {
+		return err
+	}
+
+	// Update password
+	user.PasswordHash = string(hashedPassword)
+
+	// Save to database
+	if err := uc.userRepo.Update(ctx, user); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ValidateToken validates a JWT access token and returns the user ID
 func (uc *authUseCase) ValidateToken(tokenString string) (uuid.UUID, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -225,9 +323,9 @@ func (uc *authUseCase) generateAccessToken(userID uuid.UUID) (string, int64, err
 	expiresIn := int64(uc.jwtConfig.AccessTokenExpiryTime.Seconds())
 
 	claims := jwt.MapClaims{
-		"sub": userID.String(),
-		"exp": expiresAt.Unix(),
-		"iat": time.Now().Unix(),
+		"sub":  userID.String(),
+		"exp":  expiresAt.Unix(),
+		"iat":  time.Now().Unix(),
 		"type": "access",
 	}
 
@@ -246,11 +344,11 @@ func (uc *authUseCase) generateRefreshToken(ctx context.Context, userID uuid.UUI
 	expiresAt := time.Now().Add(uc.jwtConfig.RefreshTokenExpiryTime)
 
 	claims := jwt.MapClaims{
-		"sub": userID.String(),
-		"exp": expiresAt.Unix(),
-		"iat": time.Now().Unix(),
+		"sub":  userID.String(),
+		"exp":  expiresAt.Unix(),
+		"iat":  time.Now().Unix(),
 		"type": "refresh",
-		"jti": uuid.New().String(), // JWT ID for token tracking
+		"jti":  uuid.New().String(), // JWT ID for token tracking
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
