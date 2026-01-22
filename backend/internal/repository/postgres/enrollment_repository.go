@@ -153,9 +153,11 @@ func (r *enrollmentRepository) GetByUserIDWithCourse(ctx context.Context, userID
 		SELECT 
 			e.id, e.user_id, e.course_id, e.activation_code_id, e.enrolled_at, e.expires_at, e.status, e.created_at, e.updated_at,
 			c.id, c.title, c.slug, c.description, c.short_description, c.image_url, c.price, c.original_price,
-			c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes, c.level, c.grade, c.status, c.is_featured
+			c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes, c.level, c.grade, c.status, c.is_featured,
+			u.id, u.full_name, u.email
 		FROM course_enrollments e
 		INNER JOIN courses c ON e.course_id = c.id
+		LEFT JOIN users u ON c.instructor_id = u.id
 		WHERE e.user_id = $1 AND e.status = 'active'
 		ORDER BY e.enrolled_at DESC
 	`
@@ -170,6 +172,8 @@ func (r *enrollmentRepository) GetByUserIDWithCourse(ctx context.Context, userID
 	for rows.Next() {
 		enrollment := &domain.Enrollment{}
 		course := &domain.Course{}
+		instructor := &domain.User{}
+
 		var courseImageURL, courseShortDesc, courseGrade *string
 		var courseOriginalPrice *float64
 
@@ -200,6 +204,9 @@ func (r *enrollmentRepository) GetByUserIDWithCourse(ctx context.Context, userID
 			&courseGrade,
 			&course.Status,
 			&course.IsFeatured,
+			&instructor.ID,
+			&instructor.FullName,
+			&instructor.Email,
 		)
 		if err != nil {
 			return nil, err
@@ -218,6 +225,7 @@ func (r *enrollmentRepository) GetByUserIDWithCourse(ctx context.Context, userID
 			course.OriginalPrice = courseOriginalPrice
 		}
 
+		course.Instructor = instructor
 		enrollment.Course = course
 		enrollments = append(enrollments, enrollment)
 	}

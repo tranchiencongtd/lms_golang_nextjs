@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   User,
@@ -20,7 +20,9 @@ import {
   Save,
   Eye,
   EyeOff,
-  Camera
+  Camera,
+  Calendar,
+  ArrowRight
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -52,9 +54,18 @@ const roleLabels: Record<string, { label: string; color: string }> = {
 
 export default function AccountPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, isLoading: authLoading, isAuthenticated, refreshUser } = useAuth()
 
   const [activeTab, setActiveTab] = useState<TabType>('profile')
+
+  // Handle tab from URL
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam && ['profile', 'courses', 'password'].includes(tabParam)) {
+      setActiveTab(tabParam as TabType)
+    }
+  }, [searchParams])
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [enrollmentsLoading, setEnrollmentsLoading] = useState(false)
   const [enrollmentsError, setEnrollmentsError] = useState<string | null>(null)
@@ -185,7 +196,10 @@ export default function AccountPage() {
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      setActiveTab(tab.id)
+                      router.push(`/tai-khoan?tab=${tab.id}`, { scroll: false })
+                    }}
                     className={`w-full flex items-center gap-3 px-5 py-4 text-left transition-all ${activeTab === tab.id
                       ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500 font-medium'
                       : 'text-secondary-600 hover:bg-secondary-50 border-l-4 border-transparent'
@@ -484,7 +498,7 @@ function CoursesTab({ enrollments, loading, error, onRetry }: CoursesTabProps) {
           <p className="text-secondary-500 mt-1">Danh sách các khoá học bạn đã đăng ký</p>
         </div>
         {/* Course Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white rounded-xl shadow-sm border border-secondary-100 overflow-hidden">
               {/* Image Skeleton */}
@@ -594,7 +608,7 @@ function CoursesTab({ enrollments, loading, error, onRetry }: CoursesTabProps) {
       </div>
 
       {/* Course Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {enrollments.map((enrollment) => (
           <EnrollmentCard key={enrollment.id} enrollment={enrollment} />
         ))}
@@ -616,9 +630,9 @@ function EnrollmentCard({ enrollment }: EnrollmentCardProps) {
   }
 
   const statusColors = {
-    active: 'bg-green-100 text-green-700',
-    expired: 'bg-red-100 text-red-700',
-    cancelled: 'bg-secondary-100 text-secondary-700',
+    active: 'bg-primary-600/90 text-white shadow-sm backdrop-blur-sm',
+    expired: 'bg-red-500/90 text-white shadow-sm backdrop-blur-sm',
+    cancelled: 'bg-secondary-500/90 text-white shadow-sm backdrop-blur-sm',
   }
 
   const statusLabels = {
@@ -631,80 +645,105 @@ function EnrollmentCard({ enrollment }: EnrollmentCardProps) {
     new Date(enrollment.expires_at).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-secondary-100 overflow-hidden hover:shadow-md transition-all group">
+    <div className="bg-white rounded-xl shadow-sm border border-secondary-200 overflow-hidden hover:shadow-card-hover transition-all duration-300 group flex flex-col h-full">
       {/* Course Image */}
-      <div className="relative aspect-video bg-gradient-to-br from-primary-100 to-primary-200">
+      <div className="relative aspect-video bg-secondary-100 overflow-hidden">
         {course.image_url ? (
           <img
             src={course.image_url}
             alt={course.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <BookOpen className="w-16 h-16 text-primary-300" />
+          <div className="absolute inset-0 flex items-center justify-center bg-secondary-100">
+            <BookOpen className="w-12 h-12 text-secondary-300" />
           </div>
         )}
+
+        {/* Overlay Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Status Badge */}
         <div className="absolute top-3 right-3">
-          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[enrollment.status]}`}>
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${statusColors[enrollment.status]}`}>
             {statusLabels[enrollment.status]}
           </span>
         </div>
-
-        {/* Expiring Soon Warning */}
-        {isExpiringSoon && enrollment.status === 'active' && (
-          <div className="absolute top-3 left-3">
-            <span className="flex items-center gap-1 px-2.5 py-1 bg-yellow-500 text-white rounded-full text-xs font-medium">
-              <AlertCircle className="w-3 h-3" />
-              Sắp hết hạn
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Content */}
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-grow">
+
         {/* Title */}
-        <h3 className="font-semibold text-lg text-secondary-900 line-clamp-2 group-hover:text-primary-600 transition-colors mb-2">
+        <h3 className="font-heading font-bold text-base text-secondary-900 line-clamp-2 mb-3 h-12 group-hover:text-primary-600 transition-colors" title={course.title}>
           {course.title}
         </h3>
 
-        {/* Instructor */}
+        {/* Author */}
         {course.instructor && (
-          <p className="text-sm text-secondary-500 mb-4">
-            Giảng viên: {course.instructor.full_name}
-          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-xs text-secondary-600 truncate">
+              {course.instructor.full_name}
+            </p>
+          </div>
         )}
 
         {/* Meta Info */}
-        <div className="flex flex-wrap gap-4 text-sm text-secondary-600 mb-4">
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-secondary-400" />
+        <div className="flex items-center gap-3 text-xs text-secondary-500 mb-2">
+          <div className="flex items-center gap-1">
+            <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
             <span>{course.total_lessons || 0} bài học · {formatDuration(course.duration_minutes || 0)}</span>
           </div>
         </div>
 
-        {/* Dates */}
-        <div className="flex flex-wrap gap-4 text-xs text-secondary-500 mb-4 pb-4 border-b border-secondary-100">
-          <span>Đăng ký: {formatDate(enrollment.enrolled_at)}</span>
-          {enrollment.expires_at && (
-            <span>Hết hạn: {formatDate(enrollment.expires_at)}</span>
-          )}
-        </div>
 
-        {/* Action Button */}
-        <Link
-          href={`/khoa-hoc/${course.slug}`}
-          className={`block w-full text-center py-3 rounded-lg font-medium transition-colors ${enrollment.status === 'active'
-            ? 'bg-primary-500 text-white hover:bg-primary-600'
-            : 'bg-secondary-100 text-secondary-500 cursor-not-allowed'
-            }`}
-          onClick={(e) => enrollment.status !== 'active' && e.preventDefault()}
-        >
-          {enrollment.status === 'active' ? 'Vào học' : 'Không khả dụng'}
-        </Link>
+        {/* Dates Info */}
+        <div className="mt-auto space-y-3">
+          <div className="pt-3 border-t border-secondary-100 flex flex-col gap-3">
+            {/* Registered Date */}
+            <div className="flex items-start gap-2 text-xs text-secondary-600">
+              <Calendar className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div className="flex flex-row">
+                <span className="text-secondary-500">Ngày đăng ký: {formatDate(enrollment.enrolled_at)}</span>
+
+              </div>
+            </div>
+
+            {/* Expiry Date */}
+            {enrollment.expires_at ? (
+              <div className={`flex items-start gap-2 text-xs ${isExpiringSoon ? 'text-red-600 font-medium' : 'text-secondary-600'}`}>
+                <Clock className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex flex-col">
+                  <span className={isExpiringSoon ? 'text-red-500' : 'text-secondary-500'}>Hết hạn: {formatDate(enrollment.expires_at)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-green-600 font-medium">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                <span>Truy cập trọn đời</span>
+              </div>
+            )}
+          </div>
+
+          {/* Action Button */}
+          <Link
+            href={`/khoa-hoc/${course.slug}`}
+            className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold transition-all ${enrollment.status === 'active'
+              ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow'
+              : 'bg-secondary-100 text-secondary-500 cursor-not-allowed'
+              }`}
+            onClick={(e) => enrollment.status !== 'active' && e.preventDefault()}
+          >
+            {enrollment.status === 'active' ? (
+              <>
+                Vào học
+                <ArrowRight className="w-4 h-4" />
+              </>
+            ) : (
+              'Không khả dụng'
+            )}
+          </Link>
+        </div>
       </div>
     </div>
   )

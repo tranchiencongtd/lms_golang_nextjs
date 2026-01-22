@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Poppins, Open_Sans } from 'next/font/google'
+import { Montserrat, Open_Sans } from 'next/font/google'
 import './globals.css'
 import { AuthModalProvider } from '@/contexts/AuthModalContext'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -8,14 +8,14 @@ import AuthModal from '@/components/AuthModal'
 import CourseActivationModal from '@/components/CourseActivationModal'
 import ProgressProviderWrapper from '@/components/ProgressProviderWrapper'
 
-const poppins = Poppins({
-  subsets: ['latin'],
+const montserrat = Montserrat({
+  subsets: ['latin', 'vietnamese'],
   variable: '--font-heading',
   weight: ['400', '500', '600', '700'],
 })
 
 const openSans = Open_Sans({
-  subsets: ['latin'],
+  subsets: ['latin', 'vietnamese'],
   variable: '--font-body',
   weight: ['300', '400', '500', '600', '700'],
 })
@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="vi" className={`${poppins.variable} ${openSans.variable}`}>
+    <html lang="vi" className={`${montserrat.variable} ${openSans.variable}`}>
       <body className="font-body antialiased bg-white text-secondary-800" suppressHydrationWarning>
         <ProgressProviderWrapper>
           <AuthProvider>

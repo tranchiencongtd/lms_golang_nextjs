@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { Menu, X, Search, ChevronDown, User, BookOpen, Settings, LogOut, Key, ChevronUp } from 'lucide-react'
+import { Menu, X, Search, ChevronDown, User, BookOpen, Settings, LogOut, Key, ChevronUp, Lock } from 'lucide-react'
 import { useAuthModal } from '@/contexts/AuthModalContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCourseActivationModal } from '@/contexts/CourseActivationModalContext'
@@ -16,23 +16,29 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
   const { openModal: openCourseActivationModal } = useCourseActivationModal()
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const exploreRef = useRef<HTMLDivElement>(null)
 
-  // Close user menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Close User Menu
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false)
       }
+      // Close Explore Menu
+      if (exploreRef.current && !exploreRef.current.contains(event.target as Node)) {
+        setShowExplore(false)
+      }
     }
 
-    if (showUserMenu) {
+    if (showUserMenu || showExplore) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showUserMenu])
+  }, [showUserMenu, showExplore])
 
   const handleLogout = async () => {
     await logout()
@@ -65,18 +71,19 @@ export default function Navbar() {
 
 
             {/* Explore Dropdown */}
-            <div className="relative hidden lg:block">
+            <div className="relative hidden md:block" ref={exploreRef}>
               <button
                 onMouseEnter={() => setShowExplore(true)}
                 onMouseLeave={() => setShowExplore(false)}
+                onClick={() => setShowExplore(!showExplore)}
                 className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-secondary-700 hover:bg-secondary-100 rounded transition-colors cursor-pointer"
               >
                 Khám phá
                 <ChevronDown className="w-4 h-4" />
               </button>
-              
+
               {showExplore && (
-                <div 
+                <div
                   onMouseEnter={() => setShowExplore(true)}
                   onMouseLeave={() => setShowExplore(false)}
                   className="absolute top-full left-0 w-64 bg-white border border-secondary-200 shadow-lg py-2"
@@ -96,7 +103,7 @@ export default function Navbar() {
                   <Link href="/khoa-hoc?grade=12" className="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 cursor-pointer">
                     Luyện thi THPT Quốc Gia
                   </Link>
-                
+
                   <Link href="/khoa-hoc" className="block px-4 py-2 text-sm text-primary-500 font-medium hover:bg-secondary-50 cursor-pointer">
                     Xem tất cả khoá học →
                   </Link>
@@ -106,7 +113,7 @@ export default function Navbar() {
           </div>
 
           {/* Center: Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <div className="hidden md:flex flex-1 max-w-xl mx-4 lg:mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
               <input
@@ -118,28 +125,28 @@ export default function Navbar() {
           </div>
 
           {/* Kích hoạt khoá học Button */}
-          { (
-              <button
-                onClick={openCourseActivationModal}
-                className="mr-4 hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-semibold rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all shadow-md hover:shadow-lg"
-              >
-                <Key className="w-4 h-4" />
-                Kích hoạt khoá học
-              </button>
-            )}
+          {(
+            <button
+              onClick={openCourseActivationModal}
+              className="mr-4 hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-semibold rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all shadow-md hover:shadow-lg"
+            >
+              <Key className="w-4 h-4" />
+              Kích hoạt khoá học
+            </button>
+          )}
 
           {/* Right: Auth Buttons or User Menu */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2 ">
             {isAuthenticated && user ? (
               <>
-                <Link href="/huong-dan-hoc" className="btn-ghost">
+                <Link href="/huong-dan-hoc" className="btn-ghost hidden xl:block">
                   Hướng dẫn học
                 </Link>
-                <Link href="/thanh-toan" className="btn-ghost">
+                <Link href="/thanh-toan" className="btn-ghost hidden xl:block">
                   Thanh toán
                 </Link>
                 <div className="w-px h-6 bg-secondary-200 mx-2" />
-                
+
                 {/* User Avatar & Dropdown */}
                 <div className="relative" ref={userMenuRef}>
                   <button
@@ -217,7 +224,7 @@ export default function Navbar() {
                           <span>Kích hoạt khoá học</span>
                         </button>
                         <Link
-                          href="/tai-khoan"
+                          href="/tai-khoan?tab=profile"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                         >
@@ -225,7 +232,7 @@ export default function Navbar() {
                           <span>Thông tin tài khoản</span>
                         </Link>
                         <Link
-                          href="/khoa-hoc-cua-toi"
+                          href="/tai-khoan?tab=courses"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                         >
@@ -242,13 +249,21 @@ export default function Navbar() {
                           <Key className="w-4 h-4 text-secondary-500" />
                           <span>Kích hoạt khoá học</span>
                         </button>
-                        <Link
+                        {/* <Link
                           href="/cai-dat"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                         >
                           <Settings className="w-4 h-4 text-secondary-500" />
                           <span>Cài đặt</span>
+                        </Link> */}
+                        <Link
+                          href="/tai-khoan?tab=password"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
+                        >
+                          <Lock className="w-4 h-4 text-secondary-500" />
+                          <span>Đổi mật khẩu</span>
                         </Link>
                         <div className="my-1 border-t border-secondary-100"></div>
                         <button
@@ -272,14 +287,14 @@ export default function Navbar() {
                 <Link href="/phu-huynh" className="btn-ghost">
                   Dành cho Phụ huynh
                 </Link> */}
-                
-                <Link href="/huong-dan-hoc" className="btn-ghost">
+
+                <Link href="/huong-dan-hoc" className="btn-ghost hidden xl:block">
                   Hướng dẫn học
                 </Link>
-                <Link href="/thanh-toan" className="btn-ghost">
+                <Link href="/thanh-toan" className="btn-ghost hidden xl:block">
                   Thanh toán
                 </Link>
-                <div className="w-px h-6 bg-secondary-200 mx-2" />
+                <div className="w-px h-6 bg-secondary-200 mx-2 hidden xl:block" />
                 <button onClick={openLogin} className="btn-ghost font-semibold text-primary-500 hover:text-primary-600">
                   Đăng nhập
                 </button>
@@ -312,7 +327,7 @@ export default function Navbar() {
                 className="w-full pl-10 pr-4 py-2.5 bg-secondary-50 border border-secondary-200 text-sm"
               />
             </div>
-            
+
             <div className="space-y-1">
               <Link href="/khoa-hoc?grade=1,2,3,4,5" className="block px-3 py-2 text-sm font-medium text-secondary-700 hover:bg-secondary-50 cursor-pointer">
                 Toán Tiểu học (Lớp 1 - 5)
@@ -324,7 +339,7 @@ export default function Navbar() {
                 Toán THPT (Lớp 10 - 12)
               </Link>
             </div>
-            
+
             {/* Mobile Auth Section */}
             {isAuthenticated && user ? (
               <div className="pt-4 mt-4 border-t border-secondary-200">
@@ -364,7 +379,7 @@ export default function Navbar() {
                     Kích hoạt khoá học
                   </button>
                   <Link
-                    href="/khoa-hoc-cua-toi"
+                    href="/tai-khoan?tab=courses"
                     onClick={() => setIsOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-secondary-700 hover:bg-secondary-50 rounded-lg"
                   >
@@ -372,20 +387,28 @@ export default function Navbar() {
                     Khoá học của tôi
                   </Link>
                   <Link
-                    href="/tai-khoan"
+                    href="/tai-khoan?tab=profile"
                     onClick={() => setIsOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-secondary-700 hover:bg-secondary-50 rounded-lg"
                   >
                     <User className="w-4 h-4" />
                     Thông tin tài khoản
                   </Link>
-                  <Link
+                  {/* <Link
                     href="/cai-dat"
                     onClick={() => setIsOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-secondary-700 hover:bg-secondary-50 rounded-lg"
                   >
                     <Settings className="w-4 h-4" />
                     Cài đặt
+                  </Link> */}
+                  <Link
+                    href="/tai-khoan?tab=password"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-secondary-700 hover:bg-secondary-50 rounded-lg"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Đổi mật khẩu
                   </Link>
                   <button
                     onClick={() => { handleLogout(); setIsOpen(false); }}

@@ -71,15 +71,19 @@ func (r *courseRepository) Create(ctx context.Context, course *domain.Course) er
 // GetByID retrieves a course by ID
 func (r *courseRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Course, error) {
 	query := `
-		SELECT id, title, slug, description, short_description, instructor_id,
-		       price, original_price, image_url, video_preview_url,
-		       rating, total_reviews, total_students, total_lessons, duration_minutes,
-		       level, grade, status, is_featured, created_at, updated_at
-		FROM courses
-		WHERE id = $1
+		SELECT c.id, c.title, c.slug, c.description, c.short_description, c.instructor_id,
+		       c.price, c.original_price, c.image_url, c.video_preview_url,
+		       c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes,
+		       c.level, c.grade, c.status, c.is_featured, c.created_at, c.updated_at,
+		       u.id, u.full_name, u.email
+		FROM courses c
+		LEFT JOIN users u ON c.instructor_id = u.id
+		WHERE c.id = $1
 	`
 
 	course := &domain.Course{}
+	instructor := &domain.User{}
+
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&course.ID,
 		&course.Title,
@@ -102,27 +106,39 @@ func (r *courseRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.C
 		&course.IsFeatured,
 		&course.CreatedAt,
 		&course.UpdatedAt,
+		&instructor.ID,
+		&instructor.FullName,
+		&instructor.Email,
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, domain.ErrCourseNotFound
 	}
 
-	return course, err
+	if err != nil {
+		return nil, err
+	}
+
+	course.Instructor = instructor
+	return course, nil
 }
 
 // GetBySlug retrieves a course by slug
 func (r *courseRepository) GetBySlug(ctx context.Context, slug string) (*domain.Course, error) {
 	query := `
-		SELECT id, title, slug, description, short_description, instructor_id,
-		       price, original_price, image_url, video_preview_url,
-		       rating, total_reviews, total_students, total_lessons, duration_minutes,
-		       level, grade, status, is_featured, created_at, updated_at
-		FROM courses
-		WHERE slug = $1
+		SELECT c.id, c.title, c.slug, c.description, c.short_description, c.instructor_id,
+		       c.price, c.original_price, c.image_url, c.video_preview_url,
+		       c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes,
+		       c.level, c.grade, c.status, c.is_featured, c.created_at, c.updated_at,
+		       u.id, u.full_name, u.email
+		FROM courses c
+		LEFT JOIN users u ON c.instructor_id = u.id
+		WHERE c.slug = $1
 	`
 
 	course := &domain.Course{}
+	instructor := &domain.User{}
+
 	err := r.db.QueryRow(ctx, query, slug).Scan(
 		&course.ID,
 		&course.Title,
@@ -145,13 +161,21 @@ func (r *courseRepository) GetBySlug(ctx context.Context, slug string) (*domain.
 		&course.IsFeatured,
 		&course.CreatedAt,
 		&course.UpdatedAt,
+		&instructor.ID,
+		&instructor.FullName,
+		&instructor.Email,
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, domain.ErrCourseNotFound
 	}
 
-	return course, err
+	if err != nil {
+		return nil, err
+	}
+
+	course.Instructor = instructor
+	return course, nil
 }
 
 // Update updates an existing course
@@ -226,7 +250,7 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 	// Build WHERE clause
 	if filter != nil {
 		if filter.Status != nil {
-			conditions = append(conditions, fmt.Sprintf("status = $%d", argIndex))
+			conditions = append(conditions, fmt.Sprintf("c.status = $%d", argIndex))
 			args = append(args, *filter.Status)
 			argIndex++
 		}
@@ -238,7 +262,7 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 				}
 			}
 			if len(levels) > 0 {
-				conditions = append(conditions, fmt.Sprintf("level = ANY($%d)", argIndex))
+				conditions = append(conditions, fmt.Sprintf("c.level = ANY($%d)", argIndex))
 				args = append(args, levels)
 				argIndex++
 			}
@@ -251,23 +275,23 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 				}
 			}
 			if len(grades) > 0 {
-				conditions = append(conditions, fmt.Sprintf("grade = ANY($%d)", argIndex))
+				conditions = append(conditions, fmt.Sprintf("c.grade = ANY($%d)", argIndex))
 				args = append(args, grades)
 				argIndex++
 			}
 		}
 		if filter.InstructorID != nil {
-			conditions = append(conditions, fmt.Sprintf("instructor_id = $%d", argIndex))
+			conditions = append(conditions, fmt.Sprintf("c.instructor_id = $%d", argIndex))
 			args = append(args, *filter.InstructorID)
 			argIndex++
 		}
 		if filter.IsFeatured != nil {
-			conditions = append(conditions, fmt.Sprintf("is_featured = $%d", argIndex))
+			conditions = append(conditions, fmt.Sprintf("c.is_featured = $%d", argIndex))
 			args = append(args, *filter.IsFeatured)
 			argIndex++
 		}
 		if filter.Search != nil && *filter.Search != "" {
-			conditions = append(conditions, fmt.Sprintf("(title ILIKE $%d OR description ILIKE $%d)", argIndex, argIndex))
+			conditions = append(conditions, fmt.Sprintf("(c.title ILIKE $%d OR c.description ILIKE $%d)", argIndex, argIndex))
 			searchTerm := "%" + *filter.Search + "%"
 			args = append(args, searchTerm)
 			argIndex++
@@ -280,22 +304,22 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 	}
 
 	// Build ORDER BY clause
-	orderBy := "created_at DESC"
+	orderBy := "c.created_at DESC"
 	switch sort {
 	case domain.SortCreatedAtAsc:
-		orderBy = "created_at ASC"
+		orderBy = "c.created_at ASC"
 	case domain.SortPriceAsc:
-		orderBy = "price ASC"
+		orderBy = "c.price ASC"
 	case domain.SortPriceDesc:
-		orderBy = "price DESC"
+		orderBy = "c.price DESC"
 	case domain.SortRatingDesc:
-		orderBy = "rating DESC"
+		orderBy = "c.rating DESC"
 	case domain.SortStudentsDesc:
-		orderBy = "total_students DESC"
+		orderBy = "c.total_students DESC"
 	}
 
 	// Count total
-	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM courses %s", whereClause)
+	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM courses c %s", whereClause)
 	var total int
 	err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total)
 	if err != nil {
@@ -304,11 +328,13 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 
 	// Get courses
 	query := fmt.Sprintf(`
-		SELECT id, title, slug, description, short_description, instructor_id,
-		       price, original_price, image_url, video_preview_url,
-		       rating, total_reviews, total_students, total_lessons, duration_minutes,
-		       level, grade, status, is_featured, created_at, updated_at
-		FROM courses
+		SELECT c.id, c.title, c.slug, c.description, c.short_description, c.instructor_id,
+		       c.price, c.original_price, c.image_url, c.video_preview_url,
+		       c.rating, c.total_reviews, c.total_students, c.total_lessons, c.duration_minutes,
+		       c.level, c.grade, c.status, c.is_featured, c.created_at, c.updated_at,
+		       u.id, u.full_name, u.email
+		FROM courses c
+		LEFT JOIN users u ON c.instructor_id = u.id
 		%s
 		ORDER BY %s
 		LIMIT $%d OFFSET $%d
@@ -325,6 +351,7 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 	var courses []*domain.Course
 	for rows.Next() {
 		course := &domain.Course{}
+		instructor := &domain.User{}
 		err := rows.Scan(
 			&course.ID,
 			&course.Title,
@@ -347,10 +374,14 @@ func (r *courseRepository) List(ctx context.Context, filter *domain.CourseFilter
 			&course.IsFeatured,
 			&course.CreatedAt,
 			&course.UpdatedAt,
+			&instructor.ID,
+			&instructor.FullName,
+			&instructor.Email,
 		)
 		if err != nil {
 			return nil, 0, err
 		}
+		course.Instructor = instructor
 		courses = append(courses, course)
 	}
 

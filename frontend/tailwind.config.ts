@@ -42,8 +42,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ['Poppins', 'sans-serif'],
-        body: ['Open Sans', 'sans-serif'],
+        heading: ['var(--font-heading)', 'sans-serif'],
+        body: ['var(--font-body)', 'sans-serif'],
       },
       boxShadow: {
         'card': '0 2px 4px rgba(0, 0, 0, 0.08)',
