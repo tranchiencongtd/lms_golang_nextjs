@@ -9,11 +9,12 @@ import (
 
 // Router holds all route handlers
 type Router struct {
-	authHandler       *handler.AuthHandler
-	courseHandler     *handler.CourseHandler
-	enrollmentHandler *handler.EnrollmentHandler
-	progressHandler   *handler.ProgressHandler
-	authUseCase       usecase.AuthUseCase
+	authHandler         *handler.AuthHandler
+	courseHandler       *handler.CourseHandler
+	enrollmentHandler   *handler.EnrollmentHandler
+	progressHandler     *handler.ProgressHandler
+	consultationHandler *handler.ConsultationHandler
+	authUseCase         usecase.AuthUseCase
 }
 
 // NewRouter creates a new router
@@ -22,14 +23,16 @@ func NewRouter(
 	courseHandler *handler.CourseHandler,
 	enrollmentHandler *handler.EnrollmentHandler,
 	progressHandler *handler.ProgressHandler,
+	consultationHandler *handler.ConsultationHandler,
 	authUseCase usecase.AuthUseCase,
 ) *Router {
 	return &Router{
-		authHandler:       authHandler,
-		courseHandler:     courseHandler,
-		enrollmentHandler: enrollmentHandler,
-		progressHandler:   progressHandler,
-		authUseCase:       authUseCase,
+		authHandler:         authHandler,
+		courseHandler:       courseHandler,
+		enrollmentHandler:   enrollmentHandler,
+		progressHandler:     progressHandler,
+		consultationHandler: consultationHandler,
+		authUseCase:         authUseCase,
 	}
 }
 
@@ -94,6 +97,12 @@ func (r *Router) Setup(engine *gin.Engine) {
 			progress.POST("/:courseId/lessons/:lessonId/complete", r.progressHandler.MarkLessonCompleted)
 			progress.POST("/:courseId/lessons/:lessonId/watch", r.progressHandler.UpdateWatchProgress)
 			progress.POST("/:courseId/last-lesson/:lessonId", r.progressHandler.UpdateLastLesson)
+		}
+
+		// Public consultation routes
+		consultations := v1.Group("/consultations")
+		{
+			consultations.POST("", r.consultationHandler.CreateRequest)
 		}
 	}
 }

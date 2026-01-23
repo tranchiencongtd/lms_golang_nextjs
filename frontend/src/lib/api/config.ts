@@ -25,5 +25,8 @@ export const API_ENDPOINTS = {
     check: (courseId: string) => `/enrollments/check/${courseId}`,
     createActivationCode: '/enrollments/activation-codes',
   },
+  consultations: {
+    create: '/consultations',
+  },
 } as const
 
