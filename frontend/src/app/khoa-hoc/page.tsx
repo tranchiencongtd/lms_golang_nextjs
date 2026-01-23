@@ -144,6 +144,7 @@ function CoursesContent() {
     const gradeParam = searchParams.get('grade')
     const levelParam = searchParams.get('level')
     const pageParam = searchParams.get('page')
+    const searchParam = searchParams.get('search')
 
     if (gradeParam) {
       setSelectedGrades(gradeParam.split(','))
@@ -156,6 +157,9 @@ function CoursesContent() {
       if (!isNaN(page) && page > 0) {
         setCurrentPage(page)
       }
+    }
+    if (searchParam) {
+      setSearchQuery(searchParam)
     }
   }, [searchParams])
 
@@ -307,6 +311,28 @@ function CoursesContent() {
             {/* Sidebar Filters - Desktop */}
             <aside className="hidden lg:block w-64 flex-shrink-0">
               <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-24">
+                {/* Search Input */}
+                <div className="mb-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Tìm khóa học..."
+                      className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-secondary-700 placeholder-secondary-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <h3 className="font-semibold text-secondary-900 mb-4">Bộ lọc</h3>
 
                 {/* Grade Filter */}
@@ -350,11 +376,12 @@ function CoursesContent() {
                   onClick={() => {
                     setSelectedGrades([])
                     setSelectedLevels([])
+                    setSearchQuery('')
                   }}
-                  className={`w-full mt-6 py-2 text-sm rounded transition-colors ${activeFiltersCount > 0 ? 'bg-primary-50 text-primary-600 hover:bg-primary-100' : 'text-secondary-400 cursor-not-allowed'}`}
-                  disabled={activeFiltersCount === 0}
+                  className={`w-full mt-6 py-2 text-sm rounded transition-colors ${(activeFiltersCount > 0 || searchQuery) ? 'bg-primary-50 text-primary-600 hover:bg-primary-100' : 'text-secondary-400 cursor-not-allowed'}`}
+                  disabled={activeFiltersCount === 0 && !searchQuery}
                 >
-                  Xóa bộ lọc {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                  Xóa bộ lọc {(activeFiltersCount > 0 || searchQuery) && `(${activeFiltersCount + (searchQuery ? 1 : 0)})`}
                 </button>
               </div>
             </aside>
@@ -371,9 +398,19 @@ function CoursesContent() {
                   )}
 
                   {/* Active Filters Tags */}
-                  {activeFiltersCount > 0 && (
+                  {(activeFiltersCount > 0 || searchQuery) && (
                     <div className="flex flex-wrap items-center gap-2 flex-1">
-                      <span className="text-sm text-secondary-500">Đang lọc:</span>
+                      <span className="text-sm text-secondary-500">{searchQuery ? 'Tìm kiếm:' : 'Đang lọc:'}</span>
+                      {/* Search Query Tag */}
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 text-sm rounded-full hover:bg-green-100"
+                        >
+                          "{searchQuery}"
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
                       {selectedGrades.map(gradeId => {
                         const grade = grades.find(g => g.id === gradeId)
                         return grade ? (
@@ -404,6 +441,7 @@ function CoursesContent() {
                         onClick={() => {
                           setSelectedGrades([])
                           setSelectedLevels([])
+                          setSearchQuery('')
                         }}
                         className="text-sm text-secondary-500 hover:text-secondary-700 underline ml-2"
                       >
@@ -450,6 +488,28 @@ function CoursesContent() {
               {/* Mobile Filters */}
               {showFilters && (
                 <div className="lg:hidden bg-white rounded-lg border border-gray-200 p-4 mb-6">
+                  {/* Search Input (Mobile) */}
+                  <div className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Tìm khóa học..."
+                        className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-secondary-700 placeholder-secondary-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Grade Section */}
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-secondary-700 mb-2">Lớp</h4>

@@ -1,12 +1,9 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Search, ArrowRight, CheckCircle } from 'lucide-react'
-
-const partners = [
-  { name: 'ĐH Bách Khoa', logo: '/images/bachkhoa.png' },
-  { name: 'ĐH Sư Phạm', logo: '/images/supham.png' },
-  { name: 'ĐH Quốc Gia', logo: '/images/quocgia.png' },
-  { name: 'Vinschool', logo: '/images/vinschool.png' },
-]
 
 const highlights = [
   'Học cùng đội ngũ giáo viên giỏi, giàu kinh nghiệm',
@@ -14,7 +11,38 @@ const highlights = [
   'Hỗ trợ học tập 24/7 qua nền tảng trực tuyến',
 ]
 
+const gradeOptions = [
+  { label: 'Lớp 1', value: '1' },
+  { label: 'Lớp 2', value: '2' },
+  { label: 'Lớp 3', value: '3' },
+  { label: 'Lớp 4', value: '4' },
+  { label: 'Lớp 5', value: '5' },
+  { label: 'Lớp 6', value: '6' },
+  { label: 'Lớp 7', value: '7' },
+  { label: 'Lớp 8', value: '8' },
+  { label: 'Lớp 9', value: '9' },
+  { label: 'Lớp 10', value: '10' },
+  { label: 'Lớp 11', value: '11' },
+  { label: 'Lớp 12', value: '12' },
+]
+
 export default function Hero() {
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/khoa-hoc?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch(e as unknown as React.FormEvent)
+    }
+  }
+
   return (
     <section className="bg-gradient-to-r from-primary-900 via-primary-800 to-primary-700 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -23,12 +51,12 @@ export default function Hero() {
           <div>
             {/* Heading */}
             <h1 className="text-lg sm:text-5xl lg:text-5xl font-heading font-bold leading-tight text-white">
-              Học Toán Online 
+              Học Toán Online
             </h1>
 
             {/* Subheading */}
             <p className="mt-6 text-sm sm:text-lg text-primary-100 max-w-lg">
-              Nền tảng học toán trực tuyến hàng đầu với hơn 500+ khóa học 
+              Nền tảng học toán trực tuyến hàng đầu với hơn 500+ khóa học
               từ lớp 1-12, luyện thi THPT Quốc Gia.
             </p>
 
@@ -63,33 +91,42 @@ export default function Hero() {
             </p>
 
             {/* Search Box */}
-            <div className="relative mb-6">
+            <form onSubmit={handleSearch} className="relative mb-6">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Tìm khóa học, chủ đề..."
-                className="w-full pl-12 pr-4 py-4 bg-secondary-50 border border-secondary-200 text-secondary-700 placeholder-secondary-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                className="w-full pl-12 pr-24 py-4 bg-secondary-50 border border-secondary-200 text-secondary-700 placeholder-secondary-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
               />
-            </div>
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded hover:bg-primary-600 transition-colors"
+              >
+                Tìm kiếm
+              </button>
+            </form>
 
-            {/* Popular Searches */}
+            {/* Popular Searches - Grade Filter */}
             <div className="mb-6">
               <p className="text-sm text-secondary-500 mb-3">Lớp học:</p>
               <div className="flex flex-wrap gap-2">
-                {['Lớp 1','Lớp 2','Lớp 3','Lớp 4','Lớp 5','Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'].map((topic) => (
-                  <Link 
-                    key={topic}
-                    href={`/tim-kiem?q=${topic}`}
-                    className="px-3 py-1.5 bg-secondary-100 text-secondary-700 text-sm hover:bg-secondary-200 transition-colors cursor-pointer"
+                {gradeOptions.map((grade) => (
+                  <Link
+                    key={grade.value}
+                    href={`/khoa-hoc?grade=${grade.value}`}
+                    className="px-3 py-1.5 bg-secondary-100 text-secondary-700 text-sm hover:bg-primary-100 hover:text-primary-700 transition-colors cursor-pointer"
                   >
-                    {topic}
+                    {grade.label}
                   </Link>
                 ))}
               </div>
             </div>
 
             {/* Explore Button */}
-            <Link 
+            <Link
               href="/khoa-hoc"
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors cursor-pointer"
             >
@@ -99,21 +136,7 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
-      {/* Partner Logos */}
-      {/* <div className="bg-white border-t border-secondary-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <p className="text-center text-sm text-secondary-500 mb-6">
-            Được tin dùng bởi <span className="text-primary-500 font-semibold">50,000+ học sinh và phụ huynh</span> trên toàn quốc
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
-            <div className="text-secondary-600 font-medium">Đối tác giáo dục:</div>
-            <div className="text-secondary-500">ĐH Bách Khoa Hà Nội</div>
-            <div className="text-secondary-500">ĐH Sư Phạm TP.HCM</div>
-            <div className="text-secondary-500">Hệ thống Vinschool</div>
-          </div>
-        </div>
-      </div> */}
     </section>
   )
 }
+

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Menu, X, Search, ChevronDown, User, BookOpen, Settings, LogOut, Key, ChevronUp, Lock } from 'lucide-react'
 import { useAuthModal } from '@/contexts/AuthModalContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -43,6 +44,24 @@ export default function Navbar() {
   const handleLogout = async () => {
     await logout()
     setShowUserMenu(false)
+  }
+
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/khoa-hoc?search=${encodeURIComponent(searchQuery.trim())}`)
+      setIsOpen(false) // Close mobile menu if open
+      setSearchQuery('') // Clear input after search
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch(e as unknown as React.FormEvent)
+    }
   }
 
   // Get user initials for avatar fallback
@@ -118,6 +137,9 @@ export default function Navbar() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Tìm kiếm khóa học"
                 className="w-full pl-10 pr-4 py-2.5 bg-secondary-50 border border-secondary-200 text-sm text-secondary-700 placeholder-secondary-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
               />
@@ -323,6 +345,9 @@ export default function Navbar() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Tìm kiếm khóa học"
                 className="w-full pl-10 pr-4 py-2.5 bg-secondary-50 border border-secondary-200 text-sm"
               />
