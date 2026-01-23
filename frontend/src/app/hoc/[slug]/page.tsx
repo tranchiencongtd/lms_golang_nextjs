@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -18,10 +18,12 @@ import {
   List,
   ArrowLeft,
   ArrowRight,
-  Lock
+  Lock,
+  CheckSquare
 } from 'lucide-react'
 import { getCourse, type Course as ApiCourse } from '@/lib/api/courses'
 import { checkEnrollment } from '@/lib/api/enrollments'
+import { getCourseProgress, markLessonCompleted, updateLastLesson, type CourseProgress } from '@/lib/api/progress'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatDuration, getYouTubeEmbedUrl } from '@/lib/utils'
 
@@ -57,15 +59,38 @@ export default function LearningPage() {
   const [error, setError] = useState<string | null>(null)
   const [isEnrolled, setIsEnrolled] = useState(false)
 
+  // Progress State
+  const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(null)
+  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set())
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false)
+
   // UI State
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
 
-  // Load course data
+  // Handle go back with fallback to course detail if no valid history
+  const handleGoBack = () => {
+    if (typeof window !== 'undefined') {
+      const referrer = document.referrer
+      const currentHost = window.location.host
+
+      // If referrer exists and is from our website, go back
+      if (referrer && referrer.includes(currentHost)) {
+        router.back()
+      } else {
+        // Otherwise, go to course detail page
+        router.push(`/khoa-hoc/${courseSlug}`)
+      }
+    } else {
+      router.push(`/khoa-hoc/${courseSlug}`)
+    }
+  }
+
+  // Load course data and progress
   useEffect(() => {
-    const loadCourse = async () => {
+    const loadCourseAndProgress = async () => {
       if (authLoading) return
 
       if (!isAuthenticated) {
@@ -87,11 +112,48 @@ export default function LearningPage() {
           return
         }
 
-        // Expand first section and set first lesson as current
-        if (courseData.sections && courseData.sections.length > 0) {
-          setExpandedSections([courseData.sections[0].id])
-          if (courseData.sections[0].lessons && courseData.sections[0].lessons.length > 0) {
+        // Fetch progress data
+        try {
+          const progressData = await getCourseProgress(courseData.id)
+          if (progressData?.data) {
+            setCourseProgress(progressData.data)
+            // Build set of completed lesson IDs
+            const completedIds = new Set<string>()
+            progressData.data.lesson_progress?.forEach(lp => {
+              if (lp.is_completed) {
+                completedIds.add(lp.lesson_id)
+              }
+            })
+            setCompletedLessonIds(completedIds)
+
+            // Set current lesson to last watched or first lesson
+            if (progressData.data.last_lesson_id) {
+              setCurrentLessonId(progressData.data.last_lesson_id)
+              // Find and expand the section containing this lesson
+              for (const section of courseData.sections || []) {
+                const found = section.lessons?.find((l: any) => l.id === progressData.data.last_lesson_id)
+                if (found) {
+                  setExpandedSections([section.id])
+                  break
+                }
+              }
+            } else if (courseData.sections?.[0]?.lessons?.[0]) {
+              setCurrentLessonId(courseData.sections[0].lessons[0].id)
+              setExpandedSections([courseData.sections[0].id])
+            }
+          } else {
+            // No progress yet, start from first lesson
+            if (courseData.sections?.[0]?.lessons?.[0]) {
+              setCurrentLessonId(courseData.sections[0].lessons[0].id)
+              setExpandedSections([courseData.sections[0].id])
+            }
+          }
+        } catch (progressErr) {
+          // Progress fetch failed, start from first lesson
+          console.error('Failed to load progress:', progressErr)
+          if (courseData.sections?.[0]?.lessons?.[0]) {
             setCurrentLessonId(courseData.sections[0].lessons[0].id)
+            setExpandedSections([courseData.sections[0].id])
           }
         }
       } catch (e: any) {
@@ -101,7 +163,7 @@ export default function LearningPage() {
       }
     }
 
-    loadCourse()
+    loadCourseAndProgress()
   }, [courseSlug, isAuthenticated, authLoading, router])
 
   // Map sections for UI
@@ -115,10 +177,10 @@ export default function LearningPage() {
         title: lesson.title,
         duration: minutesToDurationString(lesson.duration_minutes),
         youtubeId: lesson.youtube_id,
-        isCompleted: false, // TODO: Track progress
+        isCompleted: completedLessonIds.has(lesson.id),
       })) || []
     }))
-  }, [course])
+  }, [course, completedLessonIds])
 
   // Get current lesson
   const currentLesson = useMemo(() => {
@@ -147,13 +209,51 @@ export default function LearningPage() {
     )
   }
 
-  const selectLesson = (lessonId: string, sectionId: string) => {
+  const selectLesson = async (lessonId: string, sectionId: string) => {
     setCurrentLessonId(lessonId)
     if (!expandedSections.includes(sectionId)) {
       setExpandedSections(prev => [...prev, sectionId])
     }
     setMobileSidebarOpen(false)
+
+    // Update last lesson on server
+    if (course) {
+      try {
+        await updateLastLesson(course.id, lessonId)
+      } catch (err) {
+        console.error('Failed to update last lesson:', err)
+      }
+    }
   }
+
+  // Handler to mark current lesson as completed
+  const handleMarkComplete = useCallback(async () => {
+    if (!course || !currentLessonId || isMarkingComplete) return
+
+    if (completedLessonIds.has(currentLessonId)) {
+      // Already completed
+      return
+    }
+
+    setIsMarkingComplete(true)
+    try {
+      await markLessonCompleted(course.id, currentLessonId)
+      setCompletedLessonIds(prev => new Set([...prev, currentLessonId]))
+
+      // Update local progress count
+      if (courseProgress) {
+        setCourseProgress({
+          ...courseProgress,
+          completed_lessons: courseProgress.completed_lessons + 1,
+          progress_percent: Math.round(((courseProgress.completed_lessons + 1) / courseProgress.total_lessons) * 100)
+        })
+      }
+    } catch (err) {
+      console.error('Failed to mark lesson complete:', err)
+    } finally {
+      setIsMarkingComplete(false)
+    }
+  }, [course, currentLessonId, isMarkingComplete, completedLessonIds, courseProgress])
 
   // Calculate progress
   const totalLessons = allLessons.length
@@ -189,14 +289,14 @@ export default function LearningPage() {
       {/* Top Navigation Bar */}
       <header className="bg-gray-800 border-b border-gray-700 h-14 flex items-center px-4 flex-shrink-0 z-50">
         <div className="flex items-center gap-4 flex-1">
-          {/* Back to course */}
-          <Link
-            href={`/khoa-hoc/${courseSlug}`}
+          {/* Back to previous page */}
+          <button
+            onClick={handleGoBack}
             className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="hidden md:inline text-sm">Quay lại</span>
-          </Link>
+          </button>
 
           {/* Divider */}
           <div className="w-px h-6 bg-gray-600" />
@@ -271,12 +371,46 @@ export default function LearningPage() {
                 <p className="text-primary-400 text-sm font-medium mb-1">
                   {currentLesson?.sectionTitle}
                 </p>
-                <h2 className="text-white text-xl md:text-2xl font-semibold">
-                  {currentLesson?.title}
-                </h2>
-                <p className="text-white/50 text-sm mt-1">
-                  Thời lượng: {currentLesson?.duration ? formatDuration(currentLesson.duration) : ''}
-                </p>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-white text-xl md:text-2xl font-semibold">
+                      {currentLesson?.title}
+                    </h2>
+                    <p className="text-white/50 text-sm mt-1">
+                      Thời lượng: {currentLesson?.duration ? formatDuration(currentLesson.duration) : ''}
+                    </p>
+                  </div>
+                  {/* Mark Complete Button */}
+                  {currentLessonId && (
+                    <button
+                      onClick={handleMarkComplete}
+                      disabled={isMarkingComplete || completedLessonIds.has(currentLessonId)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all flex-shrink-0 ${completedLessonIds.has(currentLessonId)
+                        ? 'bg-green-600/20 text-green-400 cursor-default'
+                        : isMarkingComplete
+                          ? 'bg-gray-700 text-gray-400 cursor-wait'
+                          : 'bg-green-600 text-white hover:bg-green-700'
+                        }`}
+                    >
+                      {completedLessonIds.has(currentLessonId) ? (
+                        <>
+                          <CheckCircle className="w-5 h-5" />
+                          <span className="hidden sm:inline">Đã hoàn thành</span>
+                        </>
+                      ) : isMarkingComplete ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                          <span className="hidden sm:inline">Đang xử lý...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckSquare className="w-5 h-5" />
+                          <span className="hidden sm:inline">Hoàn thành bài học</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Navigation Buttons */}
@@ -285,8 +419,8 @@ export default function LearningPage() {
                   onClick={() => prevLesson && selectLesson(prevLesson.id, prevLesson.sectionId)}
                   disabled={!prevLesson}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${prevLesson
-                      ? 'bg-gray-700 text-white hover:bg-gray-600'
-                      : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                    ? 'bg-gray-700 text-white hover:bg-gray-600'
+                    : 'bg-gray-800 text-gray-600 cursor-not-allowed'
                     }`}
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -297,8 +431,8 @@ export default function LearningPage() {
                   onClick={() => nextLesson && selectLesson(nextLesson.id, nextLesson.sectionId)}
                   disabled={!nextLesson}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${nextLesson
-                      ? 'bg-primary-600 text-white hover:bg-primary-700'
-                      : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                    ? 'bg-primary-600 text-white hover:bg-primary-700'
+                    : 'bg-gray-800 text-gray-600 cursor-not-allowed'
                     }`}
                 >
                   <span className="hidden sm:inline">Bài tiếp theo</span>
@@ -359,8 +493,8 @@ export default function LearningPage() {
                         key={lesson.id}
                         onClick={() => selectLesson(lesson.id, section.id)}
                         className={`w-full flex items-start gap-3 p-4 pl-6 text-left transition-colors ${currentLessonId === lesson.id
-                            ? 'bg-primary-600/20 border-l-2 border-primary-500'
-                            : 'hover:bg-gray-700/30 border-l-2 border-transparent'
+                          ? 'bg-primary-600/20 border-l-2 border-primary-500'
+                          : 'hover:bg-gray-700/30 border-l-2 border-transparent'
                           }`}
                       >
                         {/* Status Icon */}
@@ -449,8 +583,8 @@ export default function LearningPage() {
                             key={lesson.id}
                             onClick={() => selectLesson(lesson.id, section.id)}
                             className={`w-full flex items-center gap-3 p-3 pl-5 text-left ${currentLessonId === lesson.id
-                                ? 'bg-primary-600/20 border-l-2 border-primary-500'
-                                : 'border-l-2 border-transparent'
+                              ? 'bg-primary-600/20 border-l-2 border-primary-500'
+                              : 'border-l-2 border-transparent'
                               }`}
                           >
                             {lesson.isCompleted ? (

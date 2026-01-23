@@ -2,12 +2,14 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Search, Filter, ChevronDown, X } from 'lucide-react'
+import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight, X, MoreHorizontal } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CourseCard, { CourseCardModel } from '@/components/CourseCard'
 import { getCourses, type Course as ApiCourse } from '@/lib/api/courses'
 import { formatDuration } from '@/lib/utils'
+
+const ITEMS_PER_PAGE = 6
 
 const grades = [
   { id: 'all', name: 'Tất cả' },
@@ -59,15 +61,44 @@ function CoursesLoading() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse space-y-3">
-                <div className="aspect-video bg-gray-200 rounded-md" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
-                <div className="h-3 bg-gray-200 rounded w-full" />
-                <div className="h-3 bg-gray-200 rounded w-2/3" />
-                <div className="h-5 bg-gray-200 rounded w-1/3 mt-4" />
+              <div key={idx} className="bg-white border border-secondary-200 rounded-lg overflow-hidden animate-pulse">
+                {/* Image skeleton */}
+                <div className="aspect-video bg-gray-200" />
+                {/* Content skeleton */}
+                <div className="p-4">
+                  {/* Title - 2 lines */}
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
+                  {/* Instructor */}
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
+                  {/* Rating */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-4 bg-gray-200 rounded w-8" />
+                    <div className="h-4 bg-gray-200 rounded w-20" />
+                  </div>
+                  {/* Meta */}
+                  <div className="h-3 bg-gray-200 rounded w-2/3 mb-4" />
+                  {/* Price */}
+                  <div className="pt-3 border-t border-secondary-100">
+                    <div className="h-5 bg-gray-200 rounded w-1/3" />
+                  </div>
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* Pagination skeleton */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-gray-200 animate-pulse">
+            {/* Info text skeleton */}
+            <div className="h-4 bg-gray-200 rounded w-48" />
+            {/* Pagination controls skeleton */}
+            <div className="flex items-center gap-1">
+              <div className="h-10 bg-gray-200 rounded w-16" />
+              <div className="h-10 bg-gray-200 rounded w-10" />
+              <div className="h-10 bg-gray-200 rounded w-10" />
+              <div className="h-10 bg-gray-200 rounded w-10" />
+              <div className="h-10 bg-gray-200 rounded w-16" />
+            </div>
           </div>
         </div>
       </section>
@@ -94,7 +125,10 @@ function CoursesContent() {
   const [showFilters, setShowFilters] = useState(false)
   const [courses, setCourses] = useState<CourseCardModel[]>([])
   const [total, setTotal] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [isLoading, setIsLoading] = useState(true) // Initial load only
+  const [isFetching, setIsFetching] = useState(false) // For page changes
   const [error, setError] = useState<string | null>(null)
 
   const sortOptions = [
@@ -109,6 +143,7 @@ function CoursesContent() {
   useEffect(() => {
     const gradeParam = searchParams.get('grade')
     const levelParam = searchParams.get('level')
+    const pageParam = searchParams.get('page')
 
     if (gradeParam) {
       setSelectedGrades(gradeParam.split(','))
@@ -116,12 +151,28 @@ function CoursesContent() {
     if (levelParam) {
       setSelectedLevels(levelParam.split(','))
     }
+    if (pageParam) {
+      const page = parseInt(pageParam, 10)
+      if (!isNaN(page) && page > 0) {
+        setCurrentPage(page)
+      }
+    }
   }, [searchParams])
 
-  // Fetch courses from API whenever filters change
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedGrades, selectedLevels, sortBy])
+
+  // Fetch courses from API whenever filters or page changes
   useEffect(() => {
     const fetchCourses = async () => {
-      setIsLoading(true)
+      // Only show full skeleton on initial load (no courses yet)
+      if (courses.length === 0) {
+        setIsLoading(true)
+      } else {
+        setIsFetching(true) // Soft loading for page changes
+      }
       setError(null)
 
       const sortMap: Record<string, any> = {
@@ -141,24 +192,75 @@ function CoursesContent() {
           grade: grade,
           level: level as any,
           sort: sortMap[sortBy] || 'students_desc',
-          page: 1,
-          page_size: 6,
+          page: currentPage,
+          page_size: ITEMS_PER_PAGE,
         })
 
         setCourses(res.courses.map(toCourseCardModel))
         setTotal(res.pagination.total)
+        setTotalPages(res.pagination.total_pages || Math.ceil(res.pagination.total / ITEMS_PER_PAGE))
       } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || 'Không thể tải danh sách khóa học'
         setError(msg)
         setCourses([])
         setTotal(0)
+        setTotalPages(1)
       } finally {
         setIsLoading(false)
+        setIsFetching(false)
       }
     }
 
     fetchCourses()
-  }, [searchQuery, selectedGrades, selectedLevels, sortBy])
+  }, [searchQuery, selectedGrades, selectedLevels, sortBy, currentPage])
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return
+    setCurrentPage(page)
+  }
+
+  // Generate pagination range with ellipsis
+  const getPaginationRange = () => {
+    const delta = 1 // Number of pages around current page
+    const range: (number | 'ellipsis')[] = []
+
+    // Always show first page
+    range.push(1)
+
+    if (totalPages <= 7) {
+      // Show all pages if total is small
+      for (let i = 2; i <= totalPages; i++) {
+        range.push(i)
+      }
+    } else {
+      // Calculate left and right boundaries around current page
+      const left = Math.max(2, currentPage - delta)
+      const right = Math.min(totalPages - 1, currentPage + delta)
+
+      // Add ellipsis after first page if needed
+      if (left > 2) {
+        range.push('ellipsis')
+      }
+
+      // Add pages around current page
+      for (let i = left; i <= right; i++) {
+        range.push(i)
+      }
+
+      // Add ellipsis before last page if needed
+      if (right < totalPages - 1) {
+        range.push('ellipsis')
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        range.push(totalPages)
+      }
+    }
+
+    return range
+  }
 
   // Toggle functions for multi-select
   const toggleGrade = (gradeId: string) => {
@@ -178,7 +280,8 @@ function CoursesContent() {
   }
 
   const activeFiltersCount = selectedGrades.length + selectedLevels.length
-  const skeletonItems = Array.from({ length: 6 }).map((_, idx) => idx)
+  const skeletonItems = Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => idx)
+  const paginationRange = getPaginationRange()
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -389,18 +492,49 @@ function CoursesContent() {
 
               {/* Course Grid */}
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {skeletonItems.map((idx) => (
-                    <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse space-y-3">
-                      <div className="aspect-video bg-gray-200 rounded-md" />
-                      <div className="h-4 bg-gray-200 rounded w-3/4" />
-                      <div className="h-3 bg-gray-200 rounded w-1/2" />
-                      <div className="h-3 bg-gray-200 rounded w-full" />
-                      <div className="h-3 bg-gray-200 rounded w-2/3" />
-                      <div className="h-5 bg-gray-200 rounded w-1/3 mt-4" />
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {skeletonItems.map((idx) => (
+                      <div key={idx} className="bg-white border border-secondary-200 rounded-lg overflow-hidden animate-pulse">
+                        {/* Image skeleton */}
+                        <div className="aspect-video bg-gray-200" />
+                        {/* Content skeleton */}
+                        <div className="p-4">
+                          {/* Title - 2 lines */}
+                          <div className="h-4 bg-gray-200 rounded w-full mb-2" />
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
+                          {/* Instructor */}
+                          <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
+                          {/* Rating */}
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="h-4 bg-gray-200 rounded w-8" />
+                            <div className="h-4 bg-gray-200 rounded w-20" />
+                          </div>
+                          {/* Meta */}
+                          <div className="h-3 bg-gray-200 rounded w-2/3 mb-4" />
+                          {/* Price */}
+                          <div className="pt-3 border-t border-secondary-100">
+                            <div className="h-5 bg-gray-200 rounded w-1/3" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination skeleton */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-gray-200 animate-pulse">
+                    {/* Info text skeleton */}
+                    <div className="h-4 bg-gray-200 rounded w-48" />
+                    {/* Pagination controls skeleton */}
+                    <div className="flex items-center gap-1">
+                      <div className="h-10 bg-gray-200 rounded w-16" />
+                      <div className="h-10 bg-gray-200 rounded w-10" />
+                      <div className="h-10 bg-gray-200 rounded w-10" />
+                      <div className="h-10 bg-gray-200 rounded w-10" />
+                      <div className="h-10 bg-gray-200 rounded w-16" />
                     </div>
-                  ))}
-                </div>
+                  </div>
+                </>
               ) : error ? (
                 <div className="text-center py-16">
                   <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -418,10 +552,21 @@ function CoursesContent() {
                   </button>
                 </div>
               ) : courses.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {courses.map((course) => (
-                    <CourseCard key={course.slug} course={course} />
-                  ))}
+                <div className="relative">
+                  {/* Loading overlay for page changes */}
+                  {isFetching && (
+                    <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-lg">
+                      <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg">
+                        <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm text-secondary-600">Đang tải...</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity ${isFetching ? 'opacity-50' : 'opacity-100'}`}>
+                    {courses.map((course) => (
+                      <CourseCard key={course.slug} course={course} />
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-16">
@@ -447,12 +592,78 @@ function CoursesContent() {
                 </div>
               )}
 
-              {/* Load More */}
-              {courses.length > 0 && (
-                <div className="text-center mt-10">
-                  <button className="px-8 py-3 border border-primary-500 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors">
-                    Xem thêm khóa học
-                  </button>
+              {/* Pagination */}
+              {!isLoading && !error && courses.length > 0 && totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-gray-200">
+                  {/* Info text */}
+                  <div className="text-sm text-secondary-600">
+                    Hiển thị {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, total)} trên {total} khóa học
+                  </div>
+
+                  {/* Pagination controls */}
+                  <div className="flex items-center gap-1">
+                    {/* Previous button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`flex items-center gap-1 px-3 py-2 text-sm rounded-lg transition-all ${currentPage === 1
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-secondary-600 hover:bg-gray-100 hover:text-secondary-900'
+                        }`}
+                      aria-label="Trang trước"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span className="hidden sm:inline">Trước</span>
+                    </button>
+
+                    {/* Page numbers */}
+                    <div className="flex items-center gap-1">
+                      {paginationRange.map((item, idx) => {
+                        if (item === 'ellipsis') {
+                          return (
+                            <span
+                              key={`ellipsis-${idx}`}
+                              className="w-10 h-10 flex items-center justify-center text-secondary-400"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </span>
+                          )
+                        }
+
+                        const page = item as number
+                        const isActive = page === currentPage
+
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`min-w-[40px] h-10 px-3 text-sm font-medium rounded-lg transition-all ${isActive
+                              ? 'bg-primary-600 text-white shadow-sm'
+                              : 'text-secondary-600 hover:bg-gray-100 hover:text-secondary-900'
+                              }`}
+                            aria-label={`Trang ${page}`}
+                            aria-current={isActive ? 'page' : undefined}
+                          >
+                            {page}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Next button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`flex items-center gap-1 px-3 py-2 text-sm rounded-lg transition-all ${currentPage === totalPages
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-secondary-600 hover:bg-gray-100 hover:text-secondary-900'
+                        }`}
+                      aria-label="Trang sau"
+                    >
+                      <span className="hidden sm:inline">Sau</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -461,7 +672,7 @@ function CoursesContent() {
       </section>
 
       <Footer />
-    </main>
+    </main >
   )
 }
 

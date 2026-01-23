@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -53,6 +53,21 @@ const roleLabels: Record<string, { label: string; color: string }> = {
 }
 
 export default function AccountPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary-600 mb-4" />
+          <p className="text-gray-600">Đang tải...</p>
+        </div>
+      </div>
+    }>
+      <AccountPageContent />
+    </Suspense>
+  )
+}
+
+function AccountPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, isLoading: authLoading, isAuthenticated, refreshUser } = useAuth()
@@ -749,7 +764,7 @@ function EnrollmentCard({ enrollment }: EnrollmentCardProps) {
 
           {/* Action Button */}
           <Link
-            href={`/khoa-hoc/${course.slug}`}
+            href={`/hoc/${course.slug}`}
             className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold transition-all ${enrollment.status === 'active'
               ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow'
               : 'bg-secondary-100 text-secondary-500 cursor-not-allowed'

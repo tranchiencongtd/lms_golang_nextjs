@@ -12,6 +12,7 @@ type Router struct {
 	authHandler       *handler.AuthHandler
 	courseHandler     *handler.CourseHandler
 	enrollmentHandler *handler.EnrollmentHandler
+	progressHandler   *handler.ProgressHandler
 	authUseCase       usecase.AuthUseCase
 }
 
@@ -20,12 +21,14 @@ func NewRouter(
 	authHandler *handler.AuthHandler,
 	courseHandler *handler.CourseHandler,
 	enrollmentHandler *handler.EnrollmentHandler,
+	progressHandler *handler.ProgressHandler,
 	authUseCase usecase.AuthUseCase,
 ) *Router {
 	return &Router{
 		authHandler:       authHandler,
 		courseHandler:     courseHandler,
 		enrollmentHandler: enrollmentHandler,
+		progressHandler:   progressHandler,
 		authUseCase:       authUseCase,
 	}
 }
@@ -81,6 +84,16 @@ func (r *Router) Setup(engine *gin.Engine) {
 			enrollments.GET("/my-courses", r.enrollmentHandler.GetMyCourses)
 			enrollments.GET("/check/:courseId", r.enrollmentHandler.CheckEnrollment)
 			enrollments.POST("/activation-codes", r.enrollmentHandler.CreateActivationCode)
+		}
+
+		// Protected progress routes
+		progress := v1.Group("/progress")
+		progress.Use(middleware.AuthMiddleware(r.authUseCase))
+		{
+			progress.GET("/:courseId", r.progressHandler.GetCourseProgress)
+			progress.POST("/:courseId/lessons/:lessonId/complete", r.progressHandler.MarkLessonCompleted)
+			progress.POST("/:courseId/lessons/:lessonId/watch", r.progressHandler.UpdateWatchProgress)
+			progress.POST("/:courseId/last-lesson/:lessonId", r.progressHandler.UpdateLastLesson)
 		}
 	}
 }

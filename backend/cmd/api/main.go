@@ -46,22 +46,25 @@ func main() {
 	courseRepo := postgres.NewCourseRepository(db)
 	activationCodeRepo := postgres.NewActivationCodeRepository(db)
 	enrollmentRepo := postgres.NewEnrollmentRepository(db)
+	progressRepo := postgres.NewProgressRepository(db)
 
 	// Initialize use cases
 	authUseCase := usecase.NewAuthUseCase(userRepo, refreshTokenRepo, cfg.JWT, cfg.Bcrypt.Cost)
 	courseUseCase := usecase.NewCourseUseCase(courseRepo, userRepo)
 	enrollmentUseCase := usecase.NewEnrollmentUseCase(enrollmentRepo, activationCodeRepo, courseRepo, userRepo)
+	progressUseCase := usecase.NewProgressUseCase(progressRepo, enrollmentRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authUseCase)
 	courseHandler := handler.NewCourseHandler(courseUseCase)
 	enrollmentHandler := handler.NewEnrollmentHandler(enrollmentUseCase)
+	progressHandler := handler.NewProgressHandler(progressUseCase)
 
 	// Setup router
 	engine := gin.New()
 	engine.Use(gin.Logger())
 
-	r := router.NewRouter(authHandler, courseHandler, enrollmentHandler, authUseCase)
+	r := router.NewRouter(authHandler, courseHandler, enrollmentHandler, progressHandler, authUseCase)
 	r.Setup(engine)
 
 	// Create HTTP server
