@@ -597,9 +597,9 @@ function CoursesContent() {
                 </>
               ) : error ? (
                 <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  {/* <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-8 h-8 text-red-400" />
-                  </div>
+                  </div> */}
                   <h3 className="text-lg font-semibold text-secondary-900 mb-2">
                     Không thể tải khóa học
                   </h3>

@@ -32,4 +32,17 @@ type UserRepository interface {
 
 	// ExistsByPhoneNumber checks if a user with the given phone number exists
 	ExistsByPhoneNumber(ctx context.Context, phoneNumber string) (bool, error)
+
+	// Admin methods
+	// ListUsersWithPagination returns paginated list of users with optional filters
+	ListUsersWithPagination(ctx context.Context, page, limit int, search string, role *domain.UserRole) (*domain.PaginatedUsers, error)
+
+	// UpdateUserRole updates a user's role
+	UpdateUserRole(ctx context.Context, userID uuid.UUID, role domain.UserRole) error
+
+	// AdminUpdateUser updates user details by admin
+	AdminUpdateUser(ctx context.Context, user *domain.User) error
+
+	// ToggleUserStatus activates or deactivates a user
+	ToggleUserStatus(ctx context.Context, userID uuid.UUID, isActive bool) error
 }

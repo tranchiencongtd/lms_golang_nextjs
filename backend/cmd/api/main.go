@@ -48,6 +48,7 @@ func main() {
 	enrollmentRepo := postgres.NewEnrollmentRepository(db)
 	progressRepo := postgres.NewProgressRepository(db)
 	consultationRepo := postgres.NewConsultationRepository(db)
+	statsRepo := postgres.NewStatsRepository(db)
 
 	// Initialize use cases
 	authUseCase := usecase.NewAuthUseCase(userRepo, refreshTokenRepo, cfg.JWT, cfg.Bcrypt.Cost)
@@ -55,6 +56,8 @@ func main() {
 	enrollmentUseCase := usecase.NewEnrollmentUseCase(enrollmentRepo, activationCodeRepo, courseRepo, userRepo)
 	progressUseCase := usecase.NewProgressUseCase(progressRepo, enrollmentRepo)
 	consultationUseCase := usecase.NewConsultationUseCase(consultationRepo)
+	statsUseCase := usecase.NewStatsUseCase(statsRepo)
+	adminUserUseCase := usecase.NewAdminUserUseCase(userRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authUseCase)
@@ -62,12 +65,14 @@ func main() {
 	enrollmentHandler := handler.NewEnrollmentHandler(enrollmentUseCase)
 	progressHandler := handler.NewProgressHandler(progressUseCase)
 	consultationHandler := handler.NewConsultationHandler(consultationUseCase)
+	statsHandler := handler.NewStatsHandler(statsUseCase)
+	adminUserHandler := handler.NewAdminUserHandler(adminUserUseCase)
 
 	// Setup router
 	engine := gin.New()
 	engine.Use(gin.Logger())
 
-	r := router.NewRouter(authHandler, courseHandler, enrollmentHandler, progressHandler, consultationHandler, authUseCase)
+	r := router.NewRouter(authHandler, courseHandler, enrollmentHandler, progressHandler, consultationHandler, statsHandler, adminUserHandler, authUseCase)
 	r.Setup(engine)
 
 	// Create HTTP server

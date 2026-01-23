@@ -14,6 +14,8 @@ type Router struct {
 	enrollmentHandler   *handler.EnrollmentHandler
 	progressHandler     *handler.ProgressHandler
 	consultationHandler *handler.ConsultationHandler
+	statsHandler        *handler.StatsHandler
+	adminUserHandler    *handler.AdminUserHandler
 	authUseCase         usecase.AuthUseCase
 }
 
@@ -24,6 +26,8 @@ func NewRouter(
 	enrollmentHandler *handler.EnrollmentHandler,
 	progressHandler *handler.ProgressHandler,
 	consultationHandler *handler.ConsultationHandler,
+	statsHandler *handler.StatsHandler,
+	adminUserHandler *handler.AdminUserHandler,
 	authUseCase usecase.AuthUseCase,
 ) *Router {
 	return &Router{
@@ -32,6 +36,8 @@ func NewRouter(
 		enrollmentHandler:   enrollmentHandler,
 		progressHandler:     progressHandler,
 		consultationHandler: consultationHandler,
+		statsHandler:        statsHandler,
+		adminUserHandler:    adminUserHandler,
 		authUseCase:         authUseCase,
 	}
 }
@@ -103,6 +109,23 @@ func (r *Router) Setup(engine *gin.Engine) {
 		consultations := v1.Group("/consultations")
 		{
 			consultations.POST("", r.consultationHandler.CreateRequest)
+		}
+
+		// Admin routes - protected by AuthMiddleware + AdminMiddleware
+		admin := v1.Group("/admin")
+		admin.Use(middleware.AuthMiddleware(r.authUseCase))
+		admin.Use(middleware.AdminMiddleware())
+		{
+			// Dashboard stats
+			admin.GET("/stats", r.statsHandler.GetDashboardStats)
+
+			// User management
+			admin.GET("/users", r.adminUserHandler.ListUsers)
+			admin.POST("/users", r.adminUserHandler.CreateUser)
+			admin.PUT("/users/:id", r.adminUserHandler.UpdateUser)
+			admin.DELETE("/users/:id", r.adminUserHandler.DeleteUser)
+			admin.PUT("/users/:id/role", r.adminUserHandler.UpdateUserRole)
+			admin.PATCH("/users/:id/status", r.adminUserHandler.ToggleUserStatus)
 		}
 	}
 }
