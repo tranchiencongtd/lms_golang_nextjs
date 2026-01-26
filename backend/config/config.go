@@ -22,6 +22,7 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
+	URL      string
 	Host     string
 	Port     string
 	User     string
@@ -69,6 +70,7 @@ func Load() (*Config, error) {
 			Mode: getEnv("SERVER_MODE", "development"),
 		},
 		Database: DatabaseConfig{
+			URL:      getEnv("DATABASE_URL", ""),
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnv("DB_PORT", "5432"),
 			User:     getEnv("DB_USER", "postgres"),
@@ -97,6 +99,9 @@ func getEnv(key, defaultValue string) string {
 
 // GetDSN returns PostgreSQL connection string
 func (d *DatabaseConfig) GetDSN() string {
+	if d.URL != "" {
+		return d.URL
+	}
 	return "host=" + d.Host +
 		" port=" + d.Port +
 		" user=" + d.User +
