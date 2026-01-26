@@ -141,6 +141,17 @@ export function getYouTubeThumbnail(
 }
 
 /**
+ * Extract YouTube video ID from URL
+ * @param url - YouTube video URL
+ * @returns Video ID or null if not found
+ */
+export function getYouTubeId(url: string): string | null {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return match && match[2].length === 11 ? match[2] : null
+}
+
+/**
  * Get YouTube embed URL from video ID
  * @param videoId - YouTube video ID
  * @returns YouTube embed URL

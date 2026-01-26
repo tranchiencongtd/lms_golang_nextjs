@@ -31,9 +31,9 @@ func (r *courseRepository) Create(ctx context.Context, course *domain.Course) er
 			id, title, slug, description, short_description, instructor_id,
 			price, original_price, image_url, video_preview_url,
 			rating, total_reviews, total_students, total_lessons, duration_minutes,
-			level, grade, status, is_featured, created_at, updated_at
+			level, grade, what_you_learn, requirements, status, is_featured, created_at, updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
 	`
 
 	now := time.Now()
@@ -59,6 +59,8 @@ func (r *courseRepository) Create(ctx context.Context, course *domain.Course) er
 		course.DurationMinutes,
 		course.Level,
 		course.Grade,
+		course.WhatYouLearn,
+		course.Requirements,
 		course.Status,
 		course.IsFeatured,
 		course.CreatedAt,
@@ -189,8 +191,8 @@ func (r *courseRepository) Update(ctx context.Context, course *domain.Course) er
 		SET title = $2, slug = $3, description = $4, short_description = $5,
 		    price = $6, original_price = $7, image_url = $8, video_preview_url = $9,
 		    rating = $10, total_reviews = $11, total_students = $12, total_lessons = $13,
-		    duration_minutes = $14, level = $15, grade = $16,
-		    status = $17, is_featured = $18, updated_at = $19
+		    duration_minutes = $14, level = $15, grade = $16, what_you_learn = $17, requirements = $18,
+		    status = $19, is_featured = $20, updated_at = $21
 		WHERE id = $1
 	`
 
@@ -213,6 +215,8 @@ func (r *courseRepository) Update(ctx context.Context, course *domain.Course) er
 		course.DurationMinutes,
 		course.Level,
 		course.Grade,
+		course.WhatYouLearn,
+		course.Requirements,
 		course.Status,
 		course.IsFeatured,
 		course.UpdatedAt,

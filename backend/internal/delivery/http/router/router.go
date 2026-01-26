@@ -126,6 +126,12 @@ func (r *Router) Setup(engine *gin.Engine) {
 			admin.DELETE("/users/:id", r.adminUserHandler.DeleteUser)
 			admin.PUT("/users/:id/role", r.adminUserHandler.UpdateUserRole)
 			admin.PATCH("/users/:id/status", r.adminUserHandler.ToggleUserStatus)
+
+			// Course management
+			admin.GET("/courses", r.courseHandler.ListAdminCourses)
+			admin.POST("/courses", r.courseHandler.CreateCourse)
+			admin.PUT("/courses/:id", r.courseHandler.UpdateCourse)
+			admin.DELETE("/courses/:id", r.courseHandler.DeleteCourse)
 		}
 	}
 }

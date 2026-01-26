@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
   admin: {
     stats: '/admin/stats',
     users: '/admin/users',
+    courses: '/admin/courses',
   },
 } as const
 

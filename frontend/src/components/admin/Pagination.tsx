@@ -46,61 +46,65 @@ export default function Pagination({
     return pages
   }
 
-  if (totalPages <= 1) return null
+  // if (totalPages <= 1) return null
 
   return (
     <div className="flex items-center justify-between px-6 py-3 bg-white border-t border-gray-200">
       {/* Info */}
       <div className="text-sm text-gray-700">
-        {totalItems && itemsPerPage && (
+        {totalItems !== undefined && itemsPerPage !== undefined && (
           <span>
             Hiển thị{' '}
-            <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>
+            <span className="font-medium">
+              {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
+            </span>
             {' - '}
             <span className="font-medium">
-              {Math.min(currentPage * itemsPerPage, totalItems)}
+              {Math.min(currentPage * itemsPerPage, totalItems || 0)}
             </span>{' '}
-            trong tổng số <span className="font-medium">{totalItems}</span>
+            trong tổng số <span className="font-medium">{totalItems || 0}</span>
           </span>
         )}
       </div>
 
       {/* Pagination controls */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Trước
-        </button>
-
-        {getPageNumbers().map((page, index) => (
+      {totalPages > 1 && (
+        <div className="flex items-center gap-2">
           <button
-            key={index}
-            onClick={() => typeof page === 'number' && onPageChange(page)}
-            disabled={page === '...'}
-            className={`inline-flex items-center px-4 py-2 border rounded-md text-sm font-medium ${page === currentPage
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Trước
+          </button>
+
+          {getPageNumbers().map((page, index) => (
+            <button
+              key={index}
+              onClick={() => typeof page === 'number' && onPageChange(page)}
+              disabled={page === '...'}
+              className={`inline-flex items-center px-4 py-2 border rounded-md text-sm font-medium ${page === currentPage
                 ? 'bg-blue-600 text-white border-blue-600'
                 : page === '...'
                   ? 'border-gray-300 text-gray-700 cursor-default'
                   : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
-              }`}
-          >
-            {page}
-          </button>
-        ))}
+                }`}
+            >
+              {page}
+            </button>
+          ))}
 
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Sau
-          <ChevronRight className="w-4 h-4 ml-1" />
-        </button>
-      </div>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Sau
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

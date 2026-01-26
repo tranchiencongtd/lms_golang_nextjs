@@ -48,7 +48,7 @@ function mapApiCourseToUi(course: ApiCourse) {
   // Parse semicolon-separated strings into arrays
   const parseList = (str?: string, fallback: string[] = []): string[] => {
     if (!str || str.trim() === '') return fallback
-    return str.split(';').map(item => item.trim()).filter(item => item.length > 0)
+    return str.split('\n').map(item => item.trim()).filter(item => item.length > 0)
   }
 
   const defaultWhatYouLearn = [

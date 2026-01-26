@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/mathvn/backend/internal/domain"
@@ -39,10 +40,6 @@ func (uc *courseUseCase) ListCourses(ctx context.Context, filter *domain.CourseF
 	// Default filter: only show published courses
 	if filter == nil {
 		filter = &domain.CourseFilter{}
-	}
-	if filter.Status == nil {
-		published := domain.StatusPublished
-		filter.Status = &published
 	}
 
 	// Validate and set defaults
@@ -100,6 +97,85 @@ func (uc *courseUseCase) GetCourseWithDetails(ctx context.Context, idOrSlug stri
 	course.Sections = sections
 
 	return course, nil
+}
+
+// Admin operations
+func (uc *courseUseCase) CreateCourse(ctx context.Context, course *domain.Course) error {
+	course.ID = uuid.New()
+	course.CreatedAt = time.Now()
+	course.UpdatedAt = time.Now()
+
+	if course.Slug == "" {
+		course.Slug = generateSlug(course.Title)
+	}
+
+	if course.Status == "" {
+		course.Status = domain.StatusDraft
+	}
+
+	return uc.courseRepo.Create(ctx, course)
+}
+
+func (uc *courseUseCase) UpdateCourse(ctx context.Context, course *domain.Course) error {
+	// Get existing course to preserve immutable fields
+	existingCourse, err := uc.courseRepo.GetByID(ctx, course.ID)
+	if err != nil {
+		return err
+	}
+
+	// Preserve fields that shouldn't be updated by this API
+	course.Rating = existingCourse.Rating
+	course.TotalReviews = existingCourse.TotalReviews
+	course.TotalStudents = existingCourse.TotalStudents
+	course.TotalLessons = existingCourse.TotalLessons
+	course.CreatedAt = existingCourse.CreatedAt
+	course.InstructorID = existingCourse.InstructorID // Usually shouldn't change instructor on simple update
+
+	// If slug is empty or changed in a way that needs re-generation logic (omitted for now, assuming simple update)
+	if course.Slug == "" {
+		course.Slug = existingCourse.Slug
+	}
+
+	course.UpdatedAt = time.Now()
+	return uc.courseRepo.Update(ctx, course)
+}
+
+func (uc *courseUseCase) DeleteCourse(ctx context.Context, id uuid.UUID) error {
+	return uc.courseRepo.Delete(ctx, id)
+}
+
+// Section operations
+func (uc *courseUseCase) CreateSection(ctx context.Context, section *domain.CourseSection) error {
+	section.ID = uuid.New()
+	section.CreatedAt = time.Now()
+	section.UpdatedAt = time.Now()
+	return uc.courseRepo.CreateSection(ctx, section)
+}
+
+func (uc *courseUseCase) UpdateSection(ctx context.Context, section *domain.CourseSection) error {
+	section.UpdatedAt = time.Now()
+	return uc.courseRepo.UpdateSection(ctx, section)
+}
+
+func (uc *courseUseCase) DeleteSection(ctx context.Context, id uuid.UUID) error {
+	return uc.courseRepo.DeleteSection(ctx, id)
+}
+
+// Lesson operations
+func (uc *courseUseCase) CreateLesson(ctx context.Context, lesson *domain.CourseLesson) error {
+	lesson.ID = uuid.New()
+	lesson.CreatedAt = time.Now()
+	lesson.UpdatedAt = time.Now()
+	return uc.courseRepo.CreateLesson(ctx, lesson)
+}
+
+func (uc *courseUseCase) UpdateLesson(ctx context.Context, lesson *domain.CourseLesson) error {
+	lesson.UpdatedAt = time.Now()
+	return uc.courseRepo.UpdateLesson(ctx, lesson)
+}
+
+func (uc *courseUseCase) DeleteLesson(ctx context.Context, id uuid.UUID) error {
+	return uc.courseRepo.DeleteLesson(ctx, id)
 }
 
 // Helper function to generate slug from title

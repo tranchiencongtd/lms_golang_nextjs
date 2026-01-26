@@ -96,11 +96,20 @@ export async function getCourses(params?: CourseListParams): Promise<CourseListR
     })
   }
 
-  const response = await apiClient.get<{ success: boolean; message: string; data: CourseListResponse }>(
+  const response = await apiClient.get<any>(
     `${API_ENDPOINTS.courses.list}?${queryParams.toString()}`
   )
 
-  return response.data.data
+  // Handle difference between backend "items" and frontend "courses"
+  const data = response.data.data
+  if (data.items && !data.courses) {
+    return {
+      courses: data.items,
+      pagination: data.pagination
+    }
+  }
+
+  return data
 }
 
 /**
@@ -114,4 +123,56 @@ export async function getCourse(idOrSlug: string, includeDetails = false): Promi
   const response = await apiClient.get<{ success: boolean; message: string; data: Course }>(url)
 
   return response.data.data
+}
+
+/**
+ * Get list of courses for admin (includes all statuses)
+ */
+export async function getAdminCourses(params?: CourseListParams): Promise<CourseListResponse> {
+  const queryParams = new URLSearchParams()
+
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value))
+      }
+    })
+  }
+
+  const response = await apiClient.get<{ success: boolean; message: string; data: CourseListResponse }>(
+    `${API_ENDPOINTS.admin.courses}?${queryParams.toString()}`
+  )
+
+  return response.data.data
+}
+
+/**
+ * Create a new course
+ */
+export async function createCourse(data: Partial<Course>): Promise<Course> {
+  const response = await apiClient.post<{ success: boolean; message: string; data: Course }>(
+    API_ENDPOINTS.admin.courses,
+    data
+  )
+  return response.data.data
+}
+
+/**
+ * Update a course
+ */
+export async function updateCourse(id: string, data: Partial<Course>): Promise<Course> {
+  const response = await apiClient.put<{ success: boolean; message: string; data: Course }>(
+    `${API_ENDPOINTS.admin.courses}/${id}`,
+    data
+  )
+  return response.data.data
+}
+
+/**
+ * Delete a course
+ */
+export async function deleteCourse(id: string): Promise<void> {
+  await apiClient.delete(
+    `${API_ENDPOINTS.admin.courses}/${id}`
+  )
 }
