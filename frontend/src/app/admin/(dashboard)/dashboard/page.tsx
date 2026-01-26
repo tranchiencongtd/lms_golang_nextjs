@@ -16,7 +16,7 @@ export default function DashboardPage() {
         const data = await adminApi.getStats()
         setStats(data)
       } catch (err: any) {
-        setError('Không thể tải dữ liệu thống kê')
+        setError(err.message || 'Không thể tải dữ liệu thống kê')
       } finally {
         setIsLoading(false)
       }

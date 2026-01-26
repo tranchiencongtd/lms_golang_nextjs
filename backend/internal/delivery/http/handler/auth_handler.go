@@ -298,7 +298,7 @@ func (h *AuthHandler) handleAuthError(c *gin.Context, err error) {
 	case errors.Is(err, domain.ErrUserAlreadyExists):
 		response.Conflict(c, "Email đã được sử dụng")
 	case errors.Is(err, domain.ErrInvalidCredentials):
-		response.Unauthorized(c, "Email hoặc mật khẩu không đúng")
+		response.Unauthorized(c, "Email/SĐT hoặc mật khẩu không đúng")
 	case errors.Is(err, domain.ErrUserNotActive):
 		response.Forbidden(c, "Tài khoản đã bị vô hiệu hóa")
 	case errors.Is(err, domain.ErrInvalidEmail):
