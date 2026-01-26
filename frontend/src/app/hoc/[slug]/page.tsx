@@ -71,6 +71,7 @@ export default function LearningPage() {
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null)
 
   // Handle go back with fallback to course detail if no valid history
+  // Handle go back with fallback to My Courses (smart back)
   const handleGoBack = () => {
     if (typeof window !== 'undefined') {
       const referrer = document.referrer
@@ -80,11 +81,11 @@ export default function LearningPage() {
       if (referrer && referrer.includes(currentHost)) {
         router.back()
       } else {
-        // Otherwise, go to course detail page
-        router.push(`/khoa-hoc/${courseSlug}`)
+        // Otherwise, go to My Courses tab in Profile
+        router.push('/tai-khoan?tab=courses')
       }
     } else {
-      router.push(`/khoa-hoc/${courseSlug}`)
+      router.push('/tai-khoan?tab=courses')
     }
   }
 

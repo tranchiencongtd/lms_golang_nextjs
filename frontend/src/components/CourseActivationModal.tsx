@@ -149,8 +149,28 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
       setCode('')
     } catch (err: any) {
       setIsLoading(false)
-      // Handle API error messages
-      const errorMessage = err.response?.data?.message || err.message || 'Kích hoạt thất bại. Vui lòng thử lại.'
+      // Custom error handling
+      let errorMessage = 'Kích hoạt thất bại. Vui lòng thử lại.'
+
+      if (err.response) {
+        switch (err.response.status) {
+          case 404:
+            errorMessage = 'Mã kích hoạt không hợp lệ hoặc không tồn tại.'
+            break
+          case 409: // Conflict usually means already activated or used
+            // Try to use the specific message from backend if available, otherwise generic
+            errorMessage = err.response.data?.message || 'Bạn đã kích hoạt khoá học này rồi.'
+            break
+          case 400:
+            errorMessage = err.response.data?.message || 'Mã kích hoạt không đúng định dạng.'
+            break
+          default:
+            errorMessage = err.response.data?.message || errorMessage
+        }
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+
       setError(errorMessage)
     }
   }
@@ -233,8 +253,23 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
             id="activation-code"
             value={code}
             onChange={(e) => {
-              setCode(e.target.value.toUpperCase())
-              setError(null)
+              // Auto format: Remove non-alphanumeric, uppercase, group by 4 with dashes
+              let val = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+
+              // Limit to reasonable length (e.g., 3 blocks of 4 = 12 chars + 2 dashes = 14)
+              // But let's be flexible, just group whatever is typed.
+              if (val.length > 0) {
+                const groups = val.match(/.{1,4}/g)
+                if (groups) {
+                  val = groups.join('-')
+                }
+              }
+
+              // Max length check (optional, e.g. 14 chars for 3 groups)
+              if (val.length <= 14) {
+                setCode(val)
+                setError(null)
+              }
             }}
             required
             placeholder="Mã kích hoạt có định dạng: XXXX-XXXX-XXXX"
@@ -275,7 +310,7 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
         <ul className="space-y-1.5 text-sm text-secondary-600">
           <li>• Mã kích hoạt được cung cấp khi bạn mua khoá học</li>
           <li>• Mã kích hoạt có thể được sử dụng một lần</li>
-          <li>• Nếu gặp vấn đề, vui lòng liên hệ: <a href="tel:0973507865" className="text-primary-600 hover:underline">0973.507.865</a></li>
+          <li>• Nếu gặp vấn đề, vui lòng liên hệ: <a href="tel:0973507865" className="text-primary-600 hover:underline">0973507865</a></li>
         </ul>
       </div>
     </div>
