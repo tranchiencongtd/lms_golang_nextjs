@@ -155,3 +155,46 @@ func (uc *enrollmentUseCase) CreateActivationCode(ctx context.Context, adminID u
 		ActivationCode: activationCode,
 	}, nil
 }
+
+// ListActivationCodes lists activation codes (admin only)
+func (uc *enrollmentUseCase) ListActivationCodes(ctx context.Context, page, pageSize int, courseID *string) ([]*domain.ActivationCode, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	var cID *uuid.UUID
+	if courseID != nil && *courseID != "" {
+		id, err := uuid.Parse(*courseID)
+		if err == nil {
+			cID = &id
+		}
+	}
+
+	return uc.activationCodeRepo.List(ctx, cID, pageSize, offset)
+}
+
+// DeleteActivationCode deletes an activation code (admin only)
+func (uc *enrollmentUseCase) DeleteActivationCode(ctx context.Context, id uuid.UUID) error {
+	return uc.activationCodeRepo.Delete(ctx, id)
+}
+
+// UpdateActivationCode updates an activation code status (admin only)
+func (uc *enrollmentUseCase) UpdateActivationCode(ctx context.Context, id uuid.UUID, isActive bool) (*domain.ActivationCode, error) {
+	code, err := uc.activationCodeRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	code.IsActive = isActive
+	code.UpdatedAt = time.Now()
+
+	if err := uc.activationCodeRepo.Update(ctx, code); err != nil {
+		return nil, err
+	}
+
+	return code, nil
+}

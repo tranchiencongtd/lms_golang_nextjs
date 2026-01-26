@@ -38,8 +38,14 @@ type CreateConsultationRequest struct {
 type ConsultationRepository interface {
 	Create(ctx context.Context, req *ConsultationRequest) error
 	GetByID(ctx context.Context, id uuid.UUID) (*ConsultationRequest, error)
+	List(ctx context.Context, limit, offset int) ([]*ConsultationRequest, int, error)
+	Update(ctx context.Context, req *ConsultationRequest) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type ConsultationUseCase interface {
 	CreateRequest(ctx context.Context, req *CreateConsultationRequest) error
+	ListRequests(ctx context.Context, page, pageSize int) ([]*ConsultationRequest, int, error)
+	UpdateRequest(ctx context.Context, id uuid.UUID, status string, note string) error
+	DeleteRequest(ctx context.Context, id uuid.UUID) error
 }

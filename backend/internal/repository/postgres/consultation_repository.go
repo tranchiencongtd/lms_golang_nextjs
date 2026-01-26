@@ -86,3 +86,72 @@ func (r *consultationRepository) GetByID(ctx context.Context, id uuid.UUID) (*do
 
 	return req, nil
 }
+
+// List gets consultation requests with pagination
+func (r *consultationRepository) List(ctx context.Context, limit, offset int) ([]*domain.ConsultationRequest, int, error) {
+	query := `
+		SELECT id, student_name, parent_name, phone, birth_year, grade, academic_level, status, note, created_at, updated_at
+		FROM consultation_requests
+		ORDER BY created_at DESC
+		LIMIT $1 OFFSET $2
+	`
+
+	rows, err := r.db.Query(ctx, query, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var requests []*domain.ConsultationRequest
+	for rows.Next() {
+		var note *string
+		req := &domain.ConsultationRequest{}
+		err := rows.Scan(
+			&req.ID,
+			&req.StudentName,
+			&req.ParentName,
+			&req.Phone,
+			&req.BirthYear,
+			&req.Grade,
+			&req.AcademicLevel,
+			&req.Status,
+			&note,
+			&req.CreatedAt,
+			&req.UpdatedAt,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		if note != nil {
+			req.Note = *note
+		}
+		requests = append(requests, req)
+	}
+
+	// Count total
+	var total int
+	err = r.db.QueryRow(ctx, "SELECT COUNT(*) FROM consultation_requests").Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return requests, total, nil
+}
+
+// Update updates a consultation request
+func (r *consultationRepository) Update(ctx context.Context, req *domain.ConsultationRequest) error {
+	query := `
+		UPDATE consultation_requests
+		SET status = $1, note = $2, updated_at = $3
+		WHERE id = $4
+	`
+	_, err := r.db.Exec(ctx, query, req.Status, req.Note, req.UpdatedAt, req.ID)
+	return err
+}
+
+// Delete deletes a consultation request
+func (r *consultationRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	query := `DELETE FROM consultation_requests WHERE id = $1`
+	_, err := r.db.Exec(ctx, query, id)
+	return err
+}

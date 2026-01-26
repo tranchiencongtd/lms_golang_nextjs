@@ -21,9 +21,9 @@ type ActivateCourseResult struct {
 // CreateActivationCodeInput represents the input for creating an activation code
 type CreateActivationCodeInput struct {
 	CourseID  uuid.UUID `json:"course_id" binding:"required"`
-	MaxUses   *int      `json:"max_uses"`            // Optional: nil = unlimited
-	ExpiresAt *string   `json:"expires_at"`          // Optional: nil = never expires, format: RFC3339
-	Note      *string   `json:"note"`                // Optional note
+	MaxUses   *int      `json:"max_uses"`   // Optional: nil = unlimited
+	ExpiresAt *string   `json:"expires_at"` // Optional: nil = never expires, format: RFC3339
+	Note      *string   `json:"note"`       // Optional note
 }
 
 // CreateActivationCodeResult represents the result of creating an activation code
@@ -47,4 +47,13 @@ type EnrollmentUseCase interface {
 
 	// CreateActivationCode creates a new activation code (admin only)
 	CreateActivationCode(ctx context.Context, adminID uuid.UUID, input *CreateActivationCodeInput) (*CreateActivationCodeResult, error)
+
+	// ListActivationCodes lists activation codes (admin only)
+	ListActivationCodes(ctx context.Context, page, pageSize int, courseID *string) ([]*domain.ActivationCode, int, error)
+
+	// DeleteActivationCode deletes an activation code (admin only)
+	DeleteActivationCode(ctx context.Context, id uuid.UUID) error
+
+	// UpdateActivationCode updates an activation code status (admin only)
+	UpdateActivationCode(ctx context.Context, id uuid.UUID, isActive bool) (*domain.ActivationCode, error)
 }

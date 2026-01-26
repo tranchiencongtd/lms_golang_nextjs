@@ -202,7 +202,7 @@ export default function CoursesPage() {
         <div>
           <div className="font-medium text-gray-900 line-clamp-1" title={c.title}>{c.title}</div>
           <div className="text-sm text-gray-500 line-clamp-1">{c.slug}</div>
-          {c.is_featured && <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded border border-yellow-200 mt-1 inline-block">Nổi bật</span>}
+          {c.is_featured && <span className="text-[10px] bg-primary-100 text-primary-800 px-1.5 py-0.5 rounded border border-primary-200 mt-1 inline-block">Nổi bật</span>}
         </div>
       )
     },
@@ -259,61 +259,47 @@ export default function CoursesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-5">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-          <div className="flex flex-wrap gap-2 bg-gray-50/80 p-1.5 rounded-xl border border-gray-100">
-            {[
-              { value: '', label: 'Tất cả' },
-              { value: 'published', label: 'Công khai' },
-              { value: 'draft', label: 'Bản nháp' },
-              { value: 'archived', label: 'Lưu trữ' },
-            ].map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setStatusFilter(tab.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${statusFilter === tab.value
-                  ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
-                  }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+      <div className="flex flex-wrap gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-xs font-medium text-gray-500 mb-1">TÌM KIẾM</label>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm khóa học..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+            />
           </div>
+        </div>
 
-          <div className="flex flex-1 md:flex-none gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-72 group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-              </div>
-              <input
-                type="text"
-                placeholder="Tìm kiếm khóa học..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl leading-5 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-              />
-            </div>
+        <div className="w-[180px]">
+          <label className="block text-xs font-medium text-gray-500 mb-1">TRÌNH ĐỘ</label>
+          <select
+            value={levelFilter}
+            onChange={(e) => setLevelFilter(e.target.value)}
+            className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+          >
+            <option value="">Tất cả trình độ</option>
+            <option value="basic">Cơ bản</option>
+            <option value="intermediate">Trung cấp</option>
+            <option value="advanced">Nâng cao</option>
+          </select>
+        </div>
 
-            <div className="relative min-w-[160px]">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <BarChart className="h-4 w-4 text-gray-400" />
-              </div>
-              <select
-                value={levelFilter}
-                onChange={(e) => setLevelFilter(e.target.value)}
-                className="block w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer text-gray-600 font-medium"
-              >
-                <option value="">Trình độ</option>
-                <option value="basic">Cơ bản</option>
-                {/* <option value="intermediate">Trung cấp</option> */}
-                <option value="advanced">Nâng cao</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-400">
-                <Filter className="w-3.5 h-3.5" />
-              </div>
-            </div>
-          </div>
+        <div className="w-[180px]">
+          <label className="block text-xs font-medium text-gray-500 mb-1">TRẠNG THÁI</label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="published">Công khai</option>
+            <option value="draft">Bản nháp</option>
+            <option value="archived">Lưu trữ</option>
+          </select>
         </div>
       </div>
 

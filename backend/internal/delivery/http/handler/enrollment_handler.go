@@ -2,6 +2,8 @@ package handler
 
 import (
 	"errors"
+	"math"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -226,4 +228,147 @@ func (h *EnrollmentHandler) handleEnrollmentError(c *gin.Context, err error) {
 	default:
 		response.InternalServerError(c, "Đã xảy ra lỗi hệ thống")
 	}
+}
+
+// ListActivationCodes handles listing activation codes (admin only)
+// @Summary List activation codes
+// @Description List activation codes with optional course filter
+// @Tags enrollments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param page_size query int false "Page size"
+// @Param course_id query string false "Filter by course ID"
+// @Success 200 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Router /api/v1/enrollments/activation-codes [get]
+func (h *EnrollmentHandler) ListActivationCodes(c *gin.Context) {
+	// Check if user is admin
+	roleValue, exists := c.Get("userRole")
+	if !exists {
+		response.Forbidden(c, "Không có quyền truy cập")
+		return
+	}
+
+	role, ok := roleValue.(domain.UserRole)
+	if !ok || role != domain.RoleAdmin {
+		response.Forbidden(c, "Chỉ admin mới có quyền xem danh sách mã kích hoạt")
+		return
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	courseIDStr := c.Query("course_id")
+	var courseID *string
+	if courseIDStr != "" {
+		courseID = &courseIDStr
+	}
+
+	codes, total, err := h.enrollmentUseCase.ListActivationCodes(c.Request.Context(), page, pageSize, courseID)
+	if err != nil {
+		h.handleEnrollmentError(c, err)
+		return
+	}
+
+	response.OK(c, "Lấy danh sách mã kích hoạt thành công", gin.H{
+		"items": codes,
+		"pagination": gin.H{
+			"page":        page,
+			"page_size":   pageSize,
+			"total":       total,
+			"total_pages": int(math.Ceil(float64(total) / float64(pageSize))),
+		},
+	})
+}
+
+// DeleteActivationCode handles deleting an activation code (admin only)
+// @Summary Delete activation code
+// @Description Delete an activation code
+// @Tags enrollments
+// @Security BearerAuth
+// @Param id path string true "Activation Code ID"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Router /api/v1/enrollments/activation-codes/{id} [delete]
+func (h *EnrollmentHandler) DeleteActivationCode(c *gin.Context) {
+	// Check if user is admin
+	roleValue, exists := c.Get("userRole")
+	if !exists {
+		response.Forbidden(c, "Không có quyền truy cập")
+		return
+	}
+
+	role, ok := roleValue.(domain.UserRole)
+	if !ok || role != domain.RoleAdmin {
+		response.Forbidden(c, "Chỉ admin mới có quyền xóa mã kích hoạt")
+		return
+	}
+
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "ID không hợp lệ")
+		return
+	}
+
+	if err := h.enrollmentUseCase.DeleteActivationCode(c.Request.Context(), id); err != nil {
+		h.handleEnrollmentError(c, err)
+		return
+	}
+
+	response.OK(c, "Xóa mã kích hoạt thành công", nil)
+}
+
+// UpdateActivationCode handles updating an activation code (admin only)
+// @Summary Update activation code status
+// @Description Update an activation code status
+// @Tags enrollments
+// @Security BearerAuth
+// @Param id path string true "Activation Code ID"
+// @Param input body map[string]interface{} true "Update input {is_active: bool}"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Router /api/v1/enrollments/activation-codes/{id} [put]
+func (h *EnrollmentHandler) UpdateActivationCode(c *gin.Context) {
+	// Check if user is admin
+	roleValue, exists := c.Get("userRole")
+	if !exists {
+		response.Forbidden(c, "Không có quyền truy cập")
+		return
+	}
+
+	role, ok := roleValue.(domain.UserRole)
+	if !ok || role != domain.RoleAdmin {
+		response.Forbidden(c, "Chỉ admin mới có quyền cập nhật mã kích hoạt")
+		return
+	}
+
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "ID không hợp lệ")
+		return
+	}
+
+	var input struct {
+		IsActive bool `json:"is_active"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.BadRequest(c, "Dữ liệu không hợp lệ")
+		return
+	}
+
+	code, err := h.enrollmentUseCase.UpdateActivationCode(c.Request.Context(), id, input.IsActive)
+	if err != nil {
+		h.handleEnrollmentError(c, err)
+		return
+	}
+
+	response.OK(c, "Cập nhật trạng thái thành công", code)
 }

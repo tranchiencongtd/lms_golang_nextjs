@@ -93,6 +93,9 @@ func (r *Router) Setup(engine *gin.Engine) {
 			enrollments.GET("/my-courses", r.enrollmentHandler.GetMyCourses)
 			enrollments.GET("/check/:courseId", r.enrollmentHandler.CheckEnrollment)
 			enrollments.POST("/activation-codes", r.enrollmentHandler.CreateActivationCode)
+			enrollments.GET("/activation-codes", r.enrollmentHandler.ListActivationCodes)
+			enrollments.DELETE("/activation-codes/:id", r.enrollmentHandler.DeleteActivationCode)
+			enrollments.PUT("/activation-codes/:id", r.enrollmentHandler.UpdateActivationCode)
 		}
 
 		// Protected progress routes
@@ -142,6 +145,11 @@ func (r *Router) Setup(engine *gin.Engine) {
 			admin.POST("/lessons", r.courseHandler.CreateLesson)
 			admin.PUT("/lessons/:id", r.courseHandler.UpdateLesson)
 			admin.DELETE("/lessons/:id", r.courseHandler.DeleteLesson)
+
+			// Consultation management
+			admin.GET("/consultations", r.consultationHandler.ListRequests)
+			admin.PUT("/consultations/:id", r.consultationHandler.UpdateRequest)
+			admin.DELETE("/consultations/:id", r.consultationHandler.DeleteRequest)
 		}
 	}
 }

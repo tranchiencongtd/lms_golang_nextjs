@@ -28,7 +28,7 @@ func (r *statsRepository) GetDashboardStats() (*domain.DashboardStats, error) {
 	}
 
 	// Total Courses
-	err = r.db.QueryRow(ctx, "SELECT COUNT(*) FROM courses WHERE is_published = true").Scan(&stats.TotalCourses)
+	err = r.db.QueryRow(ctx, "SELECT COUNT(*) FROM courses WHERE status = 'published'").Scan(&stats.TotalCourses)
 	if err != nil {
 		log.Printf("StatsRepo Error: Counting courses failed: %v", err)
 		return nil, err

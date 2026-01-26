@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, BookOpen, MessageSquare, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, BookOpen, MessageSquare, LogOut, Key } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 const menuItems = [
   { title: 'Tổng quan', icon: LayoutDashboard, href: '/admin/dashboard' },
   { title: 'Người dùng', icon: Users, href: '/admin/users' },
   { title: 'Khóa học', icon: BookOpen, href: '/admin/courses' },
+  { title: 'Mã kích hoạt', icon: Key, href: '/admin/activation-codes' },
   { title: 'Tư vấn', icon: MessageSquare, href: '/admin/consultations' },
 ]
 

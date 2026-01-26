@@ -237,14 +237,14 @@ function ActivateCourseForm({ onClose }: { onClose: () => void }) {
               setError(null)
             }}
             required
-            placeholder="Nhập mã kích hoạt (VD: ABC123-XYZ789)"
+            placeholder="Mã kích hoạt có định dạng: XXXX-XXXX-XXXX"
             className="w-full px-4 py-3 border border-secondary-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
             autoFocus
             disabled={isLoading}
           />
-          <p className="mt-2 text-xs text-secondary-500">
-            Mã kích hoạt thường có định dạng: XXXX-XXXX-XXXX hoặc XXXXXXXXXX
-          </p>
+          {/* <p className="mt-2 text-xs text-secondary-500">
+            Mã kích hoạt có định dạng: XXXX-XXXX-XXXX
+          </p> */}
         </div>
 
         {/* Submit button */}

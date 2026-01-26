@@ -206,10 +206,12 @@ func (r *activationCodeRepository) List(ctx context.Context, courseID *uuid.UUID
 
 	// List query
 	query := `
-		SELECT id, code, course_id, max_uses, current_uses, expires_at, is_active, created_by, note, created_at, updated_at
-		FROM activation_codes
-		WHERE ($1::uuid IS NULL OR course_id = $1)
-		ORDER BY created_at DESC
+		SELECT ac.id, ac.code, ac.course_id, ac.max_uses, ac.current_uses, ac.expires_at, ac.is_active, ac.created_by, ac.note, ac.created_at, ac.updated_at,
+		       c.id, c.title, c.slug, c.description, c.short_description, c.image_url, c.price, c.level, c.status
+		FROM activation_codes ac
+		JOIN courses c ON ac.course_id = c.id
+		WHERE ($1::uuid IS NULL OR ac.course_id = $1)
+		ORDER BY ac.created_at DESC
 		LIMIT $2 OFFSET $3
 	`
 
@@ -222,6 +224,9 @@ func (r *activationCodeRepository) List(ctx context.Context, courseID *uuid.UUID
 	var codes []*domain.ActivationCode
 	for rows.Next() {
 		code := &domain.ActivationCode{}
+		course := &domain.Course{}
+		var courseImageURL, courseShortDesc *string
+
 		err := rows.Scan(
 			&code.ID,
 			&code.Code,
@@ -234,10 +239,27 @@ func (r *activationCodeRepository) List(ctx context.Context, courseID *uuid.UUID
 			&code.Note,
 			&code.CreatedAt,
 			&code.UpdatedAt,
+			&course.ID,
+			&course.Title,
+			&course.Slug,
+			&course.Description,
+			&courseShortDesc,
+			&courseImageURL,
+			&course.Price,
+			&course.Level,
+			&course.Status,
 		)
 		if err != nil {
 			return nil, 0, err
 		}
+
+		if courseImageURL != nil {
+			course.ImageURL = courseImageURL
+		}
+		if courseShortDesc != nil {
+			course.ShortDescription = *courseShortDesc
+		}
+		code.Course = course
 		codes = append(codes, code)
 	}
 
