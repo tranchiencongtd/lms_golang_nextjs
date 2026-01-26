@@ -104,7 +104,9 @@ export default function CoursesPage() {
   }, [page, search, statusFilter, levelFilter])
 
   // Handlers
-  const handleCreate = async () => {
+  // Handlers
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault()
     // Validate
     if (!formData.title || !formData.short_description) {
       showToast('Vui lòng nhập tên và mô tả ngắn', 'error')
@@ -126,12 +128,14 @@ export default function CoursesPage() {
     }
   }
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!editingCourse) return
     setIsSaving(true)
     try {
       await adminCoursesApi.update(editingCourse.id, formData as any)
       setEditingCourse(null)
+      setIsCreateModalOpen(false)
       fetchCourses()
       showToast('Cập nhật khóa học thành công', 'success')
     } catch (err) {
@@ -140,6 +144,7 @@ export default function CoursesPage() {
       setIsSaving(false)
     }
   }
+
 
   const handleDelete = async () => {
     if (!deleteCourse) return
