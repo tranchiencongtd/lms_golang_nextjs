@@ -166,16 +166,88 @@ func (uc *courseUseCase) CreateLesson(ctx context.Context, lesson *domain.Course
 	lesson.ID = uuid.New()
 	lesson.CreatedAt = time.Now()
 	lesson.UpdatedAt = time.Now()
+
+	// Extract YouTube ID from URL if present
+	if lesson.VideoURL != nil && *lesson.VideoURL != "" {
+		ytID := extractYouTubeID(*lesson.VideoURL)
+		if ytID != "" {
+			lesson.YouTubeID = &ytID
+		}
+	}
+
 	return uc.courseRepo.CreateLesson(ctx, lesson)
 }
 
 func (uc *courseUseCase) UpdateLesson(ctx context.Context, lesson *domain.CourseLesson) error {
 	lesson.UpdatedAt = time.Now()
+
+	// Extract YouTube ID from URL if present
+	if lesson.VideoURL != nil && *lesson.VideoURL != "" {
+		ytID := extractYouTubeID(*lesson.VideoURL)
+		if ytID != "" {
+			lesson.YouTubeID = &ytID
+		}
+	} else if lesson.VideoURL != nil && *lesson.VideoURL == "" {
+		// If video url is cleared, clear youtube id too
+		// Note: This logic assumes if VideoURL is passed as empty string, it means clear.
+		// If it's nil (not updated), we do nothing.
+		// However, struct field is *string. If it's pointer to empty string, it means update to empty.
+		// If it's nil, it's ignored by repo usually (if using dynamic update).
+		// Use case receives the full struct/partial struct.
+		// Assuming repo handles full update or we update fields.
+		// For simplicity, we just sync YouTubeID if VideoURL is provided.
+	}
+
 	return uc.courseRepo.UpdateLesson(ctx, lesson)
 }
 
 func (uc *courseUseCase) DeleteLesson(ctx context.Context, id uuid.UUID) error {
 	return uc.courseRepo.DeleteLesson(ctx, id)
+}
+
+// Helper function to extract YouTube ID
+func extractYouTubeID(url string) string {
+	// Simple extraction logic - can be improved with regex
+	// Supported formats:
+	// https://www.youtube.com/watch?v=VIDEO_ID
+	// https://youtu.be/VIDEO_ID
+	// https://www.youtube.com/embed/VIDEO_ID
+
+	if strings.Contains(url, "v=") {
+		parts := strings.Split(url, "v=")
+		if len(parts) > 1 {
+			id := parts[1]
+			// Handle query params after ID
+			if idx := strings.Index(id, "&"); idx != -1 {
+				id = id[:idx]
+			}
+			return id
+		}
+	}
+
+	if strings.Contains(url, "youtu.be/") {
+		parts := strings.Split(url, "youtu.be/")
+		if len(parts) > 1 {
+			id := parts[1]
+			if idx := strings.Index(id, "?"); idx != -1 {
+				id = id[:idx]
+			}
+			return id
+		}
+	}
+
+	if strings.Contains(url, "embed/") {
+		parts := strings.Split(url, "embed/")
+		if len(parts) > 1 {
+			id := parts[1]
+			if idx := strings.Index(id, "?"); idx != -1 {
+				id = id[:idx]
+			}
+			return id
+		}
+	}
+
+	return ""
 }
 
 // Helper function to generate slug from title

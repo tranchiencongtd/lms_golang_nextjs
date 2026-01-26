@@ -132,6 +132,16 @@ func (r *Router) Setup(engine *gin.Engine) {
 			admin.POST("/courses", r.courseHandler.CreateCourse)
 			admin.PUT("/courses/:id", r.courseHandler.UpdateCourse)
 			admin.DELETE("/courses/:id", r.courseHandler.DeleteCourse)
+
+			// Section management
+			admin.POST("/sections", r.courseHandler.CreateSection)
+			admin.PUT("/sections/:id", r.courseHandler.UpdateSection)
+			admin.DELETE("/sections/:id", r.courseHandler.DeleteSection)
+
+			// Lesson management
+			admin.POST("/lessons", r.courseHandler.CreateLesson)
+			admin.PUT("/lessons/:id", r.courseHandler.UpdateLesson)
+			admin.DELETE("/lessons/:id", r.courseHandler.DeleteLesson)
 		}
 	}
 }

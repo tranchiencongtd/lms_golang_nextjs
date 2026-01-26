@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Edit2, Plus, BookOpen, Trash2, AlertTriangle, BarChart, DollarSign, Filter, FileText, Image, Video, CheckSquare, Layers } from 'lucide-react'
+import { Search, Edit2, Plus, BookOpen, Trash2, AlertTriangle, BarChart, DollarSign, Filter, FileText, Image, Video, CheckSquare, Layers, ChevronDown } from 'lucide-react'
 import DataTable, { Column } from '@/components/admin/DataTable'
 import Pagination from '@/components/admin/Pagination'
 import Modal from '@/components/admin/Modal'
 import Toast, { ToastType } from '@/components/admin/Toast'
 import { adminCoursesApi, Course, CreateCourseInput } from '@/lib/api/admin/courses'
 import { formatPrice, getYouTubeId, getYouTubeThumbnail } from '@/lib/utils'
+import CurriculumEditor from '@/components/admin/CurriculumEditor'
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([])
@@ -44,6 +45,9 @@ export default function CoursesPage() {
   }
 
   const [formData, setFormData] = useState<CreateCourseInput>(initialForm)
+
+  // Tabs state
+  const [activeTab, setActiveTab] = useState<'basic' | 'curriculum'>('basic')
 
   // Toast
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null)
@@ -180,6 +184,8 @@ export default function CoursesPage() {
       duration_minutes: course.duration_minutes || 0,
       total_lessons: course.total_lessons || 0
     })
+    setActiveTab('basic')
+    setIsCreateModalOpen(true)
   }
 
   // Columns
@@ -320,274 +326,318 @@ export default function CoursesPage() {
 
       {/* Create/Edit Modal */}
       <Modal
-        isOpen={isCreateModalOpen || !!editingCourse}
+        isOpen={isCreateModalOpen}
         onClose={() => { setIsCreateModalOpen(false); setEditingCourse(null) }}
-        title={editingCourse ? "Chỉnh sửa khóa học" : "Tạo khóa học mới"}
-        size="xl"
-        footer={
-          <>
-            <button onClick={() => { setIsCreateModalOpen(false); setEditingCourse(null) }} className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-xl font-medium">Hủy</button>
-            <button
-              onClick={editingCourse ? handleUpdate : handleCreate}
-              disabled={isSaving}
-              className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-medium shadow-lg shadow-blue-500/30"
-            >
-              {isSaving ? "Đang lưu..." : (editingCourse ? "Lưu thay đổi" : "Tạo khóa học")}
-            </button>
-          </>
-        }
+        title={editingCourse ? 'Chỉnh sửa khóa học' : 'Tạo khóa học mới'}
+        size="4xl"
       >
-        <div className="space-y-6 p-1 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-          {/* Section: Basic Info */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <BookOpen className="w-4 h-4" /> Thông tin chung
-            </h3>
-            <div className="grid gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tên khóa học <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                  placeholder="Ví dụ: Lập trình Go cơ bản..."
-                />
-              </div>
+        {editingCourse ? (
+          <div className="mb-6 border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('basic')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'basic'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                Thông tin chung
+              </button>
+              <button
+                onClick={() => setActiveTab('curriculum')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'curriculum'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                Nội dung khóa học
+              </button>
+            </nav>
+          </div>
+        ) : null}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mô tả ngắn <span className="text-red-500">*</span></label>
-                <textarea
-                  value={formData.short_description}
-                  onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 h-20 resize-none"
-                  placeholder="Mô tả tóm tắt về khóa học (hiển thị trên thẻ khóa học)..."
-                />
-              </div>
+        {activeTab === 'basic' || !editingCourse ? (
+          <form onSubmit={editingCourse ? handleUpdate : handleCreate} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column: Basic Info */}
+              <div className="space-y-6">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Tên khóa học <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <BookOpen className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      placeholder="Nhập tên khóa học..."
+                    />
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Trình độ <span className="text-red-500">*</span></label>
-                  <select
-                    value={formData.level}
-                    onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    <option value="basic">Cơ bản</option>
-                    <option value="intermediate">Trung cấp</option>
-                    <option value="advanced">Nâng cao</option>
-                  </select>
+                {/* Price Row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                      Giá chính thức <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSign className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                        className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Giá gốc (để gạch)</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSign className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.original_price || ''}
+                        onChange={(e) => setFormData({ ...formData, original_price: Number(e.target.value) })}
+                        className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Khối lớp (Grade)</label>
-                  <input
-                    type="text"
-                    value={formData.grade || ''}
-                    onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                    placeholder="VD: 10, 11, 12, Đại học..."
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4 items-end">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Trạng thái</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    <option value="draft">Bản nháp</option>
-                    <option value="published">Công khai</option>
-                    <option value="archived">Lưu trữ</option>
-                  </select>
+                {/* Level & Status */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Trình độ</label>
+                    <div className="relative">
+                      <select
+                        value={formData.level}
+                        onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                        className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 appearance-none"
+                      >
+                        <option value="basic">Cơ bản</option>
+                        <option value="intermediate">Trung cấp</option>
+                        <option value="advanced">Nâng cao</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Trạng thái</label>
+                    <div className="relative">
+                      <select
+                        value={formData.status}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                        className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 appearance-none"
+                      >
+                        <option value="draft">Bản nháp</option>
+                        <option value="published">Công khai</option>
+                        <option value="archived">Lưu trữ</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 h-[46px]">
-                  <input
-                    type="checkbox"
-                    id="is_featured"
-                    checked={formData.is_featured}
-                    onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="is_featured" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
-                    Đánh dấu nổi bật
+
+                {/* Grade */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lớp (Grade)</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Layers className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.grade || ''}
+                      onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      placeholder="VD: 10, 11, 12, Đại học..."
+                    />
+                  </div>
+                </div>
+
+                {/* Featured Checkbox */}
+                <div className="flex items-center pt-2">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`
+                    w-5 h-5 rounded border flex items-center justify-center transition-colors
+                    ${formData.is_featured
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'bg-white border-gray-300 text-transparent group-hover:border-blue-400'}
+                  `}>
+                      <CheckSquare className="w-3.5 h-3.5" />
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={formData.is_featured}
+                      onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                      className="hidden"
+                    />
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
+                      Đánh dấu là khóa học nổi bật
+                    </span>
                   </label>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div className="border-t border-gray-100 my-4"></div>
+              {/* Right Column: Media & Description */}
+              <div className="space-y-6">
+                {/* Thumbnail URL */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Link ảnh thumbnail</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Image className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.image_url || ''}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  {formData.image_url && (
+                    <div className="mt-2 relative aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={formData.image_url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
 
-          {/* Section: Price & Media */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <DollarSign className="w-4 h-4" /> Giá & Hình ảnh
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Giá bán (VND) <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <span className="absolute left-4 top-2.5 text-gray-400 font-semibold">₫</span>
-                  <input
-                    type="number"
-                    value={formData.price || ''}
-                    onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                {/* Video Preview URL */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Link video giới thiệu (YouTube)</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Video className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.video_preview_url || ''}
+                      onChange={handleVideoUrlChange}
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      placeholder="https://youtube.com/..."
+                    />
+                  </div>
+                </div>
+
+                {/* Short Description */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mô tả ngắn</label>
+                  <textarea
+                    rows={2}
+                    maxLength={150}
+                    required
+                    value={formData.short_description}
+                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="Mô tả ngắn gọn về khóa học (tối đa 150 ký tự)..."
                   />
+                  <div className="text-right text-xs text-gray-400 mt-1">
+                    {formData.short_description?.length || 0}/150
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Giá gốc (VND) <span className="text-xs font-normal text-gray-400">(Tùy chọn)</span></label>
-                <div className="relative">
-                  <span className="absolute left-4 top-2.5 text-gray-400 font-semibold">₫</span>
-                  <input
-                    type="number"
-                    value={formData.original_price || ''}
-                    onChange={(e) => setFormData({ ...formData, original_price: Number(e.target.value) })}
-                    className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                    placeholder="Để gạch ngang giá cũ"
+            </div>
+
+            <div className="border-t border-gray-100 my-4"></div>
+
+            {/* Section: Details */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <FileText className="w-4 h-4" /> Chi tiết khóa học
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mô tả chi tiết</label>
+                  <textarea
+                    rows={6}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="Nội dung chi tiết khóa học..."
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Bạn sẽ học được gì? (mỗi ý 1 dòng)</label>
+                    <textarea
+                      rows={4}
+                      value={formData.what_you_learn}
+                      onChange={(e) => setFormData({ ...formData, what_you_learn: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      placeholder="Kiến thức A"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Yêu cầu đầu vào (mỗi ý 1 dòng)</label>
+                    <textarea
+                      rows={4}
+                      value={formData.requirements}
+                      onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      placeholder="Cần máy tính"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Link Video (Preview URL)</label>
-                <div className="relative">
-                  <Video className="absolute left-3.5 top-2.5 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.video_preview_url || ''}
-                    onChange={handleVideoUrlChange}
-                    className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                    placeholder="https://youtube.com/..."
-                  />
-                </div>
-                {formData.video_preview_url && getYouTubeId(formData.video_preview_url) && (
-                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                    <CheckSquare className="w-3 h-3" /> Đã nhận diện video YouTube
-                  </p>
+            {/* Modal Actions */}
+            <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <CheckSquare className="w-4 h-4" />
+                    {editingCourse ? 'Lưu thay đổi' : 'Tạo khóa học'}
+                  </>
                 )}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Link ảnh bìa (Image URL)</label>
-                <div className="relative">
-                  <Image className="absolute left-3.5 top-2.5 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.image_url || ''}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                    placeholder="https://..."
-                  />
-                </div>
-                {formData.image_url && <p className="text-xs text-gray-500 mt-1 truncate">Preview: {formData.image_url}</p>}
-              </div>
+              </button>
             </div>
+          </form>
+        ) : (
+          <div className="mt-4">
+            {editingCourse && <CurriculumEditor courseId={editingCourse.id} />}
           </div>
-
-          <div className="border-t border-gray-100 my-4"></div>
-
-          {/* Section: Stats (Optional) */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <BarChart className="w-4 h-4" /> Thông số thống kê (Tùy chọn)
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Rating (0-5)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="5"
-                  value={formData.rating || ''}
-                  onChange={(e) => setFormData({ ...formData, rating: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lượt đánh giá</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.total_reviews || ''}
-                  onChange={(e) => setFormData({ ...formData, total_reviews: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Học viên</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.total_students || ''}
-                  onChange={(e) => setFormData({ ...formData, total_students: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Thời lượng (phút)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.duration_minutes || ''}
-                  onChange={(e) => setFormData({ ...formData, duration_minutes: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-100 my-4"></div>
-
-          {/* Section: Details */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Nội dung chi tiết
-            </h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mô tả chi tiết</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 h-32"
-                  placeholder="Nội dung đầy đủ của khóa học..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
-                  <CheckSquare className="w-4 h-4 text-green-600" /> Bạn sẽ học được gì?
-                </label>
-                <textarea
-                  value={formData.what_you_learn || ''}
-                  onChange={(e) => setFormData({ ...formData, what_you_learn: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 h-24"
-                  placeholder="Mỗi dòng một ý..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-purple-600" /> Yêu cầu đầu vào
-                </label>
-                <textarea
-                  value={formData.requirements || ''}
-                  onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 h-20"
-                  placeholder="Kiến thức cần có trước khi học..."
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </Modal>
 
       {/* Delete Modal */}

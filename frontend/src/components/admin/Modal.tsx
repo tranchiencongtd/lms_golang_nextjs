@@ -8,7 +8,7 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: ReactNode
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'full'
   footer?: ReactNode
 }
 
@@ -42,7 +42,11 @@ export default function Modal({
     sm: 'max-w-md',
     md: 'max-w-lg',
     lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+    xl: 'max-w-4xl', // Existing override
+    '2xl': 'max-w-5xl',
+    '3xl': 'max-w-6xl',
+    '4xl': 'max-w-7xl',
+    'full': 'max-w-[95vw]',
   }
 
   return (
