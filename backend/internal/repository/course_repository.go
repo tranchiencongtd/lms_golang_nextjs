@@ -24,6 +24,9 @@ type CourseRepository interface {
 	// Delete deletes a course by ID
 	Delete(ctx context.Context, id uuid.UUID) error
 
+	// RecalculateCourseStats recalculates and updates course statistics (total lessons, duration)
+	RecalculateCourseStats(ctx context.Context, courseID uuid.UUID) error
+
 	// List retrieves courses with filters, pagination, and sorting
 	List(ctx context.Context, filter *domain.CourseFilter, sort domain.CourseSort, limit, offset int) ([]*domain.Course, int, error)
 

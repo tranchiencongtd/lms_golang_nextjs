@@ -175,7 +175,13 @@ func (uc *courseUseCase) CreateLesson(ctx context.Context, lesson *domain.Course
 		}
 	}
 
-	return uc.courseRepo.CreateLesson(ctx, lesson)
+	err := uc.courseRepo.CreateLesson(ctx, lesson)
+	if err != nil {
+		return err
+	}
+
+	// Recalculate course stats
+	return uc.courseRepo.RecalculateCourseStats(ctx, lesson.CourseID)
 }
 
 func (uc *courseUseCase) UpdateLesson(ctx context.Context, lesson *domain.CourseLesson) error {
@@ -189,20 +195,30 @@ func (uc *courseUseCase) UpdateLesson(ctx context.Context, lesson *domain.Course
 		}
 	} else if lesson.VideoURL != nil && *lesson.VideoURL == "" {
 		// If video url is cleared, clear youtube id too
-		// Note: This logic assumes if VideoURL is passed as empty string, it means clear.
-		// If it's nil (not updated), we do nothing.
-		// However, struct field is *string. If it's pointer to empty string, it means update to empty.
-		// If it's nil, it's ignored by repo usually (if using dynamic update).
-		// Use case receives the full struct/partial struct.
-		// Assuming repo handles full update or we update fields.
-		// For simplicity, we just sync YouTubeID if VideoURL is provided.
 	}
 
-	return uc.courseRepo.UpdateLesson(ctx, lesson)
+	err := uc.courseRepo.UpdateLesson(ctx, lesson)
+	if err != nil {
+		return err
+	}
+
+	// Recalculate course stats
+	return uc.courseRepo.RecalculateCourseStats(ctx, lesson.CourseID)
 }
 
 func (uc *courseUseCase) DeleteLesson(ctx context.Context, id uuid.UUID) error {
-	return uc.courseRepo.DeleteLesson(ctx, id)
+	// Get lesson to find course_id
+	lesson, err := uc.courseRepo.GetLessonByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	err = uc.courseRepo.DeleteLesson(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return uc.courseRepo.RecalculateCourseStats(ctx, lesson.CourseID)
 }
 
 // Helper function to extract YouTube ID

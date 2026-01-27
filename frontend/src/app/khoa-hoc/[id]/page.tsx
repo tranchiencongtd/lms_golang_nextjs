@@ -624,7 +624,7 @@ export default function CourseDetailPage() {
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-primary-100 to-primary-200" />
                     )}
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
                     <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white transition-all z-10">
                       <Play className="w-7 h-7 text-primary-600 ml-1" />
                     </div>
