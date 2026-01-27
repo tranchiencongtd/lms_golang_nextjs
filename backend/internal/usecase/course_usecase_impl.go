@@ -124,9 +124,9 @@ func (uc *courseUseCase) UpdateCourse(ctx context.Context, course *domain.Course
 	}
 
 	// Preserve fields that shouldn't be updated by this API
-	course.Rating = existingCourse.Rating
-	course.TotalReviews = existingCourse.TotalReviews
-	course.TotalStudents = existingCourse.TotalStudents
+	// course.Rating = existingCourse.Rating             <-- Allow checking/updating manually
+	// course.TotalReviews = existingCourse.TotalReviews   <-- Allow checking/updating manually
+	// course.TotalStudents = existingCourse.TotalStudents <-- Allow checking/updating manually
 	course.TotalLessons = existingCourse.TotalLessons
 	course.CreatedAt = existingCourse.CreatedAt
 	course.InstructorID = existingCourse.InstructorID // Usually shouldn't change instructor on simple update

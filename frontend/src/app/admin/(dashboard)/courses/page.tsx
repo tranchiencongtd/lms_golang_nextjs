@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Edit2, Plus, BookOpen, Trash2, AlertTriangle, BarChart, DollarSign, Filter, FileText, Image, Video, CheckSquare, Layers, ChevronDown } from 'lucide-react'
+import { Search, Edit2, Plus, BookOpen, Trash2, AlertTriangle, BarChart, DollarSign, Filter, FileText, Image, Video, CheckSquare, Layers, ChevronDown, Star } from 'lucide-react'
 import DataTable, { Column } from '@/components/admin/DataTable'
 import Pagination from '@/components/admin/Pagination'
 import Modal from '@/components/admin/Modal'
@@ -379,16 +379,13 @@ export default function CoursesPage() {
                       Giá chính thức <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
-                      </div>
                       <input
                         type="number"
                         required
                         min="0"
-                        value={formData.price}
+                        value={formData.price || ''}
                         onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                        className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                        className="w-full pl-3 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
                         placeholder="0"
                       />
                     </div>
@@ -396,16 +393,64 @@ export default function CoursesPage() {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Giá gốc (để gạch)</label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
-                      </div>
                       <input
                         type="number"
                         min="0"
                         value={formData.original_price || ''}
                         onChange={(e) => setFormData({ ...formData, original_price: Number(e.target.value) })}
-                        className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                        className="w-full pl-3 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
                         placeholder="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Statistics (Admin only) */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Số học viên (Fake)</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <BarChart className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.total_students || 0}
+                        onChange={(e) => setFormData({ ...formData, total_students: Number(e.target.value) })}
+                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tổng đánh giá (Fake)</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <CheckSquare className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.total_reviews || 0}
+                        onChange={(e) => setFormData({ ...formData, total_reviews: Number(e.target.value) })}
+                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Rating (Fake)</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Star className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.rating || 0}
+                        onChange={(e) => setFormData({ ...formData, rating: Number(e.target.value) })}
+                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
                       />
                     </div>
                   </div>
@@ -456,13 +501,19 @@ export default function CoursesPage() {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Layers className="h-4 w-4 text-gray-400" />
                     </div>
-                    <input
-                      type="text"
+                    <select
                       value={formData.grade || ''}
                       onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20"
-                      placeholder="VD: 10, 11, 12, Đại học..."
-                    />
+                      className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 appearance-none"
+                    >
+                      <option value="">Chọn lớp</option>
+                      {[...Array(12)].map((_, i) => (
+                        <option key={i + 1} value={(i + 1).toString()}>Lớp {i + 1}</option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
                   </div>
                 </div>
 

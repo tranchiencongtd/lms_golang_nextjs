@@ -232,15 +232,15 @@ export default function CurriculumEditor({ courseId }: CurriculumEditorProps) {
 
         {sections.map((section) => (
           <div key={section.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <GripVertical className="w-4 h-4 text-gray-400 cursor-move" />
-                <div>
-                  <h4 className="font-semibold text-gray-900">{section.title}</h4>
-                  {section.description && <p className="text-sm text-gray-500">{section.description}</p>}
+            <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200 gap-4">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <GripVertical className="w-4 h-4 text-gray-400 cursor-move flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-semibold text-gray-900 truncate" title={section.title}>{section.title}</h4>
+                  {section.description && <p className="text-sm text-gray-500 truncate" title={section.description}>{section.description}</p>}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleOpenEditSection(section)}
                   className="p-1.5 text-gray-500 hover:text-blue-600 rounded-md hover:bg-blue-50"
@@ -255,7 +255,7 @@ export default function CurriculumEditor({ courseId }: CurriculumEditorProps) {
                 </button>
                 <button
                   onClick={() => handleOpenCreateLesson(section.id)}
-                  className="ml-2 flex items-center gap-1 px-3 py-1.5 text-sm bg-white border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+                  className="ml-2 flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 border border-gray-300 text-white rounded hover:bg-blue-700"
                 >
                   <Plus className="w-3 h-3" /> Bài học
                 </button>
@@ -267,17 +267,17 @@ export default function CurriculumEditor({ courseId }: CurriculumEditorProps) {
                 <div className="px-4 py-3 text-sm text-gray-400 italic">Chưa có bài học nào</div>
               )}
               {section.lessons?.map((lesson) => (
-                <div key={lesson.id} className="px-4 py-3 flex items-center justify-between hover:bg-gray-50 group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 flex justify-center text-gray-400">
+                <div key={lesson.id} className="px-4 py-3 flex items-center justify-between hover:bg-gray-50 group gap-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-8 flex justify-center text-gray-400 flex-shrink-0">
                       {lesson.video_url ? <Video className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                     </div>
-                    <div>
-                      <h5 className="text-sm font-medium text-gray-900">{lesson.title}</h5>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
-                        <span>{lesson.duration_minutes} phút</span>
+                    <div className="min-w-0 flex-1">
+                      <h5 className="text-sm font-medium text-gray-900 truncate" title={lesson.title}>{lesson.title}</h5>
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                        <span className="flex-shrink-0">{lesson.duration_minutes} phút</span>
                         {lesson.is_preview && (
-                          <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase">Học thử</span>
+                          <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase flex-shrink-0">Học thử</span>
                         )}
                       </div>
                     </div>
@@ -377,7 +377,7 @@ export default function CurriculumEditor({ courseId }: CurriculumEditorProps) {
                   <input
                     type="number"
                     min="0"
-                    value={lessonForm.duration_minutes}
+                    value={lessonForm.duration_minutes || ''}
                     onChange={e => setLessonForm({ ...lessonForm, duration_minutes: Number(e.target.value) })}
                     className="w-full border rounded-lg p-2"
                   />

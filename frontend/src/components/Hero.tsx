@@ -98,7 +98,7 @@ export default function Hero() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Tìm khóa học, chủ đề..."
+                placeholder="Tìm khóa học"
                 className="w-full pl-12 pr-24 py-4 bg-secondary-50 border border-secondary-200 text-secondary-700 placeholder-secondary-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
               />
               <button

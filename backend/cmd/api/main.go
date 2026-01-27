@@ -87,7 +87,7 @@ func main() {
 	// Start server in a goroutine
 	go func() {
 		log.Printf("Server starting on port %s", cfg.Server.Port)
-		log.Printf("API docs: http://localhost:%s/api/v1", cfg.Server.Port)
+		// log.Printf("API docs: http://localhost:%s/api/v1", cfg.Server.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}
