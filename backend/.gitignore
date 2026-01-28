@@ -27,6 +27,7 @@ coverage.html
 # Environment
 .env
 .env.local
+.env.dev
 
 # Logs
 *.log
