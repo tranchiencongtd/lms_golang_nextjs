@@ -54,8 +54,7 @@ export const metadata: Metadata = {
     images: ['https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/seo_cover.png'], // Reuse OG image
   },
   icons: {
-    icon: 'https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/icon.ico',
-    apple: 'https://raw.githubusercontent.com/tranchiencongtd/lms/3b769efd407937d27b911283104c4173f0666752/public/icon.svg',
+    icon: 'https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/logo_thaychien.ico',
   },
 }
 
