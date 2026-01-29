@@ -51,7 +51,7 @@ export default function Hero() {
           <div>
             {/* Heading */}
             <h1 className="text-lg sm:text-5xl lg:text-5xl font-heading font-bold leading-tight text-white">
-              Học Toán Online
+              CLB Toán Thầy Chiến
             </h1>
 
             {/* Subheading */}
