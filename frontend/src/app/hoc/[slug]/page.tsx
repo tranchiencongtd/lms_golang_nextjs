@@ -349,7 +349,7 @@ export default function LearningPage() {
             {currentLesson?.youtubeId ? (
               <iframe
                 className="absolute inset-0 w-full h-full"
-                src={`${getYouTubeEmbedUrl(currentLesson.youtubeId)}?autoplay=0&rel=0&modestbranding=1`}
+                src={getYouTubeEmbedUrl(currentLesson.youtubeId, { autoplay: false })}
                 title={currentLesson.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

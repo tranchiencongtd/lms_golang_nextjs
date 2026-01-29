@@ -303,7 +303,7 @@ export default function CourseDetailPage() {
                   {currentPreviewLesson?.youtubeId ? (
                     <iframe
                       className="w-full h-full"
-                      src={`${getYouTubeEmbedUrl(currentPreviewLesson.youtubeId)}?autoplay=1&rel=0`}
+                      src={getYouTubeEmbedUrl(currentPreviewLesson.youtubeId, { autoplay: true })}
                       title={currentPreviewLesson.title}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -655,7 +655,7 @@ export default function CourseDetailPage() {
                     </Link>
                   ) : (
                     <button className="w-full btn-primary py-3.5 text-base font-semibold shadow-md hover:shadow-lg transition-shadow">
-                      Mua ngay
+                      Liên hệ ngay
                     </button>
                   )}
 
@@ -707,7 +707,7 @@ export default function CourseDetailPage() {
             </Link>
           ) : (
             <button className="btn-primary py-3 px-6 font-semibold">
-              Đăng ký ngay
+              Liên hệ ngay
             </button>
           )}
         </div>

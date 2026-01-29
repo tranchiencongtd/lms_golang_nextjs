@@ -156,8 +156,26 @@ export function getYouTubeId(url: string): string | null {
  * @param videoId - YouTube video ID
  * @returns YouTube embed URL
  */
-export function getYouTubeEmbedUrl(videoId: string): string {
-  return `https://www.youtube.com/embed/${videoId}`
+export function getYouTubeEmbedUrl(
+  videoId: string,
+  options: { autoplay?: boolean; muted?: boolean; start?: number } = {}
+): string {
+  const params = new URLSearchParams()
+  // rel=0: Show related videos from the same channel only (best effort to hide recommendations)
+  params.append('rel', '0')
+  // modestbranding=1: Minimize YouTube branding
+  params.append('modestbranding', '1')
+  // iv_load_policy=3: Hide video annotations
+  params.append('iv_load_policy', '3')
+
+  // Thêm tham số để chặn đề xuất video từ kênh khác
+  params.append('playlist', videoId)
+
+  if (options.autoplay) params.append('autoplay', '1')
+  if (options.muted) params.append('mute', '1')
+  if (options.start) params.append('start', options.start.toString())
+
+  return `https://www.youtube.com/embed/${videoId}?${params.toString()}`
 }
 
 /**

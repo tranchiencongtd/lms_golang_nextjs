@@ -45,7 +45,10 @@ type BcryptConfig struct {
 // Load loads configuration from environment variables
 func Load() (*Config, error) {
 	// Load .env file if exists
-	_ = godotenv.Load(".env.dev")
+	if os.Getenv("SERVER_MODE") != "production" {
+    _ = godotenv.Load(".env.dev")
+	}
+	
 
 	// Access token expiry (default: 15 minutes)
 	accessTokenExpiryMinutes, err := strconv.Atoi(getEnv("JWT_ACCESS_TOKEN_EXPIRY_MINUTES", "15"))
