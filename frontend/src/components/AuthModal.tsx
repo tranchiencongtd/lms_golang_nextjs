@@ -67,7 +67,12 @@ function LoginForm() {
     setIsLoading(true)
 
     try {
-      await login(formData.emailOrPhone, formData.password)
+      // Race the login against a timeout to prevent infinite spinning
+      await Promise.race([
+        login(formData.emailOrPhone, formData.password),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), 10000))
+      ])
+
       closeModal()
       // Reset form
       setFormData({ emailOrPhone: '', password: '' })
@@ -131,8 +136,9 @@ function LoginForm() {
               value={formData.emailOrPhone}
               onChange={handleChange}
               required
+              disabled={isLoading}
               placeholder="Nhập email hoặc số điện thoại"
-              className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+              className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all disabled:bg-gray-100 disabled:text-gray-400"
             />
           </div>
         </div>
@@ -151,13 +157,15 @@ function LoginForm() {
               value={formData.password}
               onChange={handleChange}
               required
+              disabled={isLoading}
               placeholder="Nhập mật khẩu"
-              className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+              className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all disabled:bg-gray-100 disabled:text-gray-400"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              disabled={isLoading}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
