@@ -1,7 +1,13 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Shield } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+
+export const metadata: Metadata = {
+  title: 'Chính sách bảo mật',
+  description: 'Cam kết bảo mật thông tin cá nhân của Thầy Trần Chiến. Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu của bạn.',
+}
 
 export default function PrivacyPolicyPage() {
   return (
@@ -24,7 +30,7 @@ export default function PrivacyPolicyPage() {
 
           <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 mb-8">
             <p className="text-primary-800 text-sm">
-              <strong>Cam kết của chúng tôi:</strong> MathVN cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn.
+              <strong>Cam kết của chúng tôi:</strong> Thầy Trần Chiến cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn.
             </p>
           </div>
 
@@ -47,14 +53,14 @@ export default function PrivacyPolicyPage() {
               3. Chia sẻ thông tin
             </h2>
             <p className="text-secondary-600 mb-4 text-justify">
-              MathVN cam kết không bán hoặc cho thuê thông tin cá nhân của bạn cho bất kỳ bên thứ ba nào. Chúng tôi chỉ chia sẻ dữ liệu trong những trường hợp thực sự cần thiết, chẳng hạn như cung cấp thông tin cho giáo viên để hỗ trợ học tập, chia sẻ với phụ huynh để theo dõi tiến độ của con em, hoặc hợp tác với các đối tác thanh toán uy tín để xử lý giao dịch. Trong một số tình huống đặc biệt, chúng tôi có thể phải cung cấp thông tin theo yêu cầu của cơ quan pháp luật có thẩm quyền.
+              Thầy Trần Chiến cam kết không bán hoặc cho thuê thông tin cá nhân của bạn cho bất kỳ bên thứ ba nào. Chúng tôi chỉ chia sẻ dữ liệu trong những trường hợp thực sự cần thiết, chẳng hạn như cung cấp thông tin cho giáo viên để hỗ trợ học tập, chia sẻ với phụ huynh để theo dõi tiến độ của con em, hoặc hợp tác với các đối tác thanh toán uy tín để xử lý giao dịch. Trong một số tình huống đặc biệt, chúng tôi có thể phải cung cấp thông tin theo yêu cầu của cơ quan pháp luật có thẩm quyền.
             </p>
 
             <h2 className="text-xl font-heading font-semibold text-secondary-900 mt-8 mb-4">
               4. Bảo mật thông tin
             </h2>
             <p className="text-secondary-600 mb-4 text-justify">
-              An toàn dữ liệu là ưu tiên hàng đầu tại MathVN. Chúng tôi áp dụng các tiêu chuẩn bảo mật công nghệ cao như mã hóa SSL/TLS cho toàn bộ kết nối, lưu trữ mật khẩu dưới dạng mã hóa một chiều và thực hiện sao lưu dữ liệu định kỳ. Hệ thống của chúng tôi cũng được giám sát liên tục để ngăn chặn các nỗ lực truy cập trái phép và các mối đe dọa an ninh tiềm ẩn.
+              An toàn dữ liệu là ưu tiên hàng đầu tại Thầy Trần Chiến. Chúng tôi áp dụng các tiêu chuẩn bảo mật công nghệ cao như mã hóa SSL/TLS cho toàn bộ kết nối, lưu trữ mật khẩu dưới dạng mã hóa một chiều và thực hiện sao lưu dữ liệu định kỳ. Hệ thống của chúng tôi cũng được giám sát liên tục để ngăn chặn các nỗ lực truy cập trái phép và các mối đe dọa an ninh tiềm ẩn.
             </p>
 
             <h2 className="text-xl font-heading font-semibold text-secondary-900 mt-8 mb-4">

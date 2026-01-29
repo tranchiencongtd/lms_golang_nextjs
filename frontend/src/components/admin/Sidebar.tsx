@@ -22,10 +22,11 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-            <span className="text-white font-bold text-lg">M</span>
-          </div>
-          <span className="text-lg font-semibold text-gray-900">MathVN Admin</span>
+          <img
+            src="https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/logo_thaytranchienedu.png"
+            alt="Thầy Trần Chiến"
+            className="h-10 w-auto object-contain"
+          />
         </div>
       </div>
 

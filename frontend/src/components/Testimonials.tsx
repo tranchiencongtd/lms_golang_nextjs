@@ -9,7 +9,7 @@ const testimonials = [
     name: 'Nguyễn Minh Anh',
     role: 'Học sinh lớp 12',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face',
-    content: 'Nhờ MathVN, em đã đạt 9.2 điểm môn Toán trong kỳ thi THPT Quốc gia. Các bài giảng rất dễ hiểu và có nhiều mẹo hay giúp em giải nhanh hơn.',
+    content: 'Nhờ Thầy Trần Chiến, em đã đạt 9.2 điểm môn Toán trong kỳ thi THPT Quốc gia. Các bài giảng rất dễ hiểu và có nhiều mẹo hay giúp em giải nhanh hơn.',
     program: 'Khóa luyện thi THPT Quốc Gia 2024',
     outcome: 'Đạt 9.2 điểm Toán - Đỗ ĐH Bách Khoa Hà Nội',
   },
@@ -18,7 +18,7 @@ const testimonials = [
     name: 'Trần Văn Hùng',
     role: 'Học sinh lớp 10',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-    content: 'Em từng sợ môn Toán nhưng sau khi học với MathVN, em đã yêu thích và đạt điểm cao nhất lớp. Thầy cô giảng rất nhiệt tình và kiên nhẫn.',
+    content: 'Em từng sợ môn Toán nhưng sau khi học với Thầy Trần Chiến, em đã yêu thích và đạt điểm cao nhất lớp. Thầy cô giảng rất nhiệt tình và kiên nhẫn.',
     program: 'Toán lớp 10 - Chương trình cơ bản',
     outcome: 'Từ học sinh trung bình lên top 5 lớp',
   },
@@ -49,12 +49,12 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="section-heading">
-            học sinh nói gì về MathVN
+          <span className="text-secondary-600 font-semibold tracking-wider uppercase text-sm">
+            học sinh nói gì về Thầy Trần Chiến
+          </span>
+          <h2 className="text-3xl font-heading font-bold text-secondary-900 mt-2">
+            Hơn 50,000 học sinh và phụ huynh đã tin tưởng lựa chọn Thầy Trần Chiến.
           </h2>
-          <p className="section-subheading max-w-2xl mx-auto">
-            Hơn 50,000 học sinh và phụ huynh đã tin tưởng lựa chọn MathVN.
-          </p>
         </div>
 
         {/* Testimonials Carousel */}
@@ -119,11 +119,10 @@ export default function Testimonials() {
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
-                    index === currentIndex
-                      ? 'bg-primary-500'
-                      : 'bg-secondary-300 hover:bg-secondary-400'
-                  }`}
+                  className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${index === currentIndex
+                    ? 'bg-primary-500'
+                    : 'bg-secondary-300 hover:bg-secondary-400'
+                    }`}
                   aria-label={`Xem đánh giá ${index + 1}`}
                 />
               ))}

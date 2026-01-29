@@ -12,7 +12,7 @@ function toCourseCardModel(course: ApiCourse): CourseCardModel {
   return {
     slug: course.slug || course.id,
     title: course.title,
-    instructor: course.instructor?.full_name || 'Giảng viên MathVN',
+    instructor: course.instructor?.full_name || 'Thầy Trần Chiến',
     rating: course.rating || 0,
     reviews: course.total_reviews || 0,
     students: course.total_students || 0,
@@ -62,7 +62,7 @@ export default function Courses() {
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-secondary-900">
               Khóa học phổ biến nhất
             </h2>
-           
+
           </div>
           <p className="text-lg text-secondary-600 max-w-2xl">
             Các khóa học được học sinh đánh giá cao và tin dùng nhất.
@@ -72,12 +72,12 @@ export default function Courses() {
         {/* Courses Grid */}
         <div>
           <div className='flex justify-end mb-3 group'>
-            <Link 
-                  href="/khoa-hoc" 
-                  className=" text-left hidden md:inline-flex items-center gap-2 text-primary-600 font-semibold group-hover:text-primary-700 transition-colors"
-                >
-                  Xem tất cả
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <Link
+              href="/khoa-hoc"
+              className=" text-left hidden md:inline-flex items-center gap-2 text-primary-600 font-semibold group-hover:text-primary-700 transition-colors"
+            >
+              Xem tất cả
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
@@ -103,11 +103,11 @@ export default function Courses() {
             </div>
           )}
         </div>
-       
+
         {/* Mobile View All */}
         <div className="md:hidden text-center mt-10">
-          <Link 
-            href="/khoa-hoc" 
+          <Link
+            href="/khoa-hoc"
             className="inline-flex items-center gap-2 px-6 py-3 border-2 border-secondary-300 text-secondary-700 font-semibold rounded-lg hover:border-secondary-400 hover:bg-secondary-50 transition-colors"
           >
             Xem tất cả khóa học

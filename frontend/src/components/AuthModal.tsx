@@ -59,6 +59,8 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -78,7 +80,7 @@ function LoginForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
-    setError(null) // Clear error on input change
+    setError(null)
   }
 
   return (
@@ -86,10 +88,11 @@ function LoginForm() {
       {/* Logo */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center gap-2 mb-4">
-          <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">∑</span>
-          </div>
-          <span className="text-xl font-heading font-bold text-secondary-900">MathVN</span>
+          <img
+            src="https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/logo_thaytranchienedu.png"
+            alt="Thầy Trần Chiến"
+            className="h-12 w-auto object-contain"
+          />
         </div>
         <h2 className="text-2xl font-heading font-bold text-secondary-900 mb-1">
           Đăng nhập
@@ -100,7 +103,7 @@ function LoginForm() {
             onClick={() => switchView('register')}
             className="text-primary-600 font-medium hover:underline"
           >
-            Liên hệ ngay
+            Đăng ký ngay
           </button>
         </p>
       </div>
@@ -136,18 +139,9 @@ function LoginForm() {
 
         {/* Password */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label htmlFor="login-password" className="block text-sm font-medium text-secondary-700">
-              Mật khẩu
-            </label>
-            <button
-              type="button"
-              onClick={() => switchView('forgot-password')}
-              className="text-sm text-primary-600 hover:underline"
-            >
-              Quên mật khẩu?
-            </button>
-          </div>
+          <label htmlFor="login-password" className="block text-sm font-medium text-secondary-700 mb-1.5">
+            Mật khẩu
+          </label>
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -170,16 +164,25 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Remember me */}
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="remember"
-            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-          />
-          <label htmlFor="remember" className="ml-2 text-sm text-secondary-600">
-            Ghi nhớ đăng nhập
-          </label>
+        {/* Remember me & Forgot Password */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="remember"
+              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+            />
+            <label htmlFor="remember" className="ml-2 text-sm text-secondary-600">
+              Ghi nhớ đăng nhập
+            </label>
+          </div>
+          <button
+            type="button"
+            onClick={() => switchView('forgot-password')}
+            className="text-sm text-primary-600 hover:underline"
+          >
+            Quên mật khẩu?
+          </button>
         </div>
 
         {/* Submit */}
@@ -317,10 +320,11 @@ function RegisterForm() {
       {/* Header */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center gap-2 mb-4">
-          <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">∑</span>
-          </div>
-          <span className="text-xl font-heading font-bold text-secondary-900">MathVN</span>
+          <img
+            src="https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/logo_thaytranchienedu.png"
+            alt="Thầy Trần Chiến"
+            className="h-12 w-auto object-contain"
+          />
         </div>
         <h2 className="text-2xl font-heading font-bold text-secondary-900 mb-1">
           Tạo tài khoản

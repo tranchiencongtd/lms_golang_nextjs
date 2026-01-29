@@ -1,4 +1,4 @@
-# Air configuration for MathVN backend
+# Air configuration for backend
 # Docs: https://github.com/cosmtrek/air
 
 root = "."           # Project root (backend)

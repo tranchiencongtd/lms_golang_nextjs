@@ -66,7 +66,7 @@ function mapApiCourseToUi(course: ApiCourse) {
   return {
     id: course.id,
     title: course.title,
-    instructor: course.instructor?.full_name || 'Giảng viên MathVN',
+    instructor: course.instructor?.full_name || 'Thầy Trần Chiến',
     instructorTitle: 'Giảng viên',
     instructorAvatar: course.instructor?.avatar || '',
     rating: course.rating || 0,

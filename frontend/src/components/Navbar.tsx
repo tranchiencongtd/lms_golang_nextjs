@@ -79,13 +79,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo  + Explore */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-1">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 cursor-pointer">
-              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">∑</span>
-              </div>
-              <span className="text-xl font-heading font-bold text-primary-600">MathVN</span>
+              <img
+                src="https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/logo_thaytranchienedu.png"
+                alt="Thầy Trần Chiến"
+                className="h-14 w-auto object-contain"
+              />
             </Link>
 
 

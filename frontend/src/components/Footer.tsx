@@ -22,7 +22,7 @@ const footerLinks = {
     { label: 'Chính sách bảo mật', href: '/chinh-sach' },
   ],
   about: [
-    { label: 'Về MathVN', href: '/ve-chung-toi' },
+    { label: 'Về TCmath', href: '/ve-chung-toi' },
     { label: 'Đội ngũ giáo viên', href: '/giao-vien' },
   ],
 }
@@ -95,11 +95,11 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-secondary-400">
                 <Phone className="w-4 h-4" />
-                <span>0973507865</span>
+                <span>0905152865</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-secondary-400">
                 <Mail className="w-4 h-4" />
-                <span>hotro@mathvn.edu.vn</span>
+                <span>hotro@thaytranchienedu.vn</span>
               </li>
             </ul>
             <div className="mt-4">
@@ -129,13 +129,14 @@ export default function Footer() {
             <div className="flex flex-col md:flex-row items-center gap-4">
               {/* Logo */}
               <Link href="/" className="flex items-center gap-2 cursor-pointer">
-                <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">∑</span>
-                </div>
-                <span className="text-lg font-heading font-bold text-white">MathVN</span>
+                <img
+                  src="https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/logo_thaytranchienedu.png"
+                  alt="Thầy Trần Chiến"
+                  className="h-10 w-auto object-contain"
+                />
               </Link>
               {/* <p className="text-sm text-secondary-400">
-                © 2026 MathVN. 
+                © 2026 Thầy Trần Chiến. 
               </p> */}
               <p className="text-sm text-secondary-400">
                 Made by congtcdev with luv

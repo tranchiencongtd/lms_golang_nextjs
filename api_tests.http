@@ -1,0 +1,98 @@
+### Login to get Token
+# Replace with your actual admin credentials
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email_or_phone": "0384215155", 
+    "password": "1234567899"
+}
+
+###
+
+# @name create_course
+# Paste the token obtained from login below after 'Bearer '
+POST http://localhost:8080/api/v1/admin/courses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njk0MTA2MzUsImlhdCI6MTc2OTQwOTczNSwic3ViIjoiZjUyYjZhOTktNGRlZS00Mzc2LWFjZTMtNzM3ZGRlNDAwMzYwIiwidHlwZSI6ImFjY2VzcyJ9.5JZd8QudhStbnDcGGbescOQEIZG8S_8az9-35qu_QHc
+
+{
+  "title": "Khoa hoc Full Options",
+  "description": "Mo ta chi tiet day du ve khoa hoc nay. Noi dung rat dai...",
+  "short_description": "Mo ta ngan gon de hien thi tren card",
+  "price": 500000,
+  "original_price": 800000,
+  "level": "basic",
+  "grade": "10",
+  "what_you_learn": "- Kien thuc A\n- Kien thuc B\n- Ky nang C",
+  "requirements": "- Can may tinh\n- Can internet",
+  "status": "draft",
+  "is_featured": true,
+  "image_url": "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+  "video_preview_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+
+###
+
+# @name update_course
+# Replace {id} with actual course ID from the response above
+PUT http://localhost:8080/api/v1/admin/courses/7b149c14-9b0d-4e92-bd9b-d70395e61599
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njk0MTA2MzUsImlhdCI6MTc2OTQwOTczNSwic3ViIjoiZjUyYjZhOTktNGRlZS00Mzc2LWFjZTMtNzM3ZGRlNDAwMzYwIiwidHlwZSI6ImFjY2VzcyJ9.5JZd8QudhStbnDcGGbescOQEIZG8S_8az9-35qu_QHc
+
+{
+  "title": "Khoa hoc Full Options (Updated)",
+  "description": "Mo ta chi tiet day du ve khoa hoc nay da duoc cap nhat...",
+  "short_description": "Mo ta ngan gon da cap nhat",
+  "price": 600000,
+  "original_price": 900000,
+  "level": "intermediate",
+  "grade": "11, 12",
+  "what_you_learn": "- Kien thuc A+\n- Kien thuc B+\n- Ky nang C+",
+  "requirements": "- Can may tinh manh\n- Can internet toc do cao",
+  "status": "published",
+  "is_featured": false,
+  "image_url": "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+  "video_preview_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+
+###
+
+# @name create_section
+# Replace {course_id} with actual course ID
+POST http://localhost:8080/api/v1/admin/sections
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njk0MTA2MzUsImlhdCI6MTc2OTQwOTczNSwic3ViIjoiZjUyYjZhOTktNGRlZS00Mzc2LWFjZTMtNzM3ZGRlNDAwMzYwIiwidHlwZSI6ImFjY2VzcyJ9.5JZd8QudhStbnDcGGbescOQEIZG8S_8az9-35qu_QHc
+
+{
+  "course_id": "7b149c14-9b0d-4e92-bd9b-d70395e61599",
+  "title": "Chuong 1: Gioi thieu",
+  "description": "Gioi thieu tong quan ve khoa hoc",
+  "order_index": 1
+}
+
+###
+
+# @name create_lesson
+# Replace {course_id} and {section_id} with actual values
+POST http://localhost:8080/api/v1/admin/lessons
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njk0MTA2MzUsImlhdCI6MTc2OTQwOTczNSwic3ViIjoiZjUyYjZhOTktNGRlZS00Mzc2LWFjZTMtNzM3ZGRlNDAwMzYwIiwidHlwZSI6ImFjY2VzcyJ9.5JZd8QudhStbnDcGGbescOQEIZG8S_8az9-35qu_QHc
+
+{
+  "course_id": "7b149c14-9b0d-4e92-bd9b-d70395e61599",
+  "section_id": "REPLACE_WITH_SECTION_ID_FROM_RESPONSE",
+  "title": "Bai 1: Setup moi truong",
+  "description": "Huong dan cai dat VSCode, Go, NodeJS",
+  "video_url": "https://youtu.be/video_id",
+  "duration_minutes": 15,
+  "order_index": 1,
+  "is_preview": true
+}
+
+###
+# @name get_dashboard_stats
+# Get admin dashboard statistics
+GET http://localhost:8080/api/v1/admin/stats
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njk0MTg4MDEsImlhdCI6MTc2OTQxNzkwMSwic3ViIjoiZjUyYjZhOTktNGRlZS00Mzc2LWFjZTMtNzM3ZGRlNDAwMzYwIiwidHlwZSI6ImFjY2VzcyJ9.rzVq1TxNnLwU_IxTPkv6rL8yHbB5TbMSmez1p7c-5zU

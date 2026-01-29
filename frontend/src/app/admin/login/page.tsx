@@ -52,10 +52,11 @@ export default function AdminLoginPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#0056D2] rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/20">
-            <span className="text-white font-bold text-3xl">∑</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Portal</h1>
+          <img
+            src="https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/logo_thaytranchienedu.png"
+            alt="Thầy Trần Chiến"
+            className="h-20 w-auto object-contain mx-auto"
+          />
           <p className="text-gray-500 mt-2">Đăng nhập để quản lý hệ thống</p>
         </div>
 
@@ -81,7 +82,7 @@ export default function AdminLoginPage() {
                 onChange={(e) => setEmailOrPhone(e.target.value)}
                 required
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all text-sm"
-                placeholder="admin@mathvn.com"
+                placeholder="admin@thaytranchienedu.vn"
               />
             </div>
           </div>

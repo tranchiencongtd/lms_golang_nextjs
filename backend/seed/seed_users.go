@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 	"github.com/mathvn/backend/config"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
-	_ = godotenv.Load()
+	// _ = godotenv.Load()
 	cfg, err := config.Load()
 	if err != nil {
 		fmt.Println("❌ Failed to load config:", err)
@@ -27,7 +27,7 @@ func main() {
 	}
 	defer db.Close()
 
-	password := "password123"
+	password := "0123456789"
 	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	now := time.Now()
 
@@ -35,9 +35,9 @@ func main() {
 		email, fullName, phone, role string
 		isActive, isVerified         bool
 	}{
-		{"admin@mathvn.vn", "Admin User", "0900000000", "admin", true, true},
-		{"teacher@mathvn.vn", "Teacher User", "0911111111", "teacher", true, true},
-		{"student@mathvn.vn", "Student User", "0922222222", "student", true, false},
+		{"admin@mathvn.vn", "Admin", "0384215155", "admin", true, true},
+		{"teacher@mathvn.vn", "Teacher", "0973507865", "teacher", true, true},
+		{"student@mathvn.vn", "Student", "0384215166", "student", true, false},
 	}
 
 	for _, u := range users {
