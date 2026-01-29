@@ -23,7 +23,7 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL('https://thaytranchienedu.vn'),
   title: {
-    default: 'TCmath- Học Toán Online Hiệu Quả',
+    default: 'Cmath- Học Toán Online Hiệu Quả',
     template: '%s | TCmath'
   },
   description: 'Nền tảng học toán trực tuyến hàng đầu Việt Nam. Khóa học từ lớp 6-12, luyện thi THPT Quốc Gia, và toán cao cấp với giáo viên giỏi.',
