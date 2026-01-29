@@ -28,7 +28,7 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
+  { icon: Facebook, href: 'https://www.facebook.com/thaytranchien', label: 'Facebook' },
   { icon: Youtube, href: 'https://youtube.com', label: 'YouTube' },
 ]
 
@@ -95,11 +95,11 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-secondary-400">
                 <Phone className="w-4 h-4" />
-                <span>0905152865</span>
+                <span>0978959065</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-secondary-400">
                 <Mail className="w-4 h-4" />
-                <span>hotro@thaytranchienedu.vn</span>
+                <span>tranchiencva@gmail.com</span>
               </li>
             </ul>
             <div className="mt-4">
@@ -139,7 +139,7 @@ export default function Footer() {
                 © 2026 Thầy Trần Chiến. 
               </p> */}
               <p className="text-sm text-secondary-400">
-                Made by congtcdev with luv
+                Made by <Link href="https://www.facebook.com/toanthaycong" target="_blank" className="hover:underline">congtcdev</Link> with luv
               </p>
               <br />
             </div>

@@ -655,7 +655,7 @@ export default function CourseDetailPage() {
                     </Link>
                   ) : (
                     <button className="w-full btn-primary py-3.5 text-base font-semibold shadow-md hover:shadow-lg transition-shadow">
-                      Liên hệ ngay
+                      <Link href="https://www.facebook.com/thaytranchien" target="_blank">Liên hệ ngay</Link>
                     </button>
                   )}
 
@@ -707,7 +707,7 @@ export default function CourseDetailPage() {
             </Link>
           ) : (
             <button className="btn-primary py-3 px-6 font-semibold">
-              Liên hệ ngay
+              <Link href="https://www.facebook.com/thaytranchien" target="_blank">Liên hệ ngay</Link>
             </button>
           )}
         </div>
