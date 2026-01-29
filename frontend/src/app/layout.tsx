@@ -26,8 +26,8 @@ export const metadata: Metadata = {
     default: 'Cmath- Học Toán Online Hiệu Quả',
     template: '%s | TCmath'
   },
-  description: 'Nền tảng học toán trực tuyến hàng đầu Việt Nam. Khóa học từ lớp 6-12, luyện thi THPT Quốc Gia, và toán cao cấp với giáo viên giỏi.',
-  keywords: ['học toán online', 'luyện thi toán', 'toán thpt quốc gia', 'thầy trần chiến', 'học toán trực tuyến'],
+  description: 'Nền tảng học toán trực tuyến hàng đầu Việt Nam. Khóa học từ lớp 1-12, luyện thi THPT Quốc Gia, và toán cao cấp với giáo viên giỏi.',
+  keywords: ['học toán online', 'luyện thi toán', 'toán thpt quốc gia', 'thầy trần chiến', 'học toán trực tuyến', 'toán thcs'],
   authors: [{ name: 'TCmathTeam' }],
   creator: 'TCmath',
   publisher: 'TCmath',
@@ -35,22 +35,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'vi_VN',
     url: '/',
-    title: 'TCmath- Học Toán Online Hiệu Quả',
-    description: 'Nền tảng học toán trực tuyến hàng đầu Việt Nam. Khóa học từ lớp 6-12, luyện thi THPT Quốc Gia.',
-    siteName: 'TCmath',
+    title: 'Cmath- Học Toán Online Hiệu Quả',
+    description: 'Nền tảng học toán trực tuyến hàng đầu Việt Nam. Khóa học từ lớp 1-12, luyện thi THPT Quốc Gia.',
+    siteName: 'Cmath',
     images: [
       {
         url: 'https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/seo_cover.png', // You should create this image in public/
         width: 1200,
         height: 630,
-        alt: 'TCmath- Học Toán Online',
+        alt: 'Cmath- Học Toán Online',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TCmath- Học Toán Online Hiệu Quả',
-    description: 'Nền tảng học toán trực tuyến hàng đầu Việt Nam. Khóa học từ lớp 6-12, luyện thi THPT Quốc Gia.',
+    title: 'Cmath- Học Toán Online Hiệu Quả',
+    description: 'Nền tảng học toán trực tuyến hàng đầu Việt Nam. Khóa học từ lớp 1-12, luyện thi THPT Quốc Gia.',
     images: ['https://raw.githubusercontent.com/tranchiencongtd/hosting-file/refs/heads/main/images/seo_cover.png'], // Reuse OG image
   },
   icons: {
