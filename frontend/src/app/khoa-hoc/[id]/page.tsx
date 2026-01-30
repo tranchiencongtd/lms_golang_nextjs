@@ -67,7 +67,7 @@ function mapApiCourseToUi(course: ApiCourse) {
     id: course.id,
     title: course.title,
     instructor: course.instructor?.full_name || 'Thầy Trần Chiến',
-    instructorTitle: 'Giảng viên',
+    instructorTitle: 'Giáo viên',
     instructorAvatar: course.instructor?.avatar || '',
     rating: course.rating || 0,
     students: course.total_students || 0,
@@ -386,7 +386,7 @@ export default function CourseDetailPage() {
                     onClick={() => setShowPreviewModal(false)}
                     className="w-full btn-primary py-3 font-semibold"
                   >
-                    Đăng ký khóa học
+                    <Link href="https://www.facebook.com/thaytranchien" target='_blank'> Liên hệ ngay</Link>
                   </button>
                 </div>
               </div>
@@ -579,7 +579,7 @@ export default function CourseDetailPage() {
 
               {/* Instructor */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-secondary-900 mb-4">Giảng viên</h2>
+                <h2 className="text-xl font-bold text-secondary-900 mb-4">Giáo viên</h2>
                 <div className="flex items-start gap-4">
                   <div className="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
                     {course.instructor.charAt(0)}
@@ -588,18 +588,18 @@ export default function CourseDetailPage() {
                     <h3 className="font-semibold text-secondary-900 text-lg">{course.instructor}</h3>
                     <p className="text-secondary-500 mb-3">{course.instructorTitle}</p>
                     <div className="flex items-center gap-4 text-sm text-secondary-600">
-                      <div className="flex items-center gap-1">
+                      {/* <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                         <span>{course.rating} đánh giá</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4 text-secondary-400" />
                         <span>{course.students.toLocaleString()} học sinh</span>
-                      </div>
-                      <div className="flex items-center gap-1">
+                      </div> */}
+                      {/* <div className="flex items-center gap-1">
                         <BookOpen className="w-4 h-4 text-secondary-400" />
                         <span>5 khóa học</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

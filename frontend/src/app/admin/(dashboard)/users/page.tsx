@@ -176,7 +176,7 @@ export default function UsersPage() {
       render: (user) => {
         const roleLabels = {
           admin: { text: 'Quản trị', color: 'bg-purple-100 text-purple-700' },
-          teacher: { text: 'Giảng viên', color: 'bg-blue-100 text-blue-700' },
+          teacher: { text: 'Giáo viên', color: 'bg-blue-100 text-blue-700' },
           student: { text: 'Học viên', color: 'bg-gray-100 text-gray-700' },
         }
         const role = roleLabels[user.role]
@@ -271,7 +271,7 @@ export default function UsersPage() {
           >
             <option value="">Tất cả vai trò</option>
             <option value="student">Học viên</option>
-            <option value="teacher">Giảng viên</option>
+            <option value="teacher">Giáo viên</option>
             <option value="admin">Quản trị viên</option>
           </select>
         </div>
@@ -340,7 +340,7 @@ export default function UsersPage() {
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none text-base"
             >
               <option value="student">Học viên</option>
-              <option value="teacher">Giảng viên</option>
+              <option value="teacher">Giáo viên</option>
               <option value="admin">Quản trị viên</option>
             </select>
           </div>
@@ -467,7 +467,7 @@ export default function UsersPage() {
                   className="w-full pl-11 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-base appearance-none cursor-pointer"
                 >
                   <option value="student">Học viên (Student)</option>
-                  <option value="teacher">Giảng viên (Teacher)</option>
+                  <option value="teacher">Giáo viên (Teacher)</option>
                   <option value="admin">Quản trị viên (Admin)</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
